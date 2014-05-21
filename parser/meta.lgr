@@ -1,0 +1,12 @@
+<identifier> -> letter(letter|digit)*
+<num> -> digit+
+<eof> -> 0 // end of input
+
+digit -> {'0'..'9'}
+letter -> {'a'..'z' | 'A'..'Z' | '_'}
+
+{whitespace} -> (\t | \r | \n | ' ')+
+
+\t ->  9 // tab
+\n -> 10 // newline
+\r -> 13 // return

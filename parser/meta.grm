@@ -1,0 +1,18 @@
+{ '+' '-' } <<  // lower priority
+{ '*' '/' } <<  // higher priority
+
+Goal -> [Function]... <eof>
+
+Function -> <identifier> '(' [Arg]','... ')' '{' Expr ';' '}'
+Arg -> <identifier>
+
+Expr -> Expr '+' Expr
+     -> Expr '-' Expr
+     -> Expr '*' Expr
+     -> Expr '/' Expr
+     -> '(' Expr ')'
+     -> <num>
+     -> Arg
+     -> Call
+
+Call -> <identifier> '(' [Expr]/','... ')'
