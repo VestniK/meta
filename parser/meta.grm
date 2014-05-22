@@ -3,7 +3,7 @@
 
 Goal -> [Function]... <eof>
 
-Function -> <identifier> '(' [Arg]','... ')' '{' Expr ';' '}'
+Function -> <identifier> '(' [Arg]/','... ')' '{' 'return' Expr ';' '}'
 Arg -> <identifier>
 
 Expr -> Expr '+' Expr
