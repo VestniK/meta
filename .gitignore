@@ -1,3 +1,4 @@
 build
 parser/meta.lex
 parser/meta.*.txt
+.kdev4
