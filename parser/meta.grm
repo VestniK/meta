@@ -1,7 +1,11 @@
 { '+' '-' } <<  // lower priority
 { '*' '/' } <<  // higher priority
 
-Goal -> [Function]... <eof>
+Goal -> Source <eof>
+
+Source -> Package [Function]...
+
+Package -> 'package' (<qname> | <identifier>) ';'
 
 Function -> <identifier> '(' [Arg]/','... ')' '{' 'return' Expr ';' '}'
 Arg -> <identifier>

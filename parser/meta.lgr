@@ -1,4 +1,5 @@
 <identifier> -> letter(letter|digit)*
+<qname> -> <identifier>('.'<identifier>)+
 <num> -> digit+
 <eof> -> 0 // end of input
 
