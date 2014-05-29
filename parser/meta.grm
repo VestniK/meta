@@ -5,9 +5,9 @@ Goal -> Source <eof>
 
 Source -> Package [Function]...
 
-Package -> 'package' (<qname> | <identifier>) ';'
+Package -> 'package' (<qname> | <identifier>) ';' => onPackage
 
-Function -> <identifier> '(' [Arg]/','... ')' '{' 'return' Expr ';' '}'
+Function -> <identifier> '(' [Arg]/','... ')' '{' 'return' Expr ';' '}' *> Function
 Arg -> <identifier>
 
 Expr -> Expr '+' Expr
