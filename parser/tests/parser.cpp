@@ -1,20 +1,28 @@
 #include <cassert>
 #include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
 
 #include "parser/metaparser.h"
+#include "parser/metanodes.h"
 
-class TestActions: public meta::ParseActions
+class TestActions: public meta::ParseActions, public meta::NodeActions
 {
 public:
-    virtual void onPackage(const meta::StackFrame *start, size_t size)
+    virtual void onPackage(const meta::StackFrame *start, size_t size) override
     {
         assert(size == 3);
         package.assign(start[1].start, start[1].end - start[1].start);
     }
 
+    virtual void onFunction(std::shared_ptr<meta::Function> node) override
+    {
+        functions.push_back(node->name());
+    }
+
     std::string package;
+    std::vector<std::string> functions;
 };
 
 TEST(Parser, zeroParamFunc) {
@@ -22,8 +30,11 @@ TEST(Parser, zeroParamFunc) {
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
+    parser.setNodeActions(&actions);
     ASSERT_NO_THROW(parser.parse(input));
-    ASSERT_EQ(actions.package, std::string("test"));
+    ASSERT_EQ(actions.package, "test");
+    ASSERT_EQ(actions.functions.size(), 1);
+    ASSERT_EQ(actions.functions[0], "foo");
 }
 
 TEST(Parser, oneParamFunc) {
@@ -31,8 +42,11 @@ TEST(Parser, oneParamFunc) {
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
+    parser.setNodeActions(&actions);
     ASSERT_NO_THROW(parser.parse(input));
-    ASSERT_EQ(actions.package, std::string("test"));
+    ASSERT_EQ(actions.package, "test");
+    ASSERT_EQ(actions.functions.size(), 1);
+    ASSERT_EQ(actions.functions[0], "foo");
 }
 
 TEST(Parser, twoParamFunc) {
@@ -40,8 +54,11 @@ TEST(Parser, twoParamFunc) {
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
+    parser.setNodeActions(&actions);
     ASSERT_NO_THROW(parser.parse(input));
-    ASSERT_EQ(actions.package, std::string("test"));
+    ASSERT_EQ(actions.package, "test");
+    ASSERT_EQ(actions.functions.size(), 1);
+    ASSERT_EQ(actions.functions[0], "foo");
 }
 
 TEST(Parser, twoFunc) {
@@ -49,8 +66,12 @@ TEST(Parser, twoFunc) {
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
+    parser.setNodeActions(&actions);
     ASSERT_NO_THROW(parser.parse(input));
-    ASSERT_EQ(actions.package, std::string("test"));
+    ASSERT_EQ(actions.package, "test");
+    ASSERT_EQ(actions.functions.size(), 2);
+    ASSERT_EQ(actions.functions[0], "foo");
+    ASSERT_EQ(actions.functions[1], "bar");
 }
 
 TEST(Parser, funcCall) {
@@ -58,8 +79,12 @@ TEST(Parser, funcCall) {
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
+    parser.setNodeActions(&actions);
     ASSERT_NO_THROW(parser.parse(input));
-    ASSERT_EQ(actions.package, std::string("test"));
+    ASSERT_EQ(actions.package, "test");
+    ASSERT_EQ(actions.functions.size(), 2);
+    ASSERT_EQ(actions.functions[0], "foo");
+    ASSERT_EQ(actions.functions[1], "bar");
 }
 
 TEST(Parser, emptyPackage) {
@@ -67,6 +92,8 @@ TEST(Parser, emptyPackage) {
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
+    parser.setNodeActions(&actions);
     ASSERT_NO_THROW(parser.parse(input));
-    ASSERT_EQ(actions.package, std::string("test.test"));
+    ASSERT_EQ(actions.package, "test.test");
+    ASSERT_EQ(actions.functions.size(), 0);
 }
