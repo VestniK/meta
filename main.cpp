@@ -3,8 +3,7 @@
 #include <iostream>
 #include <vector>
 
-#include "parser/metaparser.h"
-#include "fs/io.h"
+#include "parser/package.h"
 
 int main(int argc, char **argv)
 {
@@ -13,11 +12,8 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
     try {
-        std::vector<char> src;
-        readWholeFile(argv[1], src);
-
-        meta::Parser parser;
-        parser.parse(src.data());
+        Package package;
+        package.parse(argv[1]);
     } catch(const std::exception &err) {
         std::cerr << err.what() << std::endl;
         return EXIT_FAILURE;

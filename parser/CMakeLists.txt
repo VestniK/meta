@@ -5,6 +5,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(SRC
   metanodes.cpp
+  package.cpp
 )
 
 lrstar_grammar(GRM_SRC meta SKEL c++11)
