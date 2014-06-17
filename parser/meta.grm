@@ -10,10 +10,7 @@ Package -> 'package' (<qname> | <identifier>) ';' => onPackage
 Function -> <identifier> '(' [Arg]/','... ')' '{' 'return' Expr ';' '}' *> Function
 Arg -> <identifier>
 
-Expr -> Expr '+' Expr
-     -> Expr '-' Expr
-     -> Expr '*' Expr
-     -> Expr '/' Expr
+Expr -> Expr ('+' | '-' | '*' | '/') Expr
      -> '(' Expr ')'
      -> <num>
      -> Arg
