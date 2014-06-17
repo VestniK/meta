@@ -12,6 +12,7 @@ struct Package
     std::map<std::string, std::shared_ptr<meta::Function> > functions;
 
     void parse(const std::string &sourcePath);
+    void parse(const std::string &sourcePath, const char *content);
 };
 
 #endif // PACKAGE_H

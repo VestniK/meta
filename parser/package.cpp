@@ -36,9 +36,14 @@ void Package::parse(const std::string &sourcePath)
 {
     std::vector<char> content;
     readWholeFile(sourcePath, content);
+    parse(sourcePath, content.data());
+}
+
+void Package::parse(const std::string &sourcePath, const char *content)
+{
     meta::Parser parser;
     PackageCompiler compiler(*this);
     parser.setParseActions(&compiler);
     parser.setNodeActions(&compiler);
-    parser.parse(content.data());
+    parser.parse(content);
 }
