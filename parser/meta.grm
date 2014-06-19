@@ -8,12 +8,12 @@ Source -> Package [Function]...
 Package -> 'package' (<qname> | <identifier>) ';' => onPackage
 
 Function -> <identifier> '(' [Arg]/','... ')' '{' 'return' Expr ';' '}' *> Function
-Arg -> <identifier>
+Arg -> <identifier> <identifier> +> Arg
 
 Expr -> Expr ('+' | '-' | '*' | '/') Expr +> BinaryOp
      -> '(' Expr ')'
      -> <num> +> Number
-     -> Arg +> Var
+     -> <identifier> +> Var
      -> Call
 
 Call -> <identifier> '(' [Expr]/','... ')'

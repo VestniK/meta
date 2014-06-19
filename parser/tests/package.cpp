@@ -22,7 +22,7 @@ TEST(Package, oneFunction) {
 }
 
 TEST(Package, twoFunctions) {
-    const char *content = "package unit.test; sqr(x) {return x*x;} bar(x1, x2) {return x2 - x1;}";
+    const char *content = "package unit.test; sqr(int x) {return x*x;} bar(int x1, int x2) {return x2 - x1;}";
     Package pkg;
     pkg.parse("test.meta", content);
     ASSERT_EQ(pkg.name, "unit.test");
@@ -32,7 +32,7 @@ TEST(Package, twoFunctions) {
 }
 
 TEST(Package, nameConflict) {
-    const char *content = "package unit.test; foo(x) {return x*x;} foo(x1, x2) {return x2 - x1;}";
+    const char *content = "package unit.test; foo(int x) {return x*x;} foo(int x1, int x2) {return x2 - x1;}";
     Package pkg;
     try {
     ASSERT_THROW(pkg.parse("test.meta", content), std::runtime_error);
