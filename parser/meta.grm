@@ -10,7 +10,7 @@ Package -> 'package' (<qname> | <identifier>) ';' => onPackage
 Function -> <identifier> '(' [Arg]/','... ')' '{' Statement '}' *> Function
 Arg -> <identifier> <identifier> +> Arg
 
-Statement -> return Expr ';' +> Return
+Statement -> 'return' Expr ';' +> Return
 
 Expr -> Expr ('+' | '-' | '*' | '/') Expr +> BinaryOp
      -> '(' Expr ')'
