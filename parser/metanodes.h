@@ -63,8 +63,28 @@ public:
     Var(const StackFrame *start, size_t size);
 
     const std::string &name() const {return mName;}
+
 private:
     std::string mName;
+};
+
+class Call: public Node
+{
+meta_NODE
+public:
+    Call(const StackFrame *reduction, size_t size);
+
+    const std::string &functionName() const {return mFunctionName;}
+
+private:
+    std::string mFunctionName;
+};
+
+class Return: public Node
+{
+meta_NODE
+public:
+    Return(const StackFrame *reduction, size_t size);
 };
 
 } // namespace meta

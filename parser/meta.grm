@@ -7,8 +7,10 @@ Source -> Package [Function]...
 
 Package -> 'package' (<qname> | <identifier>) ';' => onPackage
 
-Function -> <identifier> '(' [Arg]/','... ')' '{' 'return' Expr ';' '}' *> Function
+Function -> <identifier> '(' [Arg]/','... ')' '{' Statement '}' *> Function
 Arg -> <identifier> <identifier> +> Arg
+
+Statement -> return Expr ';' +> Return
 
 Expr -> Expr ('+' | '-' | '*' | '/') Expr +> BinaryOp
      -> '(' Expr ')'
@@ -16,4 +18,4 @@ Expr -> Expr ('+' | '-' | '*' | '/') Expr +> BinaryOp
      -> <identifier> +> Var
      -> Call
 
-Call -> <identifier> '(' [Expr]/','... ')'
+Call -> <identifier> '(' [Expr]/','... ')' +> Call
