@@ -51,40 +51,48 @@ private:
 
 TEST(Arythmetic, priorities)
 {
-    const char *content = "package test; foo() {return 5+7*8;}";
+    const char *content = "package test; foo() {return 5*2+7*8;}";
     Package pkg;
     pkg.parse("test.meta", content);
     LoggingCalc calc;
     pkg.functions["foo"]->walk(&calc);
-    ASSERT_EQ(calc.calcSequence().size(), 2);
+    ASSERT_EQ(calc.calcSequence().size(), 3);
 
     ASSERT_EQ(calc.calcSequence()[0].operation, meta::BinaryOp::mul);
-    ASSERT_EQ(calc.calcSequence()[0].left, 7);
-    ASSERT_EQ(calc.calcSequence()[0].right, 8);
+    ASSERT_EQ(calc.calcSequence()[0].left, 5);
+    ASSERT_EQ(calc.calcSequence()[0].right, 2);
 
-    ASSERT_EQ(calc.calcSequence()[1].operation, meta::BinaryOp::add);
-    ASSERT_EQ(calc.calcSequence()[1].left, 5);
-    ASSERT_EQ(calc.calcSequence()[1].right, 56);
+    ASSERT_EQ(calc.calcSequence()[1].operation, meta::BinaryOp::mul);
+    ASSERT_EQ(calc.calcSequence()[1].left, 7);
+    ASSERT_EQ(calc.calcSequence()[1].right, 8);
 
-    ASSERT_EQ(calc.result(), 61);
+    ASSERT_EQ(calc.calcSequence()[2].operation, meta::BinaryOp::add);
+    ASSERT_EQ(calc.calcSequence()[2].left, 10);
+    ASSERT_EQ(calc.calcSequence()[2].right, 56);
+
+    ASSERT_EQ(calc.result(), 66);
 }
 
 TEST(Arythmetic, parenthesis)
 {
-    const char *content = "package test; foo() {return (11+5)/8;}";
+    const char *content = "package test; foo() {return 2*(11+5)/8;}";
     Package pkg;
     pkg.parse("test.meta", content);
     LoggingCalc calc;
     pkg.functions["foo"]->walk(&calc);
-    ASSERT_EQ(calc.calcSequence().size(), 2);
+    ASSERT_EQ(calc.calcSequence().size(), 3);
 
     ASSERT_EQ(calc.calcSequence()[0].operation, meta::BinaryOp::add);
     ASSERT_EQ(calc.calcSequence()[0].left, 11);
     ASSERT_EQ(calc.calcSequence()[0].right, 5);
 
-    ASSERT_EQ(calc.calcSequence()[1].operation, meta::BinaryOp::div);
-    ASSERT_EQ(calc.calcSequence()[1].left, 16);
-    ASSERT_EQ(calc.calcSequence()[1].right, 8);
+    ASSERT_EQ(calc.calcSequence()[1].operation, meta::BinaryOp::mul);
+    ASSERT_EQ(calc.calcSequence()[1].left, 2);
+    ASSERT_EQ(calc.calcSequence()[1].right, 16);
 
-    ASSERT_EQ(calc.result(), 2);
+    ASSERT_EQ(calc.calcSequence()[2].operation, meta::BinaryOp::div);
+    ASSERT_EQ(calc.calcSequence()[2].left, 32);
+    ASSERT_EQ(calc.calcSequence()[2].right, 8);
+
+    ASSERT_EQ(calc.result(), 4);
 }

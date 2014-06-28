@@ -12,7 +12,10 @@ Arg -> <identifier> <identifier> +> Arg
 
 Statement -> 'return' Expr ';' +> Return
 
-Expr -> Expr ('+' | '-' | '*' | '/') Expr +> BinaryOp
+Expr -> Expr '+' Expr +> BinaryOp
+     -> Expr '-' Expr +> BinaryOp
+     -> Expr '*' Expr +> BinaryOp
+     -> Expr '/' Expr +> BinaryOp
      -> '(' Expr ')'
      -> <num> +> Number
      -> <identifier> +> Var
