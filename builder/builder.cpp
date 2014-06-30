@@ -12,7 +12,12 @@
 
 #include "parser/metanodes.h"
 
-#include "codegen/codegen.h"
+#include "astutils/childrengatherer.h"
+
+#include "builder/builder.h"
+#include "builder/environment.h"
+
+namespace builder {
 
 struct BuildContext
 {
@@ -25,21 +30,42 @@ struct BuildContext
     std::stack<llvm::Value*> evaluationStack;
 };
 
-template<class T>
-class ChildrenGatherer: public meta::Visitor
+class CodeGen: public meta::Visitor
 {
 public:
-    virtual void visit(T *node) override {mGathered.push_back(node);}
+    CodeGen(Environment &env);
+    virtual ~CodeGen();
 
-    const std::vector<T *> &gathered() const {return mGathered;}
+    virtual void visit(meta::Function *node) override;
+
+    virtual void visit(meta::Call *) override;
+
+    virtual void visit(meta::Number *node) override;
+    virtual void visit(meta::Var *node) override;
+
+    virtual void leave(meta::BinaryOp *node) override;
+    virtual void leave(meta::Return *node) override;
+
+    void save(const std::string &path);
 
 private:
-    std::vector<T *> mGathered;
+    Environment &env;
+    std::unique_ptr<BuildContext> buildContext;
 };
 
-CodeGen::CodeGen(const std::string &package):
-    globalContext(llvm::getGlobalContext()), /// @todo move to BuildContext struct
-    module(new llvm::Module(package, globalContext)),
+void build(Package& pkg, const std::string& output)
+{
+    Environment env(pkg.name);
+    for (auto func : pkg.functions)
+        env.addFunction(func.second.get());
+    CodeGen codegen(env);
+    for (auto func : pkg.functions)
+        func.second->walk(&codegen);
+    codegen.save(output);
+}
+
+CodeGen::CodeGen(Environment &env):
+    env(env),
     buildContext(new BuildContext)
 {
 }
@@ -51,31 +77,20 @@ CodeGen::~CodeGen()
 void CodeGen::visit(meta::Function *node)
 {
     buildContext->varMap.clear();
-    buildContext->currFunc = nullptr;
+    buildContext->currFunc = env.module->getFunction(node->name());
 
-    ChildrenGatherer<meta::Arg> argGatherer;
+    astutils::ChildrenGatherer<meta::Arg> argGatherer;
     node->walk(&argGatherer);
 
-    llvm::Type *intType = llvm::Type::getInt32Ty(globalContext);
-    std::vector<llvm::Type *> argTypes;
-    for (const auto arg : argGatherer.gathered()) {
-        if (arg->type() == "int")
-            argTypes.push_back(intType);
-        else
-            throw std::runtime_error(std::string("Argument ") + arg->name() + " of the function " + node->name() + " is of unknown type " + arg->type()); /// @todo missing code position info
-    }
-    llvm::FunctionType *funcType = llvm::FunctionType::get(intType, argTypes, false);
-    buildContext->currFunc = llvm::Function::Create(funcType, llvm::GlobalValue::ExternalLinkage, node->name(), module.get());
     llvm::Function::arg_iterator it = buildContext->currFunc->arg_begin();
     for (const auto arg : argGatherer.gathered()) {
-        it->setName(arg->name());
         buildContext->varMap[arg->name()] = it; /// @todo check name collisions
         assert(it != buildContext->currFunc->arg_end());
         ++it;
     }
     assert(it == buildContext->currFunc->arg_end());
 
-    llvm::BasicBlock *body = llvm::BasicBlock::Create(globalContext, "", buildContext->currFunc);
+    llvm::BasicBlock *body = llvm::BasicBlock::Create(env.context, "", buildContext->currFunc);
     buildContext->builder.SetInsertPoint(body);
 }
 
@@ -87,7 +102,7 @@ void CodeGen::visit(meta::Call *)
 
 void CodeGen::visit(meta::Number *node)
 {
-    llvm::Type *intType = llvm::Type::getInt32Ty(globalContext);
+    llvm::Type *intType = llvm::Type::getInt32Ty(env.context);
     buildContext->evaluationStack.push(llvm::ConstantInt::get(intType, node->value(), true));
 }
 
@@ -125,8 +140,10 @@ void CodeGen::save(const std::string& path)
 {
     std::string errBuf;
     llvm::raw_fd_ostream out(path.c_str(), errBuf, llvm::sys::fs::F_Binary);
-    llvm::WriteBitcodeToFile(module.get(), out);
+    llvm::WriteBitcodeToFile(env.module.get(), out);
     out.close();
     if (out.has_error())
         throw std::runtime_error(errBuf);
 }
+
+} // namespace builder

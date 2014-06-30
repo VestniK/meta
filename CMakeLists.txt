@@ -11,8 +11,8 @@ add_definitions(-Wall -Werror -std=c++11)
 
 add_subdirectory(parser)
 add_subdirectory(fs)
-add_subdirectory(codegen)
+add_subdirectory(builder)
 
 add_executable(meta main.cpp)
-target_link_libraries(meta parser fs codegen)
+target_link_libraries(meta parser fs builder)
 install(TARGETS meta RUNTIME DESTINATION bin)

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "parser/package.h"
-#include "codegen/codegen.h"
+#include "builder/builder.h"
 
 int main(int argc, char **argv)
 {
@@ -15,10 +15,7 @@ int main(int argc, char **argv)
     try {
         Package package;
         package.parse(argv[1]);
-        CodeGen codegen(package.name);
-        for (auto func : package.functions)
-            func.second->walk(&codegen);
-        codegen.save(argv[2]);
+        builder::build(package, argv[2]);
     } catch(const std::exception &err) {
         std::cerr << err.what() << std::endl;
         return EXIT_FAILURE;

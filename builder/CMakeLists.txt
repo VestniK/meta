@@ -9,8 +9,9 @@ set(LLVM_DEPS ${LLVM_DEPS} curses dl)
 set(LLVM_REQUIRED_LIBS LLVMBitWriter LLVMCore LLVMSupport)
 
 set(SRC
-  codegen.cpp
+  builder.cpp
+  environment.cpp
 )
 
-add_library(codegen STATIC ${SRC})
-target_link_libraries(codegen ${LLVM_DEPS} ${LLVM_REQUIRED_LIBS} curses dl)
+add_library(builder STATIC ${SRC})
+target_link_libraries(builder ${LLVM_DEPS} ${LLVM_REQUIRED_LIBS} curses dl)
