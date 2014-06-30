@@ -15,3 +15,5 @@ set(SRC
 
 add_library(builder STATIC ${SRC})
 target_link_libraries(builder ${LLVM_DEPS} ${LLVM_REQUIRED_LIBS} curses dl)
+
+add_subdirectory(tests)
