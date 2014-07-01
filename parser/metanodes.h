@@ -3,22 +3,10 @@
 
 #include <string>
 
+#include "parser/function.h"
 #include "parser/metaparser.h"
 
 namespace meta {
-
-class Function: public Node
-{
-meta_NODE
-public:
-    Function(const StackFrame *start, size_t size);
-
-    const std::string &name() const {return mName;}
-    const std::string &retType() const {return mRetType;}
-private:
-    std::string mName;
-    std::string mRetType;
-};
 
 class Arg: public Node
 {
