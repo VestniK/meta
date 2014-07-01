@@ -9,6 +9,8 @@ int poly(int x);
 
 int dist(int x, int y);
 
+int distCall(int x);
+
 }
 
 // Functions with the same body as above funcs
@@ -22,6 +24,11 @@ int poly(int x)
 int dist(int x, int y)
 {
     return x*x + y*y;
+}
+
+int distCall(int x)
+{
+    return dist(x, x);
 }
 
 }
@@ -44,3 +51,10 @@ TEST(BuilderTests, twoArgs)
             ASSERT_EQ(dist(x, y), local::dist(x, y));
     }
 }
+
+TEST(BuilderTests, functionWithCall)
+{
+    for (int x = -50; x < 50; ++x)
+        ASSERT_EQ(distCall(x), local::distCall(x));
+}
+

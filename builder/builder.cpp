@@ -21,11 +21,9 @@ namespace builder {
 
 struct BuildContext
 {
-    BuildContext(): currFunc(nullptr), builder(llvm::getGlobalContext()) {}
+    BuildContext(Environment &env): builder(env.context) {}
 
-    llvm::Function *currFunc;
     std::map<std::string, llvm::Value*> varMap;
-
     llvm::IRBuilder<> builder;
     std::stack<llvm::Value*> evaluationStack;
 };
@@ -39,6 +37,7 @@ public:
     virtual void visit(meta::Function *node) override;
 
     virtual void visit(meta::Call *) override;
+    virtual void leave(meta::Call *node) override;
 
     virtual void visit(meta::Number *node) override;
     virtual void visit(meta::Var *node) override;
@@ -66,7 +65,7 @@ void build(Package& pkg, const std::string& output)
 
 CodeGen::CodeGen(Environment &env):
     env(env),
-    buildContext(new BuildContext)
+    buildContext(new BuildContext(env))
 {
 }
 
@@ -77,27 +76,41 @@ CodeGen::~CodeGen()
 void CodeGen::visit(meta::Function *node)
 {
     buildContext->varMap.clear();
-    buildContext->currFunc = env.module->getFunction(node->name());
+    llvm::Function *func = env.module->getFunction(node->name());
+    assert(func); // All functions should be registered in the environment before compilation
 
     astutils::ChildrenGatherer<meta::Arg> argGatherer;
     node->walk(&argGatherer);
 
-    llvm::Function::arg_iterator it = buildContext->currFunc->arg_begin();
+    llvm::Function::arg_iterator it = func->arg_begin();
     for (const auto arg : argGatherer.gathered()) {
         buildContext->varMap[arg->name()] = it; /// @todo check name collisions
-        assert(it != buildContext->currFunc->arg_end());
+        assert(it != func->arg_end());
         ++it;
     }
-    assert(it == buildContext->currFunc->arg_end());
+    assert(it == func->arg_end());
 
-    llvm::BasicBlock *body = llvm::BasicBlock::Create(env.context, "", buildContext->currFunc);
+    llvm::BasicBlock *body = llvm::BasicBlock::Create(env.context, "", func);
     buildContext->builder.SetInsertPoint(body);
 }
 
 void CodeGen::visit(meta::Call *)
 {
-    /// @todo add call functions support
-    throw std::runtime_error("Not implemented yet");
+    buildContext->evaluationStack.push(nullptr); // Marker for the result operation value
+}
+
+void CodeGen::leave(meta::Call *node)
+{
+    llvm::Function *func = env.module->getFunction(node->functionName());
+    /// @todo this kind of checks should be done before compilation
+    if (func == nullptr)
+        throw std::runtime_error(std::string("Call of unknown function " + node->functionName()));
+    std::vector<llvm::Value*> args;
+    for (; buildContext->evaluationStack.top() != nullptr; buildContext->evaluationStack.pop())
+        args.push_back(buildContext->evaluationStack.top());
+    if (func->arg_size() != args.size())
+        throw std::runtime_error(std::string("Call of the function ") + node->functionName() + " with incorrect number of arguments");
+    buildContext->evaluationStack.top() = buildContext->builder.CreateCall(func, args);
 }
 
 void CodeGen::visit(meta::Number *node)
