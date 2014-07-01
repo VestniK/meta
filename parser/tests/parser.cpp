@@ -16,6 +16,7 @@ struct ArgInfo
 struct FuncInfo
 {
     std::string name;
+    std::string retType;
     std::vector<ArgInfo> args;
 };
 
@@ -27,6 +28,7 @@ public:
     virtual void visit(meta::Function *func)
     {
         info.name = func->name();
+        info.retType = func->retType();
     }
 
     virtual void visit(meta::Arg *arg)
@@ -157,3 +159,18 @@ TEST(Parser, emptyPackage) {
     ASSERT_EQ(actions.package, "test.test");
     ASSERT_EQ(actions.functions.size(), 0);
 }
+
+TEST(Parser, funcRetType) {
+    const char *input = "package test; int iFoo() {return 0;}\ndouble dFoo() {return 0;}";
+    meta::Parser parser;
+    TestActions actions;
+    parser.setParseActions(&actions);
+    parser.setNodeActions(&actions);
+    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_EQ(actions.functions.size(), 2);
+    ASSERT_EQ(actions.functions[0].name, "iFoo");
+    ASSERT_EQ(actions.functions[0].retType, "int");
+    ASSERT_EQ(actions.functions[1].name, "dFoo");
+    ASSERT_EQ(actions.functions[1].retType, "double");
+}
+
