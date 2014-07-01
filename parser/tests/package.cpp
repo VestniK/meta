@@ -34,13 +34,5 @@ TEST(Package, twoFunctions) {
 TEST(Package, nameConflict) {
     const char *content = "package unit.test; int foo(int x) {return x*x;} int foo(int x1, int x2) {return x2 - x1;}";
     Package pkg;
-    try {
     ASSERT_THROW(pkg.parse("test.meta", content), std::runtime_error);
-    } catch(std::runtime_error &e) {
-        printf("caught an std::runtime_error %s\n", e.what());
-    } catch(const std::exception &e) {
-        printf("caught an std::exception %s\n", e.what());
-    } catch(...)  {
-        printf("caught something strange\n");
-    }
 }

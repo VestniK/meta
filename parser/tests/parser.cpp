@@ -7,41 +7,6 @@
 #include "parser/metaparser.h"
 #include "parser/metanodes.h"
 
-struct ArgInfo
-{
-    std::string type;
-    std::string name;
-};
-
-struct FuncInfo
-{
-    std::string name;
-    std::string retType;
-    std::vector<ArgInfo> args;
-};
-
-class FuncInfoGatherer: public meta::Visitor
-{
-public:
-    FuncInfoGatherer(FuncInfo &dest): info(dest) {}
-
-    virtual void visit(meta::Function *func)
-    {
-        info.name = func->name();
-        info.retType = func->retType();
-    }
-
-    virtual void visit(meta::Arg *arg)
-    {
-        info.args.push_back(ArgInfo());
-        info.args.back().type = arg->type();
-        info.args.back().name = arg->name();
-    }
-
-private:
-    FuncInfo &info;
-};
-
 class TestActions: public meta::ParseActions, public meta::NodeActions
 {
 public:
@@ -53,13 +18,11 @@ public:
 
     virtual void onFunction(std::shared_ptr<meta::Function> node) override
     {
-        functions.push_back(FuncInfo());
-        FuncInfoGatherer gatherer(functions.back());
-        node->walk(&gatherer);
+        functions.push_back(node);
     }
 
     std::string package;
-    std::vector<FuncInfo> functions;
+    std::vector< std::shared_ptr<meta::Function> > functions;
 };
 
 TEST(Parser, zeroParamFunc) {
@@ -71,8 +34,8 @@ TEST(Parser, zeroParamFunc) {
     ASSERT_NO_THROW(parser.parse(input));
     ASSERT_EQ(actions.package, "test");
     ASSERT_EQ(actions.functions.size(), 1);
-    ASSERT_EQ(actions.functions[0].name, "foo");
-    ASSERT_EQ(actions.functions[0].args.size(), 0);
+    ASSERT_EQ(actions.functions[0]->name(), "foo");
+    ASSERT_EQ(actions.functions[0]->args().size(), 0);
 }
 
 TEST(Parser, oneParamFunc) {
@@ -84,10 +47,11 @@ TEST(Parser, oneParamFunc) {
     ASSERT_NO_THROW(parser.parse(input));
     ASSERT_EQ(actions.package, "test");
     ASSERT_EQ(actions.functions.size(), 1);
-    ASSERT_EQ(actions.functions[0].name, "foo");
-    ASSERT_EQ(actions.functions[0].args.size(), 1);
-    ASSERT_EQ(actions.functions[0].args[0].type, "int");
-    ASSERT_EQ(actions.functions[0].args[0].name, "x");
+    ASSERT_EQ(actions.functions[0]->name(), "foo");
+    const auto args = actions.functions[0]->args();
+    ASSERT_EQ(args.size(), 1);
+    ASSERT_EQ(args[0]->type(), "int");
+    ASSERT_EQ(args[0]->name(), "x");
 }
 
 TEST(Parser, twoParamFunc) {
@@ -99,12 +63,13 @@ TEST(Parser, twoParamFunc) {
     ASSERT_NO_THROW(parser.parse(input));
     ASSERT_EQ(actions.package, "test");
     ASSERT_EQ(actions.functions.size(), 1);
-    ASSERT_EQ(actions.functions[0].name, "foo");
-    ASSERT_EQ(actions.functions[0].args.size(), 2);
-    ASSERT_EQ(actions.functions[0].args[0].type, "int");
-    ASSERT_EQ(actions.functions[0].args[0].name, "x");
-    ASSERT_EQ(actions.functions[0].args[1].type, "int");
-    ASSERT_EQ(actions.functions[0].args[1].name, "y");
+    ASSERT_EQ(actions.functions[0]->name(), "foo");
+    const auto args = actions.functions[0]->args();
+    ASSERT_EQ(args.size(), 2);
+    ASSERT_EQ(args[0]->type(), "int");
+    ASSERT_EQ(args[0]->name(), "x");
+    ASSERT_EQ(args[1]->type(), "int");
+    ASSERT_EQ(args[1]->name(), "y");
 }
 
 TEST(Parser, twoFunc) {
@@ -117,15 +82,17 @@ TEST(Parser, twoFunc) {
     ASSERT_EQ(actions.package, "test");
     ASSERT_EQ(actions.functions.size(), 2);
 
-    ASSERT_EQ(actions.functions[0].name, "foo");
-    ASSERT_EQ(actions.functions[0].args.size(), 1);
-    ASSERT_EQ(actions.functions[0].args[0].type, "int");
-    ASSERT_EQ(actions.functions[0].args[0].name, "x");
+    ASSERT_EQ(actions.functions[0]->name(), "foo");
+    const auto args1 = actions.functions[0]->args();
+    ASSERT_EQ(args1.size(), 1);
+    ASSERT_EQ(args1[0]->type(), "int");
+    ASSERT_EQ(args1[0]->name(), "x");
 
-    ASSERT_EQ(actions.functions[1].name, "bar");
-    ASSERT_EQ(actions.functions[1].args.size(), 1);
-    ASSERT_EQ(actions.functions[1].args[0].type, "int");
-    ASSERT_EQ(actions.functions[1].args[0].name, "x");
+    ASSERT_EQ(actions.functions[1]->name(), "bar");
+    const auto args2 = actions.functions[1]->args();
+    ASSERT_EQ(args2.size(), 1);
+    ASSERT_EQ(args2[0]->type(), "int");
+    ASSERT_EQ(args2[0]->name(), "x");
 }
 
 TEST(Parser, funcCall) {
@@ -138,15 +105,17 @@ TEST(Parser, funcCall) {
     ASSERT_EQ(actions.package, "test");
     ASSERT_EQ(actions.functions.size(), 2);
 
-    ASSERT_EQ(actions.functions[0].name, "foo");
-    ASSERT_EQ(actions.functions[0].args.size(), 1);
-    ASSERT_EQ(actions.functions[0].args[0].type, "int");
-    ASSERT_EQ(actions.functions[0].args[0].name, "x");
+    ASSERT_EQ(actions.functions[0]->name(), "foo");
+    const auto args1 = actions.functions[0]->args();
+    ASSERT_EQ(args1.size(), 1);
+    ASSERT_EQ(args1[0]->type(), "int");
+    ASSERT_EQ(args1[0]->name(), "x");
 
-    ASSERT_EQ(actions.functions[1].name, "bar");
-    ASSERT_EQ(actions.functions[1].args.size(), 1);
-    ASSERT_EQ(actions.functions[1].args[0].type, "int");
-    ASSERT_EQ(actions.functions[1].args[0].name, "y");
+    ASSERT_EQ(actions.functions[1]->name(), "bar");
+    const auto args2 = actions.functions[1]->args();
+    ASSERT_EQ(args2.size(), 1);
+    ASSERT_EQ(args2[0]->type(), "int");
+    ASSERT_EQ(args2[0]->name(), "y");
 }
 
 TEST(Parser, emptyPackage) {
@@ -168,9 +137,9 @@ TEST(Parser, funcRetType) {
     parser.setNodeActions(&actions);
     ASSERT_NO_THROW(parser.parse(input));
     ASSERT_EQ(actions.functions.size(), 2);
-    ASSERT_EQ(actions.functions[0].name, "iFoo");
-    ASSERT_EQ(actions.functions[0].retType, "int");
-    ASSERT_EQ(actions.functions[1].name, "dFoo");
-    ASSERT_EQ(actions.functions[1].retType, "double");
+    ASSERT_EQ(actions.functions[0]->name(), "iFoo");
+    ASSERT_EQ(actions.functions[0]->retType(), "int");
+    ASSERT_EQ(actions.functions[1]->name(), "dFoo");
+    ASSERT_EQ(actions.functions[1]->retType(), "double");
 }
 
