@@ -51,7 +51,7 @@ private:
 
 TEST(Arythmetic, priorities)
 {
-    const char *content = "package test; foo() {return 5*2+7*8;}";
+    const char *content = "package test; int foo() {return 5*2+7*8;}";
     Package pkg;
     pkg.parse("test.meta", content);
     LoggingCalc calc;
@@ -75,7 +75,7 @@ TEST(Arythmetic, priorities)
 
 TEST(Arythmetic, parenthesis)
 {
-    const char *content = "package test; foo() {return 2*(11+5)/8;}";
+    const char *content = "package test; int foo() {return 2*(11+5)/8;}";
     Package pkg;
     pkg.parse("test.meta", content);
     LoggingCalc calc;

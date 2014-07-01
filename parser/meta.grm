@@ -7,7 +7,7 @@ Source -> Package [Function]...
 
 Package -> 'package' (<qname> | <identifier>) ';' => onPackage
 
-Function -> <identifier> '(' [Arg]/','... ')' '{' Statement '}' *> Function
+Function -> <identifier> <identifier> '(' [Arg]/','... ')' '{' Statement '}' *> Function
 Arg -> <identifier> <identifier> +> Arg
 
 Statement -> 'return' Expr ';' +> Return

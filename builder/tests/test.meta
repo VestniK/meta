@@ -1,16 +1,16 @@
 package test;
 
-dist(int x, int y)
+int dist(int x, int y)
 {
     return x*x + y*y;
 }
 
-constFoo()
+int constFoo()
 {
     return 5;
 }
 
-poly(int x)
+int poly(int x)
 {
     return 5*x*x - 6*x + 3;
 }

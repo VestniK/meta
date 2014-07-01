@@ -61,7 +61,7 @@ public:
 };
 
 TEST(Parser, zeroParamFunc) {
-    const char *input = "package test; foo() {return 5;}";
+    const char *input = "package test; int foo() {return 5;}";
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
@@ -74,7 +74,7 @@ TEST(Parser, zeroParamFunc) {
 }
 
 TEST(Parser, oneParamFunc) {
-    const char *input = "package test; foo(int x) {return 5*x*x - 2*x + 3;}";
+    const char *input = "package test; int foo(int x) {return 5*x*x - 2*x + 3;}";
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
@@ -89,7 +89,7 @@ TEST(Parser, oneParamFunc) {
 }
 
 TEST(Parser, twoParamFunc) {
-    const char *input = "package test; foo(int x, int y) {return 5*x + 6/y;}";
+    const char *input = "package test; int foo(int x, int y) {return 5*x + 6/y;}";
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
@@ -106,7 +106,7 @@ TEST(Parser, twoParamFunc) {
 }
 
 TEST(Parser, twoFunc) {
-    const char *input = "package test; foo(int x) {return 5*x;}\nbar(int x) {return x/5;}";
+    const char *input = "package test; int foo(int x) {return 5*x;}\nint bar(int x) {return x/5;}";
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
@@ -127,7 +127,7 @@ TEST(Parser, twoFunc) {
 }
 
 TEST(Parser, funcCall) {
-    const char *input = "package test; foo(int x) {return 5*x;}\nbar(int y) {return 5*foo(y/5);}";
+    const char *input = "package test; int foo(int x) {return 5*x;}\nint bar(int y) {return 5*foo(y/5);}";
     meta::Parser parser;
     TestActions actions;
     parser.setParseActions(&actions);
