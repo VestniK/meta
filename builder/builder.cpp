@@ -50,14 +50,13 @@ private:
     std::unique_ptr<BuildContext> buildContext;
 };
 
-void build(Package& pkg, const std::string& output)
+void build(std::shared_ptr<meta::Package> pkg, const std::string& output)
 {
-    Environment env(pkg.name);
-    for (auto func : pkg.functions)
-        env.addFunction(func.second.get());
+    Environment env(pkg->name());
+    for (auto func : pkg->functions())
+        env.addFunction(func);
     CodeGen codegen(env);
-    for (auto func : pkg.functions)
-        func.second->walk(&codegen);
+    pkg->walk(&codegen);
     codegen.save(output);
 }
 

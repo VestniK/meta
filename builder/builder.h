@@ -9,7 +9,7 @@
 
 namespace builder {
 
-void build(Package &pkg, const std::string &output);
+void build(std::shared_ptr<meta::Package> pkg, const std::string &output);
 
 } // namespace builder
 

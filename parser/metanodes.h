@@ -6,6 +6,7 @@
 #include "parser/call.h"
 #include "parser/function.h"
 #include "parser/number.h"
+#include "parser/package.h"
 #include "parser/return.h"
 #include "parser/var.h"
 

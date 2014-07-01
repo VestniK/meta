@@ -1,13 +1,11 @@
 { '+' '-' } <<  // lower priority
 { '*' '/' } <<  // higher priority
 
-Goal -> Source <eof>
+Goal -> Package <eof>
 
-Source -> Package [Function]...
+Package -> 'package' (<qname> | <identifier>) ';' [Function]... +> Package
 
-Package -> 'package' (<qname> | <identifier>) ';' => onPackage
-
-Function -> <identifier> <identifier> '(' [Arg]/','... ')' '{' Statement '}' *> Function
+Function -> <identifier> <identifier> '(' [Arg]/','... ')' '{' Statement '}' +> Function
 Arg -> <identifier> <identifier> +> Arg
 
 Statement -> 'return' Expr ';' +> Return

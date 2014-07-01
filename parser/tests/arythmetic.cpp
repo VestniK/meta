@@ -3,7 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include "parser/package.h"
+#include "parser/binaryop.h"
+#include "parser/number.h"
 
 struct Operation
 {
@@ -51,11 +52,12 @@ private:
 
 TEST(Arythmetic, priorities)
 {
-    const char *content = "package test; int foo() {return 5*2+7*8;}";
-    Package pkg;
-    pkg.parse("test.meta", content);
+    const char *input = "package test; int foo() {return 5*2+7*8;}";
+    meta::Parser parser;
+    std::shared_ptr<meta::Node> root(nullptr);
+    ASSERT_NO_THROW(root = parser.parse(input));
     LoggingCalc calc;
-    pkg.functions["foo"]->walk(&calc);
+    root->walk(&calc);
     ASSERT_EQ(calc.calcSequence().size(), 3);
 
     ASSERT_EQ(calc.calcSequence()[0].operation, meta::BinaryOp::mul);
@@ -75,11 +77,12 @@ TEST(Arythmetic, priorities)
 
 TEST(Arythmetic, parenthesis)
 {
-    const char *content = "package test; int foo() {return 2*(11+5)/8;}";
-    Package pkg;
-    pkg.parse("test.meta", content);
+    const char *input = "package test; int foo() {return 2*(11+5)/8;}";
+    meta::Parser parser;
+    std::shared_ptr<meta::Node> root(nullptr);
+    ASSERT_NO_THROW(root = parser.parse(input));
     LoggingCalc calc;
-    pkg.functions["foo"]->walk(&calc);
+    root->walk(&calc);
     ASSERT_EQ(calc.calcSequence().size(), 3);
 
     ASSERT_EQ(calc.calcSequence()[0].operation, meta::BinaryOp::add);

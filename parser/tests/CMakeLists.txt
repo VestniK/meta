@@ -4,7 +4,6 @@ include_directories(${GTEST_INCLUDE_DIRS})
 add_executable(ParserTests
   parser.cpp
   lexer.cpp
-  package.cpp
   arythmetic.cpp
 )
 target_link_libraries(ParserTests parser fs ${GTEST_BOTH_LIBRARIES})

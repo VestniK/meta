@@ -1,18 +1,25 @@
 #ifndef PACKAGE_H
 #define PACKAGE_H
 
-#include <map>
 #include <string>
+#include <vector>
 
-#include "parser/metanodes.h"
+#include "parser/metaparser.h"
 
-struct Package
+namespace meta {
+
+class Package: public Node
 {
-    std::string name;
-    std::map<std::string, std::shared_ptr<meta::Function> > functions;
+meta_NODE
+public:
+    Package(const StackFrame *start, size_t size);
 
-    void parse(const std::string &sourcePath);
-    void parse(const std::string &sourcePath, const char *content);
+    const std::string &name() const {return mName;}
+    std::vector<Function *> functions();
+private:
+    std::string mName;
 };
+
+}
 
 #endif // PACKAGE_H
