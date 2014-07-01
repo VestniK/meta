@@ -12,8 +12,6 @@
 
 #include "parser/metanodes.h"
 
-#include "astutils/childrengatherer.h"
-
 #include "builder/builder.h"
 #include "builder/environment.h"
 
@@ -79,11 +77,8 @@ void CodeGen::visit(meta::Function *node)
     llvm::Function *func = env.module->getFunction(node->name());
     assert(func); // All functions should be registered in the environment before compilation
 
-    astutils::ChildrenGatherer<meta::Arg> argGatherer;
-    node->walk(&argGatherer);
-
     llvm::Function::arg_iterator it = func->arg_begin();
-    for (const auto arg : argGatherer.gathered()) {
+    for (const auto arg : node->args()) {
         buildContext->varMap[arg->name()] = it; /// @todo check name collisions
         assert(it != func->arg_end());
         ++it;
