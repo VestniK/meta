@@ -5,10 +5,12 @@ Goal -> Package <eof>
 
 Package -> 'package' (<qname> | <identifier>) ';' [Function]... +> Package
 
-Function -> <identifier> <identifier> '(' [Arg]/','... ')' '{' Statement '}' +> Function
+Function -> <identifier> <identifier> '(' [Arg]/','... ')' '{' (Statement)... '}' +> Function
 Arg -> <identifier> <identifier> +> Arg
 
-Statement -> 'return' Expr ';' +> Return
+Statement -> <identifier> <identifier> ['=' Expr] ';' +> VarDecl
+          -> Var '=' Expr ';' +> Assigment
+          -> 'return' Expr ';' +> Return
 
 Expr -> Expr '+' Expr +> BinaryOp
      -> Expr '-' Expr +> BinaryOp
@@ -16,7 +18,9 @@ Expr -> Expr '+' Expr +> BinaryOp
      -> Expr '/' Expr +> BinaryOp
      -> '(' Expr ')'
      -> <num> +> Number
-     -> <identifier> +> Var
+     -> Var
      -> Call
+
+Var -> <identifier> +> Var
 
 Call -> <identifier> '(' [Expr]/','... ')' +> Call

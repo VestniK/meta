@@ -5,9 +5,11 @@
 #include <gtest/gtest.h>
 
 #include "parser/arg.h"
+#include "parser/assigment.h"
 #include "parser/function.h"
 #include "parser/metaparser.h"
 #include "parser/package.h"
+#include "parser/vardecl.h"
 
 TEST(Parser, zeroParamFunc) {
     const char *input = "package test; int foo() {return 5;}";
@@ -120,3 +122,31 @@ TEST(Parser, funcRetType) {
     ASSERT_EQ(functions[1]->retType(), "double");
 }
 
+TEST(Parser, varTest) {
+    const char *input = R"META(
+        package test;
+        int foo(int x)
+        {
+            int y = 2*x;
+            int z;
+            z = x*x;
+            return z + y - 3;
+        }
+    )META";
+    meta::Parser parser;
+    std::shared_ptr<meta::Package> root(nullptr);
+    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
+    auto varDeclarations = root->getChildren<meta::VarDecl>(2);
+    ASSERT_EQ(varDeclarations.size(), 2);
+    ASSERT_EQ(varDeclarations[0]->type(), "int");
+    ASSERT_EQ(varDeclarations[0]->name(), "y");
+    ASSERT_TRUE(varDeclarations[0]->inited());
+
+    ASSERT_EQ(varDeclarations[1]->type(), "int");
+    ASSERT_EQ(varDeclarations[1]->name(), "z");
+    ASSERT_FALSE(varDeclarations[1]->inited());
+
+    auto assigments = root->getChildren<meta::Assigment>(2);
+    ASSERT_EQ(assigments.size(), 1);
+    ASSERT_EQ(assigments[0]->modifiedVar(), "z");
+}

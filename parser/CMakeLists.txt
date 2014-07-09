@@ -5,6 +5,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(SRC
   arg.cpp
+  assigment.cpp
   binaryop.cpp
   call.cpp
   function.cpp
@@ -12,6 +13,7 @@ set(SRC
   package.cpp
   return.cpp
   var.cpp
+  vardecl.cpp
 )
 
 lrstar_grammar(GRM_SRC meta SKEL c++11)
