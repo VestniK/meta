@@ -1,7 +1,5 @@
 #include <cassert>
 
-#include "astutils/childrengatherer.h"
-
 #include "parser/function.h"
 #include "parser/package.h"
 
@@ -15,9 +13,7 @@ Package::Package(const StackFrame *start, size_t size): Node(start, size)
 
 std::vector<Function*> Package::functions()
 {
-    astutils::ChildrenGatherer<Function> funcGatherer;
-    walk(&funcGatherer);
-    return funcGatherer.gathered();
+    return getChildren<Function>();
 }
 
 }

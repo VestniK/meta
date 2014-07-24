@@ -5,8 +5,6 @@
 
 #include "parser/metanodes.h"
 
-#include "astutils/childrengatherer.h"
-
 #include "builder/environment.h"
 
 builder::Environment::Environment(const std::string& moduleName):
@@ -21,12 +19,10 @@ builder::Environment::~Environment()
 
 void builder::Environment::addFunction(meta::Function *func)
 {
-    astutils::ChildrenGatherer<meta::Arg> argGatherer;
-    func->walk(&argGatherer);
-
+    const auto args = func->args();
     llvm::Type *intType = llvm::Type::getInt32Ty(context);
     std::vector<llvm::Type *> argTypes;
-    for (const auto arg : argGatherer.gathered()) {
+    for (const auto arg : args) {
         if (arg->type() == "int")
             argTypes.push_back(intType);
         else
@@ -35,7 +31,7 @@ void builder::Environment::addFunction(meta::Function *func)
     llvm::FunctionType *funcType = llvm::FunctionType::get(intType, argTypes, false);
     llvm::Function *prototype = llvm::Function::Create(funcType, llvm::GlobalValue::ExternalLinkage, func->name(), module.get());
     llvm::Function::arg_iterator it = prototype->arg_begin();
-    for (const auto arg : argGatherer.gathered()) {
+    for (const auto arg : args) {
         it->setName(arg->name());
         assert(it != prototype->arg_end());
         ++it;

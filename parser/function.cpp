@@ -1,7 +1,5 @@
 #include <cassert>
 
-#include "astutils/childrengatherer.h"
-
 #include "parser/arg.h"
 #include "parser/function.h"
 
@@ -18,9 +16,7 @@ Function::Function(const meta::StackFrame* start, size_t size): Node(start, size
 
 std::vector<Arg*> Function::args()
 {
-    astutils::ChildrenGatherer<Arg> argGatherer;
-    walk(&argGatherer);
-    return argGatherer.gathered();
+    return getChildren<Arg>();
 }
 
 } // namespace meta
