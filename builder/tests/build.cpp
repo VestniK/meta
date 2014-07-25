@@ -18,7 +18,8 @@ namespace local {
 
 int poly(int x)
 {
-    return 5*x*x - 6*x + 3;
+    int common = x + 3;
+    return 5*common*common - 6*common + 3;
 }
 
 int dist(int x, int y)

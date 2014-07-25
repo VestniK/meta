@@ -11,10 +11,10 @@ meta_NODE
 public:
     Assigment(const StackFrame* start, size_t size);
 
-    const std::string &modifiedVar() const {return mModifiedVar;}
+    const std::string &varName() const {return mVarName;}
 
 private:
-    std::string mModifiedVar;
+    std::string mVarName;
 };
 
 }

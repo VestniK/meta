@@ -21,7 +21,8 @@ struct BuildContext
 {
     BuildContext(Environment &env): builder(env.context) {}
 
-    std::map<std::string, llvm::Value*> varMap;
+    std::map<std::string, llvm::Value*> varMap; // IR registry allocated
+    std::map<std::string, llvm::AllocaInst*> mutableVarMap; // Stack allocated
     llvm::IRBuilder<> builder;
     std::stack<llvm::Value*> evaluationStack;
 };
@@ -39,6 +40,8 @@ public:
 
     virtual void visit(meta::Number *node) override;
     virtual void visit(meta::Var *node) override;
+    virtual void leave(meta::VarDecl *node) override;
+    virtual void leave(meta::Assigment *node) override;
 
     virtual void leave(meta::BinaryOp *node) override;
     virtual void leave(meta::Return *node) override;
@@ -73,6 +76,7 @@ CodeGen::~CodeGen()
 void CodeGen::visit(meta::Function *node)
 {
     buildContext->varMap.clear();
+    buildContext->mutableVarMap.clear();
     llvm::Function *func = env.module->getFunction(node->name());
     assert(func); // All functions should be registered in the environment before compilation
 
@@ -116,12 +120,45 @@ void CodeGen::visit(meta::Number *node)
 void CodeGen::visit(meta::Var *node)
 {
     auto it = buildContext->varMap.find(node->name());
-    if (it == buildContext->varMap.end())
-        throw std::runtime_error(std::string("Undefined variable ") + node->name());
-    buildContext->evaluationStack.push(it->second);
+    llvm::Value *val = nullptr;
+    if (it != buildContext->varMap.end())
+        val = it->second;
+    else {
+        auto it = buildContext->mutableVarMap.find(node->name());
+        if (it == buildContext->mutableVarMap.end())
+            throw std::runtime_error(std::string("Undefined variable ") + node->name());
+        val = buildContext->builder.CreateLoad(it->second);
+    }
+    buildContext->evaluationStack.push(val);
 }
 
-void CodeGen::leave(meta::BinaryOp* node)
+void CodeGen::leave(meta::VarDecl *node)
+{
+    llvm::Function *currFunc = buildContext->builder.GetInsertBlock()->getParent();
+    llvm::IRBuilder<> stackVarDeclBuilder(&(currFunc->getEntryBlock()), currFunc->getEntryBlock().begin());
+    llvm::Type *type = llvm::Type::getInt32Ty(env.context); // TODO use note->type() to calculate properly
+    llvm::AllocaInst *stackVar = stackVarDeclBuilder.CreateAlloca(type, 0, node->name().c_str());
+
+    buildContext->mutableVarMap[node->name()] = stackVar;
+
+    if (!node->inited())
+        return;
+    assert(buildContext->evaluationStack.size() >= 1);
+    buildContext->builder.CreateStore(buildContext->evaluationStack.top(), stackVar);
+    buildContext->evaluationStack.pop();
+}
+
+void CodeGen::leave(meta::Assigment *node)
+{
+    auto it = buildContext->mutableVarMap.find(node->varName());
+    if (it == buildContext->mutableVarMap.end())
+        throw std::runtime_error(std::string("Variable ") + node->varName() + " doesn't exists or not mutable");
+    assert(buildContext->evaluationStack.size() >= 1);
+    buildContext->builder.CreateStore(buildContext->evaluationStack.top(), it->second);
+    buildContext->evaluationStack.pop();
+}
+
+void CodeGen::leave(meta::BinaryOp *node)
 {
     assert(buildContext->evaluationStack.size() >=2);
     llvm::Value *right = buildContext->evaluationStack.top();
@@ -136,7 +173,7 @@ void CodeGen::leave(meta::BinaryOp* node)
     }
 }
 
-void CodeGen::leave(meta::Return* node)
+void CodeGen::leave(meta::Return *node)
 {
     assert(buildContext->evaluationStack.size() == 1);
     buildContext->builder.CreateRet(buildContext->evaluationStack.top());

@@ -148,5 +148,5 @@ TEST(Parser, varTest) {
 
     auto assigments = root->getChildren<meta::Assigment>(2);
     ASSERT_EQ(assigments.size(), 1);
-    ASSERT_EQ(assigments[0]->modifiedVar(), "z");
+    ASSERT_EQ(assigments[0]->varName(), "z");
 }
