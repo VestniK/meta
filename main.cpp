@@ -16,14 +16,29 @@ int main(int argc, char **argv)
         std::cerr << "Ussage: " << argv[0] << " SRC_FILE OUTPUT" << std::endl;
         return EXIT_FAILURE;
     }
+    const enum ErrorVerbosity {silent, brief, lineMarked, expectedTerms, parserStack} verbosity = expectedTerms;
     try {
         std::vector<char> input;
         readWholeFile(argv[1], input);
         meta::Parser parser;
-        auto package = std::dynamic_pointer_cast<meta::Package>(parser.parse(input.data()));
+        auto package = std::dynamic_pointer_cast<meta::Package>(parser.parse(input.data(), input.size()));
         builder::build(package, argv[2]);
+    } catch(const meta::SyntaxError &err) {
+        if (verbosity > silent)
+            std::cerr << argv[1] << ':' << err.token().line << ':' << err.token().column << ": " << err.what();
+        if (verbosity == brief)
+            std::cerr << std::endl;
+        if (verbosity > brief) {
+            std::cerr << ':' << std::endl;
+            std::cerr << err.line() << std::endl;
+        }
+        if (verbosity > lineMarked)
+            std::cerr << "Expected one of the following terms:" << std::endl << err.expected();
+        if (verbosity > expectedTerms)
+            std::cerr << "Parser stack dump:" << std::endl << err.parserStack();
+        return EXIT_FAILURE;
     } catch(const std::exception &err) {
-        std::cerr << err.what() << std::endl;
+        std::cerr << "Internal compiler error: " << err.what() << std::endl;
         return EXIT_FAILURE;
     }
 

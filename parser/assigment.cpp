@@ -7,7 +7,7 @@ namespace meta {
 Assigment::Assigment(const StackFrame* start, size_t size): Node(start, size)
 {
     assert(size == 4);
-    mVarName.assign(start[0].start, start[0].end - start[0].start);
+    mVarName = start[0].tokens;
 }
 
 }

@@ -7,7 +7,7 @@ namespace meta {
 Var::Var(const StackFrame* start, size_t size): Node(start, size)
 {
     assert(size == 1);
-    mName.assign(start->start, start->end - start->start);
+    mName = start[0].tokens;
 }
 
 } // namespace meta
