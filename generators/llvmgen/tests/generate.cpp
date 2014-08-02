@@ -11,6 +11,7 @@ int dist(int x, int y);
 
 int distCall(int x);
 
+int varsUsage(int x);
 }
 
 // Functions with the same body as above funcs
@@ -30,6 +31,15 @@ int dist(int x, int y)
 int distCall(int x)
 {
     return dist(x, x);
+}
+
+int varsUsage(int x)
+{
+    int y;
+    int z = 5;
+    y = x + z;
+    z = y*x;
+    return x + y + z;
 }
 
 }
@@ -59,3 +69,8 @@ TEST(BuilderTests, functionWithCall)
         ASSERT_EQ(distCall(x), local::distCall(x));
 }
 
+TEST(BuilderTests, varsUsage)
+{
+    for (int x = -50; x < 50; ++x)
+        ASSERT_EQ(varsUsage(x), local::varsUsage(x));
+}

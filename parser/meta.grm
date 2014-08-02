@@ -18,9 +18,9 @@ Expr -> Expr '+' Expr +> BinaryOp
      -> Expr '/' Expr +> BinaryOp
      -> '(' Expr ')'
      -> <num> +> Number
-     -> Var
+     -> Var  +> Var
      -> Call
 
-Var -> <identifier> +> Var
+Var -> <identifier>
 
 Call -> <identifier> '(' [Expr]/','... ')' +> Call
