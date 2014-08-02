@@ -11,6 +11,7 @@
 #include "parser/metanodes.h"
 
 #include "generators/llvmgen/environment.h"
+#include "generators/llvmgen/privateheadercheck.h"
 
 namespace generators {
 namespace llvmgen {

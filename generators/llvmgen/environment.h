@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include "generators/llvmgen/privateheadercheck.h"
+
 namespace llvm {
 
 class LLVMContext;
