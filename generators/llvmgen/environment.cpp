@@ -5,19 +5,22 @@
 
 #include "parser/metanodes.h"
 
-#include "builder/environment.h"
+#include "generators/llvmgen/environment.h"
 
-builder::Environment::Environment(const std::string& moduleName):
+namespace generators {
+namespace llvmgen {
+
+Environment::Environment(const std::string& moduleName):
     context(llvm::getGlobalContext()),
     module(new llvm::Module(moduleName, context))
 {
 }
 
-builder::Environment::~Environment()
+Environment::~Environment()
 {
 }
 
-void builder::Environment::addFunction(meta::Function *func)
+void Environment::addFunction(meta::Function *func)
 {
     const auto args = func->args();
     llvm::Type *intType = llvm::Type::getInt32Ty(context);
@@ -38,3 +41,7 @@ void builder::Environment::addFunction(meta::Function *func)
     }
     assert(it == prototype->arg_end());
 }
+
+} // namespace llvmgen
+} // namespace generators
+

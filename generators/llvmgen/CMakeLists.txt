@@ -9,11 +9,11 @@ set(LLVM_DEPS ${LLVM_DEPS} curses dl)
 set(LLVM_REQUIRED_LIBS LLVMBitWriter LLVMCore LLVMSupport)
 
 set(SRC
-  builder.cpp
+  generator.cpp
   environment.cpp
 )
 
-add_library(builder STATIC ${SRC})
-target_link_libraries(builder ${LLVM_DEPS} ${LLVM_REQUIRED_LIBS} curses dl)
+add_library(llvmgenerator STATIC ${SRC})
+target_link_libraries(llvmgenerator ${LLVM_DEPS} ${LLVM_REQUIRED_LIBS} curses dl)
 
 add_subdirectory(tests)

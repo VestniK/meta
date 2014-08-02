@@ -8,7 +8,7 @@
 #include "parser/metaparser.h"
 #include "parser/package.h"
 
-#include "builder/builder.h"
+#include "generators/llvmgen/generator.h"
 
 int main(int argc, char **argv)
 {
@@ -22,7 +22,7 @@ int main(int argc, char **argv)
         readWholeFile(argv[1], input);
         meta::Parser parser;
         auto package = std::dynamic_pointer_cast<meta::Package>(parser.parse(input.data(), input.size()));
-        builder::build(package, argv[2]);
+        generators::llvmgen::generate(package, argv[2]);
     } catch(const meta::SyntaxError &err) {
         if (verbosity > silent)
             std::cerr << argv[1] << ':' << err.token().line << ':' << err.token().column << ": " << err.what();

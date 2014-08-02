@@ -12,10 +12,11 @@
 
 #include "parser/metanodes.h"
 
-#include "builder/builder.h"
-#include "builder/environment.h"
+#include "generators/llvmgen/environment.h"
+#include "generators/llvmgen/generator.h"
 
-namespace builder {
+namespace generators {
+namespace llvmgen {
 
 struct BuildContext
 {
@@ -53,7 +54,7 @@ private:
     std::unique_ptr<BuildContext> buildContext;
 };
 
-void build(std::shared_ptr<meta::Package> pkg, const std::string& output)
+void generate(std::shared_ptr<meta::Package> pkg, const std::string& output)
 {
     Environment env(pkg->name());
     for (auto func : pkg->functions())
@@ -190,4 +191,5 @@ void CodeGen::save(const std::string& path)
         throw std::runtime_error(errBuf);
 }
 
-} // namespace builder
+} // namespace llvmgen
+} // namespace generator

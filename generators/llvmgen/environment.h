@@ -16,7 +16,8 @@ class Function;
 
 }
 
-namespace builder {
+namespace generators {
+namespace llvmgen {
 
 struct Environment
 {
@@ -29,6 +30,8 @@ struct Environment
     std::unique_ptr<llvm::Module> module;
 };
 
-} // namespace builder
+} // namespace llvmgen
+} // namespace generators
 
 #endif // ENVIRONMENT_H
+
