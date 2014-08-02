@@ -18,11 +18,15 @@ int main(int argc, char **argv)
     }
     const enum ErrorVerbosity {silent, brief, lineMarked, expectedTerms, parserStack} verbosity = expectedTerms;
     try {
+        // read
         std::vector<char> input;
         readWholeFile(argv[1], input);
+        // parse
         meta::Parser parser;
         auto package = std::dynamic_pointer_cast<meta::Package>(parser.parse(input.data(), input.size()));
-        generators::llvmgen::generate(package, argv[2]);
+        // generate
+        std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
+        gen->generate(package, argv[2]);
     } catch(const meta::SyntaxError &err) {
         if (verbosity > silent)
             std::cerr << argv[1] << ':' << err.token().line << ':' << err.token().column << ": " << err.what();

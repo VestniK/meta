@@ -4,13 +4,12 @@
 #include <string>
 #include <memory>
 
-#include "parser/metaparser.h"
-#include "parser/package.h"
+#include "generators/generator.h"
 
 namespace generators {
 namespace llvmgen {
 
-void generate(std::shared_ptr<meta::Package> pkg, const std::string &output);
+generators::Generator *createLlvmGenerator();
 
 } // namespace llvmgen
 } // namespace generators

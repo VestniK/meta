@@ -18,11 +18,11 @@
 namespace generators {
 namespace llvmgen {
 
-class CodeGen: public meta::Visitor
+class LlvmGenVisitor: public meta::Visitor
 {
 public:
-    CodeGen(Environment &env);
-    virtual ~CodeGen();
+    LlvmGenVisitor(Environment &env);
+    virtual ~LlvmGenVisitor();
 
     virtual void visit(meta::Function *node) override;
 
@@ -47,27 +47,36 @@ private:
     llvm::IRBuilder<> builder;
 };
 
-void generate(std::shared_ptr<meta::Package> pkg, const std::string& output)
+class LlvmGen: public generators::Generator
 {
-    Environment env(pkg->name());
-    for (auto func : pkg->functions())
-        env.addFunction(func);
-    CodeGen codegen(env);
-    pkg->walk(&codegen);
-    codegen.save(output);
+public:
+    virtual void generate(std::shared_ptr<meta::Package> pkg, const std::string& output) override
+    {
+        Environment env(pkg->name());
+        for (auto func : pkg->functions())
+            env.addFunction(func);
+        LlvmGenVisitor codegen(env);
+        pkg->walk(&codegen);
+        codegen.save(output);
+    }
+};
+
+generators::Generator *createLlvmGenerator()
+{
+    return new LlvmGen;
 }
 
-CodeGen::CodeGen(Environment &env):
+LlvmGenVisitor::LlvmGenVisitor(Environment &env):
     env(env),
     builder(env.context)
 {
 }
 
-CodeGen::~CodeGen()
+LlvmGenVisitor::~LlvmGenVisitor()
 {
 }
 
-void CodeGen::visit(meta::Function *node)
+void LlvmGenVisitor::visit(meta::Function *node)
 {
     regVarMap.clear();
     stackVarMap.clear();
@@ -86,12 +95,12 @@ void CodeGen::visit(meta::Function *node)
     builder.SetInsertPoint(body);
 }
 
-void CodeGen::visit(meta::Call *)
+void LlvmGenVisitor::visit(meta::Call *)
 {
     evaluationStack.push(nullptr); // Marker for the result operation value
 }
 
-void CodeGen::leave(meta::Call *node)
+void LlvmGenVisitor::leave(meta::Call *node)
 {
     llvm::Function *func = env.module->getFunction(node->functionName());
     /// @todo this kind of checks should be done before compilation
@@ -105,13 +114,13 @@ void CodeGen::leave(meta::Call *node)
     evaluationStack.top() = builder.CreateCall(func, args);
 }
 
-void CodeGen::visit(meta::Number *node)
+void LlvmGenVisitor::visit(meta::Number *node)
 {
     llvm::Type *intType = llvm::Type::getInt32Ty(env.context);
     evaluationStack.push(llvm::ConstantInt::get(intType, node->value(), true));
 }
 
-void CodeGen::visit(meta::Var *node)
+void LlvmGenVisitor::visit(meta::Var *node)
 {
     auto it = regVarMap.find(node->name());
     llvm::Value *val = nullptr;
@@ -126,7 +135,7 @@ void CodeGen::visit(meta::Var *node)
     evaluationStack.push(val);
 }
 
-void CodeGen::leave(meta::VarDecl *node)
+void LlvmGenVisitor::leave(meta::VarDecl *node)
 {
     llvm::Function *currFunc = builder.GetInsertBlock()->getParent();
     llvm::IRBuilder<> stackVarDeclBuilder(&(currFunc->getEntryBlock()), currFunc->getEntryBlock().begin());
@@ -142,7 +151,7 @@ void CodeGen::leave(meta::VarDecl *node)
     evaluationStack.pop();
 }
 
-void CodeGen::leave(meta::Assigment *node)
+void LlvmGenVisitor::leave(meta::Assigment *node)
 {
     auto it = stackVarMap.find(node->varName());
     if (it == stackVarMap.end())
@@ -152,7 +161,7 @@ void CodeGen::leave(meta::Assigment *node)
     evaluationStack.pop();
 }
 
-void CodeGen::leave(meta::BinaryOp *node)
+void LlvmGenVisitor::leave(meta::BinaryOp *node)
 {
     assert(evaluationStack.size() >=2);
     llvm::Value *right = evaluationStack.top();
@@ -167,14 +176,14 @@ void CodeGen::leave(meta::BinaryOp *node)
     }
 }
 
-void CodeGen::leave(meta::Return *node)
+void LlvmGenVisitor::leave(meta::Return *node)
 {
     assert(evaluationStack.size() == 1);
     builder.CreateRet(evaluationStack.top());
     evaluationStack.pop();
 }
 
-void CodeGen::save(const std::string& path)
+void LlvmGenVisitor::save(const std::string& path)
 {
     std::string errBuf;
     llvm::raw_fd_ostream out(path.c_str(), errBuf, llvm::sys::fs::F_Binary);
