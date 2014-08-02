@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cstdio>
 #include <stdexcept>
 #include <vector>
 
@@ -11,6 +12,26 @@
 
 namespace generators {
 namespace llvmgen {
+
+static bool stackLogEnabled = false;
+
+static inline void push(std::stack<llvm::Value*> &stack, llvm::Value *val, const std::string &what)
+{
+    if (stackLogEnabled) fprintf(stderr, "PUSH: %s\n", what.c_str());
+    stack.push(val);
+}
+
+static inline void pop(std::stack<llvm::Value*> &stack, const std::string &what)
+{
+    if (stackLogEnabled) fprintf(stderr, "POP: %s\n", what.c_str());
+    stack.pop();
+}
+
+static inline void set(std::stack<llvm::Value*> &stack, llvm::Value *val, const std::string &from, const std::string &to)
+{
+    if (stackLogEnabled) fprintf(stderr, "CHANGE: %s with %s\n", from.c_str(), to.c_str());
+    stack.top() = val;
+}
 
 ModuleBuilder::ModuleBuilder(Environment &env):
     env(env),
@@ -41,9 +62,9 @@ void ModuleBuilder::visit(meta::Function *node)
     builder.SetInsertPoint(body);
 }
 
-void ModuleBuilder::visit(meta::Call *)
+void ModuleBuilder::visit(meta::Call *node)
 {
-    evaluationStack.push(nullptr); // Marker for the result operation value
+    push(evaluationStack, nullptr, node->functionName() + " call result placeholder");
 }
 
 void ModuleBuilder::leave(meta::Call *node)
@@ -53,17 +74,17 @@ void ModuleBuilder::leave(meta::Call *node)
     if (func == nullptr)
         throw std::runtime_error(std::string("Call of unknown function " + node->functionName()));
     std::vector<llvm::Value*> args;
-    for (; evaluationStack.top() != nullptr; evaluationStack.pop())
+    for (; evaluationStack.top() != nullptr; pop(evaluationStack, "call argument"))
         args.push_back(evaluationStack.top());
     if (func->arg_size() != args.size())
         throw std::runtime_error(std::string("Call of the function ") + node->functionName() + " with incorrect number of arguments");
-    evaluationStack.top() = builder.CreateCall(func, args);
+    set(evaluationStack, builder.CreateCall(func, args), "call result placeholder", node->functionName() + " result");
 }
 
 void ModuleBuilder::visit(meta::Number *node)
 {
     llvm::Type *intType = llvm::Type::getInt32Ty(env.context);
-    evaluationStack.push(llvm::ConstantInt::get(intType, node->value(), true));
+    push(evaluationStack, llvm::ConstantInt::get(intType, node->value(), true), "number constant");
 }
 
 void ModuleBuilder::visit(meta::Var *node)
@@ -78,7 +99,7 @@ void ModuleBuilder::visit(meta::Var *node)
             throw std::runtime_error(std::string("Undefined variable ") + node->name());
         val = builder.CreateLoad(it->second);
     }
-    evaluationStack.push(val);
+    push(evaluationStack, val, node->name() + " variable value");
 }
 
 void ModuleBuilder::leave(meta::VarDecl *node)
@@ -94,7 +115,7 @@ void ModuleBuilder::leave(meta::VarDecl *node)
         return;
     assert(evaluationStack.size() >= 1);
     builder.CreateStore(evaluationStack.top(), stackVar);
-    evaluationStack.pop();
+    pop(evaluationStack, node->name() + " var initial value");
 }
 
 void ModuleBuilder::leave(meta::Assigment *node)
@@ -104,20 +125,20 @@ void ModuleBuilder::leave(meta::Assigment *node)
         throw std::runtime_error(std::string("Variable ") + node->varName() + " doesn't exists or not mutable");
     assert(evaluationStack.size() >= 1);
     builder.CreateStore(evaluationStack.top(), it->second);
-    evaluationStack.pop();
+    pop(evaluationStack, node->varName() + " var new value");
 }
 
 void ModuleBuilder::leave(meta::BinaryOp *node)
 {
     assert(evaluationStack.size() >=2);
     llvm::Value *right = evaluationStack.top();
-    evaluationStack.pop();
+    pop(evaluationStack, "bin op right operand");
     llvm::Value *left = evaluationStack.top();
     switch (node->operation()) {
-        case meta::BinaryOp::add: evaluationStack.top() = builder.CreateAdd(left, right); break;
-        case meta::BinaryOp::sub: evaluationStack.top() = builder.CreateSub(left, right); break;
-        case meta::BinaryOp::mul: evaluationStack.top() = builder.CreateMul(left, right); break;
-        case meta::BinaryOp::div: evaluationStack.top() = builder.CreateSDiv(left, right); break;
+        case meta::BinaryOp::add: set(evaluationStack, builder.CreateAdd(left, right), "left operand", "operator+ value"); break;
+        case meta::BinaryOp::sub: set(evaluationStack, builder.CreateSub(left, right), "left operand", "operator- value"); break;
+        case meta::BinaryOp::mul: set(evaluationStack, builder.CreateMul(left, right), "left operand", "operator* value"); break;
+        case meta::BinaryOp::div: set(evaluationStack, builder.CreateSDiv(left, right), "left operand", "operator/ value"); break;
         default: assert(false);
     }
 }
@@ -126,7 +147,7 @@ void ModuleBuilder::leave(meta::Return *node)
 {
     assert(evaluationStack.size() == 1);
     builder.CreateRet(evaluationStack.top());
-    evaluationStack.pop();
+    pop(evaluationStack, "return value");
 }
 
 void ModuleBuilder::save(const std::string& path)
