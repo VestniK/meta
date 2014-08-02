@@ -9,8 +9,9 @@ set(LLVM_DEPS ${LLVM_DEPS} curses dl)
 set(LLVM_REQUIRED_LIBS LLVMBitWriter LLVMCore LLVMSupport)
 
 set(SRC
-  generator.cpp
   environment.cpp
+  generator.cpp
+  modulebuilder.cpp
 )
 
 add_library(llvmgenerator STATIC ${SRC})
