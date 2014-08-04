@@ -150,6 +150,11 @@ void ModuleBuilder::leave(meta::Return *node)
     pop(evaluationStack, "return value");
 }
 
+void ModuleBuilder::leave(meta::ExprStatement *)
+{
+    pop(evaluationStack, "unused expr result");
+}
+
 void ModuleBuilder::save(const std::string& path)
 {
     std::string errBuf;

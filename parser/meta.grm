@@ -10,6 +10,7 @@ Arg -> <identifier> <identifier> +> Arg
 
 Statement -> <identifier> <identifier> ['=' Expr] ';' +> VarDecl
           -> Var '=' Expr ';' +> Assigment
+          -> Expr ';' +> ExprStatement
           -> 'return' Expr ';' +> Return
 
 Expr -> Expr '+' Expr +> BinaryOp

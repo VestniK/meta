@@ -8,6 +8,7 @@ set(SRC
   assigment.cpp
   binaryop.cpp
   call.cpp
+  exprstatement.cpp
   function.cpp
   number.cpp
   package.cpp

@@ -34,6 +34,7 @@ public:
 
     virtual void leave(meta::BinaryOp *node) override;
     virtual void leave(meta::Return *node) override;
+    virtual void leave (meta::ExprStatement *);
 
     void save(const std::string &path);
 

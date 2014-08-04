@@ -5,6 +5,7 @@
 #include "parser/assigment.h"
 #include "parser/binaryop.h"
 #include "parser/call.h"
+#include "parser/exprstatement.h"
 #include "parser/function.h"
 #include "parser/number.h"
 #include "parser/package.h"
