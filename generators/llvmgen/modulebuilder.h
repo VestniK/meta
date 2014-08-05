@@ -16,6 +16,8 @@
 namespace generators {
 namespace llvmgen {
 
+struct ModuleBuilderPrivate;
+
 class ModuleBuilder: public meta::Visitor
 {
 public:
@@ -39,11 +41,8 @@ public:
     void save(const std::string &path);
 
 private:
-    Environment &env;
-    std::map<std::string, llvm::Value*> regVarMap; // IR registry allocated
-    std::map<std::string, llvm::AllocaInst*> stackVarMap; // Stack allocated
+    std::unique_ptr<ModuleBuilderPrivate> d;
     std::stack<llvm::Value*> evaluationStack;
-    llvm::IRBuilder<> builder;
 };
 
 } // namespace llvmgen
