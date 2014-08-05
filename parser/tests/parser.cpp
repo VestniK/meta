@@ -150,3 +150,33 @@ TEST(Parser, varTest) {
     ASSERT_EQ(assigments.size(), 1);
     ASSERT_EQ(assigments[0]->varName(), "z");
 }
+
+TEST(Parser, assignAsExpr) {
+    const char *input = R"META(
+        package test;
+        int foo(int x)
+        {
+            int y;
+            int z;
+            z = (y = x + 1)*x;
+            return z + y - 3;
+        }
+    )META";
+    meta::Parser parser;
+    std::shared_ptr<meta::Package> root(nullptr);
+    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
+    auto varDeclarations = root->getChildren<meta::VarDecl>(-1);
+    ASSERT_EQ(varDeclarations.size(), 2);
+    ASSERT_EQ(varDeclarations[0]->type(), "int");
+    ASSERT_EQ(varDeclarations[0]->name(), "y");
+    ASSERT_FALSE(varDeclarations[0]->inited());
+
+    ASSERT_EQ(varDeclarations[1]->type(), "int");
+    ASSERT_EQ(varDeclarations[1]->name(), "z");
+    ASSERT_FALSE(varDeclarations[1]->inited());
+
+    auto assigments = root->getChildren<meta::Assigment>(-1);
+    ASSERT_EQ(assigments.size(), 2);
+    ASSERT_EQ(assigments[0]->varName(), "z");
+    ASSERT_EQ(assigments[1]->varName(), "y");
+}
