@@ -29,3 +29,11 @@ int varsUsage(int x)
     z = y*x;
     return x + y + z;
 }
+
+int assigment(int x)
+{
+    int a;
+    int b;
+    int c = a = b = x + 5;
+    return a + b + c;
+}

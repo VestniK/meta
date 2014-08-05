@@ -146,7 +146,7 @@ TEST(Parser, varTest) {
     ASSERT_EQ(varDeclarations[1]->name(), "z");
     ASSERT_FALSE(varDeclarations[1]->inited());
 
-    auto assigments = root->getChildren<meta::Assigment>(2);
+    auto assigments = root->getChildren<meta::Assigment>(-1);
     ASSERT_EQ(assigments.size(), 1);
     ASSERT_EQ(assigments[0]->varName(), "z");
 }

@@ -6,7 +6,7 @@ namespace meta {
 
 Assigment::Assigment(const StackFrame* start, size_t size): Node(start, size)
 {
-    assert(size == 4);
+    assert(size == 3);
     mVarName = start[0].tokens;
 }
 

@@ -125,7 +125,7 @@ void ModuleBuilder::leave(meta::Assigment *node)
         throw std::runtime_error(std::string("Variable ") + node->varName() + " doesn't exists or not mutable");
     assert(evaluationStack.size() >= 1);
     builder.CreateStore(evaluationStack.top(), it->second);
-    pop(evaluationStack, node->varName() + " var new value");
+    // current stack top points to the result of the expression uset as assigment rval
 }
 
 void ModuleBuilder::leave(meta::BinaryOp *node)

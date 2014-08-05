@@ -9,7 +9,6 @@ Function -> <identifier> <identifier> '(' [Arg]/','... ')' '{' (Statement)... '}
 Arg -> <identifier> <identifier> +> Arg
 
 Statement -> <identifier> <identifier> ['=' Expr] ';' +> VarDecl
-          -> Var '=' Expr ';' +> Assigment
           -> Expr ';' +> ExprStatement
           -> 'return' Expr ';' +> Return
 
@@ -21,6 +20,7 @@ Expr -> Expr '+' Expr +> BinaryOp
      -> <num> +> Number
      -> Var  +> Var
      -> Call
+     -> Var '=' Expr +> Assigment
 
 Var -> <identifier>
 

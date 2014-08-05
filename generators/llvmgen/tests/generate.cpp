@@ -12,6 +12,8 @@ int dist(int x, int y);
 int distCall(int x);
 
 int varsUsage(int x);
+
+int assigment(int x);
 }
 
 // Functions with the same body as above funcs
@@ -40,6 +42,14 @@ int varsUsage(int x)
     y = x + z;
     z = y*x;
     return x + y + z;
+}
+
+int assigment(int x)
+{
+    int a;
+    int b;
+    int c = a = b = x + 5;
+    return a + b + c;
 }
 
 }
@@ -74,3 +84,10 @@ TEST(BuilderTests, varsUsage)
     for (int x = -50; x < 50; ++x)
         ASSERT_EQ(varsUsage(x), local::varsUsage(x));
 }
+
+TEST(BuilderTests, assigment)
+{
+    for (int x = -50; x < 50; ++x)
+        ASSERT_EQ(assigment(x), local::assigment(x));
+}
+
