@@ -1,5 +1,7 @@
 #include "parser/metanodes.h"
 
+#include "generators/translationrunner.h"
+
 #include "generators/llvmgen/generator.h"
 #include "generators/llvmgen/modulebuilder.h"
 
@@ -15,7 +17,8 @@ public:
         for (auto func : pkg->functions())
             env.addFunction(func);
         ModuleBuilder builder(env);
-        pkg->walk(&builder);
+        generators::TranslationRunner<llvm::Value *> runner;
+        runner.translate(pkg.get(), &builder);
         builder.save(output);
     }
 };

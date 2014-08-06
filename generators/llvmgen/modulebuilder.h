@@ -10,39 +10,38 @@
 #include "parser/metaparser.h"
 #include "parser/metanodes.h"
 
+#include "generators/translator.h"
+
 #include "generators/llvmgen/environment.h"
 #include "generators/llvmgen/privateheadercheck.h"
 
 namespace generators {
 namespace llvmgen {
 
-struct ModuleBuilderPrivate;
-
-class ModuleBuilder: public meta::Visitor
+class ModuleBuilder: public generators::Translator<llvm::Value*>
 {
 public:
-    ModuleBuilder(Environment &env);
-    virtual ~ModuleBuilder();
+    ModuleBuilder(Environment &env): env(env), builder(env.context) {}
 
-    virtual void visit(meta::Function *node) override;
-
-    virtual void visit(meta::Call *) override;
-    virtual void leave(meta::Call *node) override;
-
-    virtual void visit(meta::Number *node) override;
-    virtual void visit(meta::Var *node) override;
-    virtual void leave(meta::VarDecl *node) override;
-    virtual void leave(meta::Assigment *node) override;
-
-    virtual void leave(meta::BinaryOp *node) override;
-    virtual void leave(meta::Return *node) override;
-    virtual void leave (meta::ExprStatement *);
+    virtual void startFunction(meta::Function *node) override;
+    // Value consumers
+    virtual void declareVar(meta::VarDecl *node, llvm::Value *initialVal) override;
+    virtual void returnValue(meta::Return *node, llvm::Value *val) override;
+    // Value providers
+    virtual llvm::Value *number(meta::Number *node) override;
+    virtual llvm::Value *var(meta::Var *node) override;
+    // Operations on values
+    virtual llvm::Value *call(meta::Call *node, const std::vector<llvm::Value*> &args) override;
+    virtual llvm::Value *assign(meta::Assigment *node, llvm::Value *val) override;
+    virtual llvm::Value *binaryOp(meta::BinaryOp *node, llvm::Value *left, llvm::Value *right) override;
 
     void save(const std::string &path);
 
 private:
-    std::unique_ptr<ModuleBuilderPrivate> d;
-    std::stack<llvm::Value*> evaluationStack;
+    Environment &env;
+    std::map<std::string, llvm::Value*> regVarMap; // IR registry allocated
+    std::map<std::string, llvm::AllocaInst*> stackVarMap; // Stack allocated
+    llvm::IRBuilder<> builder;
 };
 
 } // namespace llvmgen
