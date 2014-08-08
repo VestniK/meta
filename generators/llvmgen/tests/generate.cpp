@@ -21,7 +21,7 @@ namespace local {
 
 int poly(int x)
 {
-    int common = x + 3;
+    int common = -x + 3;
     return 5*common*common - 6*common + 3;
 }
 
@@ -39,7 +39,7 @@ int varsUsage(int x)
 {
     int y;
     int z = 5;
-    y = x + z;
+    y = +x + z;
     z = y*x;
     return x + y + z;
 }

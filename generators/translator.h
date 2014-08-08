@@ -11,6 +11,7 @@ class Number;
 class Var;
 class Assigment;
 class BinaryOp;
+class PrefixOp;
 
 } // namespace meta
 
@@ -33,6 +34,7 @@ public:
     virtual Value call(meta::Call *node, const std::vector<Value> &args) = 0;
     virtual Value assign(meta::Assigment *node, Value val) = 0;
     virtual Value binaryOp(meta::BinaryOp *node, Value left, Value right) = 0;
+    virtual Value prefixOp(meta::PrefixOp *node, Value val) = 0;
 };
 
 } // namespace generators

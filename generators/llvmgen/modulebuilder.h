@@ -34,6 +34,7 @@ public:
     virtual llvm::Value *call(meta::Call *node, const std::vector<llvm::Value*> &args) override;
     virtual llvm::Value *assign(meta::Assigment *node, llvm::Value *val) override;
     virtual llvm::Value *binaryOp(meta::BinaryOp *node, llvm::Value *left, llvm::Value *right) override;
+    virtual llvm::Value *prefixOp(meta::PrefixOp *node, llvm::Value *val);
 
     void save(const std::string &path);
 

@@ -100,6 +100,16 @@ llvm::Value *ModuleBuilder::binaryOp(meta::BinaryOp *node, llvm::Value *left, ll
     return nullptr;
 }
 
+llvm::Value *ModuleBuilder::prefixOp(meta::PrefixOp *node, llvm::Value *val)
+{
+    switch (node->operation()) {
+        case meta::PrefixOp::negative: return builder.CreateNeg(val);
+        case meta::PrefixOp::positive: return val;
+        default: assert(false);
+    }
+    return nullptr;
+}
+
 void ModuleBuilder::save(const std::string &path)
 {
     std::string errBuf;

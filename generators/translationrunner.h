@@ -80,6 +80,13 @@ private:
         Value left = stack.top();
         stack.top() = translator->binaryOp(node, left, right);
     }
+
+    virtual void leave(meta::PrefixOp *node) override
+    {
+        assert(stack.size() > 0);
+        stack.top() = translator->prefixOp(node, stack.top());
+    }
+
     virtual void leave(meta::Return *node) override
     {
         assert(stack.size() == 1);
