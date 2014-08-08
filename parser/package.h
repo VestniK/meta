@@ -12,7 +12,7 @@ class Package: public Node
 {
 meta_NODE
 public:
-    Package(const StackFrame *start, size_t size);
+    Package(AST &ast, const StackFrame *start, size_t size);
 
     const std::string &name() const {return mName;}
     std::vector<Function *> functions();

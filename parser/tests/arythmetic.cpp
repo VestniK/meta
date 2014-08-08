@@ -54,10 +54,10 @@ TEST(Arythmetic, priorities)
 {
     const char *input = "package test; int foo() {return 5*2+7*8;}";
     meta::Parser parser;
-    std::shared_ptr<meta::Node> root(nullptr);
-    ASSERT_NO_THROW(root = parser.parse(input));
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
     LoggingCalc calc;
-    root->walk(&calc);
+    ast.walk(&calc);
     ASSERT_EQ(calc.calcSequence().size(), 3);
 
     ASSERT_EQ(calc.calcSequence()[0].operation, meta::BinaryOp::mul);
@@ -79,10 +79,10 @@ TEST(Arythmetic, parenthesis)
 {
     const char *input = "package test; int foo() {return 2*(11+5)/8;}";
     meta::Parser parser;
-    std::shared_ptr<meta::Node> root(nullptr);
-    ASSERT_NO_THROW(root = parser.parse(input));
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
     LoggingCalc calc;
-    root->walk(&calc);
+    ast.walk(&calc);
     ASSERT_EQ(calc.calcSequence().size(), 3);
 
     ASSERT_EQ(calc.calcSequence()[0].operation, meta::BinaryOp::add);

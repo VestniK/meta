@@ -9,7 +9,7 @@ class BinaryOp: public Node
 {
 meta_NODE
 public:
-    BinaryOp(const StackFrame *start, size_t size);
+    BinaryOp(AST &ast, const StackFrame *start, size_t size);
 
     enum Operation {add, sub, mul, div};
     Operation operation() const {return mOp;}

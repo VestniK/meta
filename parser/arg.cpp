@@ -4,7 +4,7 @@
 
 namespace meta {
 
-Arg::Arg(const StackFrame* start, size_t size): Node(start, size)
+Arg::Arg(AST &ast, const StackFrame* start, size_t size): Node(ast, start, size)
 {
     assert(size == 2);
     mType = start[0].tokens;

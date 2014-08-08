@@ -9,7 +9,7 @@ class Assigment: public Node
 {
 meta_NODE
 public:
-    Assigment(const StackFrame* start, size_t size);
+    Assigment(AST &ast, const StackFrame* start, size_t size);
 
     const std::string &varName() const {return mVarName;}
 

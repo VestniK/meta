@@ -11,7 +11,7 @@ class VarDecl: public meta::Node
 {
 meta_NODE
 public:
-    VarDecl(const StackFrame* start, size_t size);
+    VarDecl(AST &ast, const StackFrame* start, size_t size);
 
     const std::string &name() const {return mName;}
     const std::string &type() const {return mType;}

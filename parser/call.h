@@ -8,7 +8,7 @@ class Call: public Node
 {
 meta_NODE
 public:
-    Call(const StackFrame *reduction, size_t size);
+    Call(AST &ast, const StackFrame *reduction, size_t size);
 
     const std::string &functionName() const {return mFunctionName;}
 

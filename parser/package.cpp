@@ -5,7 +5,7 @@
 
 namespace meta {
 
-Package::Package(const StackFrame *start, size_t size): Node(start, size)
+Package::Package(AST &ast, const StackFrame *start, size_t size): Node(ast, start, size)
 {
     assert(size == 4);
     mName = start[1].tokens;

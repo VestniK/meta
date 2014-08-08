@@ -6,7 +6,7 @@
 
 namespace meta {
 
-Number::Number(const StackFrame* start, size_t size): Node(start, size)
+Number::Number(AST &ast, const StackFrame* start, size_t size): Node(ast, start, size)
 {
     assert(size == 1);
     mValue = atoi(std::string(start[0].tokens).c_str());

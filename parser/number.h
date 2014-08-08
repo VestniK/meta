@@ -9,7 +9,7 @@ class Number: public Node
 {
 meta_NODE
 public:
-    Number(const StackFrame *start, size_t size);
+    Number(AST &ast, const StackFrame *start, size_t size);
 
     int value() const {return mValue;}
 

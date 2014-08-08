@@ -2,7 +2,7 @@
 
 namespace meta {
 
-ExprStatement::ExprStatement(const StackFrame *start, size_t size): Node(start, size)
+ExprStatement::ExprStatement(AST &ast, const StackFrame *start, size_t size): Node(ast, start, size)
 {
 
 }

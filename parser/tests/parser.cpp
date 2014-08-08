@@ -14,10 +14,12 @@
 TEST(Parser, zeroParamFunc) {
     const char *input = "package test; int foo() {return 5;}";
     meta::Parser parser;
-    std::shared_ptr<meta::Package> root(nullptr);
-    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
-    ASSERT_EQ(root->name(), "test");
-    const auto functions = root->functions();
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
+    auto packages = ast.getChildren<meta::Package>();
+    ASSERT_EQ(packages.size(), 1);
+    ASSERT_EQ(packages.front()->name(), "test");
+    const auto functions = packages.front()->functions();
     ASSERT_EQ(functions.size(), 1);
     ASSERT_EQ(functions[0]->name(), "foo");
     ASSERT_EQ(functions[0]->args().size(), 0);
@@ -26,10 +28,12 @@ TEST(Parser, zeroParamFunc) {
 TEST(Parser, oneParamFunc) {
     const char *input = "package test; int foo(int x) {return 5*x*x - 2*x + 3;}";
     meta::Parser parser;
-    std::shared_ptr<meta::Package> root(nullptr);
-    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
-    ASSERT_EQ(root->name(), "test");
-    const auto functions = root->functions();
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
+    auto packages = ast.getChildren<meta::Package>();
+    ASSERT_EQ(packages.size(), 1);
+    ASSERT_EQ(packages.front()->name(), "test");
+    const auto functions = packages.front()->functions();
     ASSERT_EQ(functions.size(), 1);
     ASSERT_EQ(functions[0]->name(), "foo");
     const auto args = functions[0]->args();
@@ -41,10 +45,12 @@ TEST(Parser, oneParamFunc) {
 TEST(Parser, twoParamFunc) {
     const char *input = "package test; int foo(int x, int y) {return 5*x + 6/y;}";
     meta::Parser parser;
-    std::shared_ptr<meta::Package> root(nullptr);
-    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
-    ASSERT_EQ(root->name(), "test");
-    const auto functions = root->functions();
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
+    auto packages = ast.getChildren<meta::Package>();
+    ASSERT_EQ(packages.size(), 1);
+    ASSERT_EQ(packages.front()->name(), "test");
+    const auto functions = packages.front()->functions();
     ASSERT_EQ(functions.size(), 1);
     ASSERT_EQ(functions[0]->name(), "foo");
     const auto args = functions[0]->args();
@@ -58,10 +64,12 @@ TEST(Parser, twoParamFunc) {
 TEST(Parser, twoFunc) {
     const char *input = "package test; int foo(int x) {return 5*x;}\nint bar(int x) {return x/5;}";
     meta::Parser parser;
-    std::shared_ptr<meta::Package> root(nullptr);
-    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
-    ASSERT_EQ(root->name(), "test");
-    const auto functions = root->functions();
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
+    auto packages = ast.getChildren<meta::Package>();
+    ASSERT_EQ(packages.size(), 1);
+    ASSERT_EQ(packages.front()->name(), "test");
+    const auto functions = packages.front()->functions();
     ASSERT_EQ(functions.size(), 2);
 
     ASSERT_EQ(functions[0]->name(), "foo");
@@ -80,10 +88,12 @@ TEST(Parser, twoFunc) {
 TEST(Parser, funcCall) {
     const char *input = "package test; int foo(int x) {return 5*x;}\nint bar(int y) {return 5*foo(y/5);}";
     meta::Parser parser;
-    std::shared_ptr<meta::Package> root(nullptr);
-    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
-    ASSERT_EQ(root->name(), "test");
-    const auto functions = root->functions();
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
+    auto packages = ast.getChildren<meta::Package>();
+    ASSERT_EQ(packages.size(), 1);
+    ASSERT_EQ(packages.front()->name(), "test");
+    const auto functions = packages.front()->functions();
     ASSERT_EQ(functions.size(), 2);
 
     ASSERT_EQ(functions[0]->name(), "foo");
@@ -102,19 +112,23 @@ TEST(Parser, funcCall) {
 TEST(Parser, emptyPackage) {
     const char *input = "package test.test;";
     meta::Parser parser;
-    std::shared_ptr<meta::Package> root(nullptr);
-    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
-    ASSERT_EQ(root->name(), "test.test");
-    ASSERT_EQ(root->functions().size(), 0);
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
+    auto packages = ast.getChildren<meta::Package>();
+    ASSERT_EQ(packages.size(), 1);
+    ASSERT_EQ(packages.front()->name(), "test.test");
+    ASSERT_EQ(packages.front()->functions().size(), 0);
 }
 
 TEST(Parser, funcRetType) {
     const char *input = "package test; int iFoo() {return 0;}\ndouble dFoo() {return 0;}";
     meta::Parser parser;
-    std::shared_ptr<meta::Package> root(nullptr);
-    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
-    ASSERT_EQ(root->name(), "test");
-    const auto functions = root->functions();
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
+    auto packages = ast.getChildren<meta::Package>();
+    ASSERT_EQ(packages.size(), 1);
+    ASSERT_EQ(packages.front()->name(), "test");
+    const auto functions = packages.front()->functions();
     ASSERT_EQ(functions.size(), 2);
     ASSERT_EQ(functions[0]->name(), "iFoo");
     ASSERT_EQ(functions[0]->retType(), "int");
@@ -134,9 +148,11 @@ TEST(Parser, varTest) {
         }
     )META";
     meta::Parser parser;
-    std::shared_ptr<meta::Package> root(nullptr);
-    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
-    auto varDeclarations = root->getChildren<meta::VarDecl>(2);
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
+    auto packages = ast.getChildren<meta::Package>();
+    ASSERT_EQ(packages.size(), 1);
+    auto varDeclarations = packages.front()->getChildren<meta::VarDecl>(2);
     ASSERT_EQ(varDeclarations.size(), 2);
     ASSERT_EQ(varDeclarations[0]->type(), "int");
     ASSERT_EQ(varDeclarations[0]->name(), "y");
@@ -146,7 +162,7 @@ TEST(Parser, varTest) {
     ASSERT_EQ(varDeclarations[1]->name(), "z");
     ASSERT_FALSE(varDeclarations[1]->inited());
 
-    auto assigments = root->getChildren<meta::Assigment>(-1);
+    auto assigments = packages.front()->getChildren<meta::Assigment>(-1);
     ASSERT_EQ(assigments.size(), 1);
     ASSERT_EQ(assigments[0]->varName(), "z");
 }
@@ -163,9 +179,11 @@ TEST(Parser, assignAsExpr) {
         }
     )META";
     meta::Parser parser;
-    std::shared_ptr<meta::Package> root(nullptr);
-    ASSERT_NO_THROW(root = std::dynamic_pointer_cast<meta::Package>(parser.parse(input)));
-    auto varDeclarations = root->getChildren<meta::VarDecl>(-1);
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input));
+    auto packages = ast.getChildren<meta::Package>();
+    ASSERT_EQ(packages.size(), 1);
+    auto varDeclarations = packages.front()->getChildren<meta::VarDecl>(-1);
     ASSERT_EQ(varDeclarations.size(), 2);
     ASSERT_EQ(varDeclarations[0]->type(), "int");
     ASSERT_EQ(varDeclarations[0]->name(), "y");
@@ -175,7 +193,7 @@ TEST(Parser, assignAsExpr) {
     ASSERT_EQ(varDeclarations[1]->name(), "z");
     ASSERT_FALSE(varDeclarations[1]->inited());
 
-    auto assigments = root->getChildren<meta::Assigment>(-1);
+    auto assigments = packages.front()->getChildren<meta::Assigment>(-1);
     ASSERT_EQ(assigments.size(), 2);
     ASSERT_EQ(assigments[0]->varName(), "z");
     ASSERT_EQ(assigments[1]->varName(), "y");
