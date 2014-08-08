@@ -12,6 +12,7 @@ set(SRC
   function.cpp
   number.cpp
   package.cpp
+  prefixop.cpp
   return.cpp
   var.cpp
   vardecl.cpp

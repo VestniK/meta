@@ -5,6 +5,7 @@
 
 #include "parser/binaryop.h"
 #include "parser/number.h"
+#include "parser/prefixop.h"
 
 struct Operation
 {
@@ -35,6 +36,15 @@ public:
             case meta::BinaryOp::mul: mCalcStack.back() = current.left*current.right; break;
             case meta::BinaryOp::div: mCalcStack.back() = current.left/current.right; break;
             default: assert(false);
+        }
+    }
+
+    virtual void leave(meta::PrefixOp *op)
+    {
+        assert(mCalcStack.size() >= 1);
+        switch(op->operation()) {
+            case meta::PrefixOp::negative: mCalcStack.back() = - mCalcStack.back(); break;
+            case meta::PrefixOp::positive: mCalcStack.back() = + mCalcStack.back(); break;
         }
     }
 
@@ -99,3 +109,41 @@ TEST(Arythmetic, parenthesis)
 
     ASSERT_EQ(calc.result(), 4);
 }
+
+struct TestData
+{
+    const char *expression;
+    int expectedResult;
+};
+
+class Arythmetic: public ::testing::TestWithParam<TestData>
+{
+public:
+};
+
+TEST_P(Arythmetic, calcTest)
+{
+    TestData data = GetParam();
+    std::string input = "package test; int foo() {return ";
+    input += data.expression;
+    input += ";}";
+
+    meta::Parser parser;
+    meta::AST ast;
+    ASSERT_NO_THROW(ast = parser.parse(input.c_str()));
+    LoggingCalc calc;
+    ast.walk(&calc);
+    ASSERT_EQ(calc.result(), data.expectedResult);
+}
+
+INSTANTIATE_TEST_CASE_P(PrefixOp, Arythmetic, ::testing::Values(
+    TestData({"+1", 1}),
+    TestData({"-1", -1}),
+    TestData({"+1+5", 6}),
+    TestData({"-1 + 5", 4}),
+    TestData({"1 + +5", 6}),
+    TestData({"1 + -5", -4}),
+    TestData({"-2*3 + 4", -2}),
+    TestData({"2*-3 + 4", -2}),
+    TestData({"2*3 + -4", 2})
+));

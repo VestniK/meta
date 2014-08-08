@@ -12,15 +12,19 @@ Statement -> <identifier> <identifier> ['=' Expr] ';' +> VarDecl
           -> Expr ';' +> ExprStatement
           -> 'return' Expr ';' +> Return
 
-Expr -> Expr '+' Expr +> BinaryOp
+Expr -> UnaryExpr
+     -> Expr '+' Expr +> BinaryOp
      -> Expr '-' Expr +> BinaryOp
      -> Expr '*' Expr +> BinaryOp
      -> Expr '/' Expr +> BinaryOp
-     -> '(' Expr ')'
-     -> <num> +> Number
-     -> Var  +> Var
      -> Call
      -> Var '=' Expr +> Assigment
+
+UnaryExpr -> '+' UnaryExpr +> PrefixOp
+          -> '-' UnaryExpr +> PrefixOp
+          -> <num> +> Number
+          -> Var  +> Var
+          -> '(' Expr ')'
 
 Var -> <identifier>
 
