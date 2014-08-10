@@ -4,10 +4,10 @@ find_package(lrstar)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(SRC
-  arg.cpp
   assigment.cpp
   binaryop.cpp
   call.cpp
+  codeblock.cpp
   exprstatement.cpp
   function.cpp
   number.cpp

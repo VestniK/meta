@@ -15,7 +15,7 @@ public:
 
     const std::string &name() const {return mName;}
     const std::string &retType() const {return mRetType;}
-    std::vector<Arg*> args();
+    std::vector<VarDecl*> args();
 private:
     std::string mName;
     std::string mRetType;

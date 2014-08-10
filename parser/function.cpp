@@ -1,7 +1,7 @@
 #include <cassert>
 
-#include "parser/arg.h"
 #include "parser/function.h"
+#include "parser/vardecl.h"
 
 namespace meta {
 
@@ -14,9 +14,9 @@ Function::Function(AST *ast, const StackFrame* start, size_t size): Node(ast, st
     mName = start[namePos].tokens;
 }
 
-std::vector<Arg*> Function::args()
+std::vector<VarDecl*> Function::args()
 {
-    return getChildren<Arg>();
+    return getChildren<VarDecl>();
 }
 
 } // namespace meta

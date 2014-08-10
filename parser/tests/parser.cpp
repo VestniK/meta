@@ -4,8 +4,8 @@
 
 #include <gtest/gtest.h>
 
-#include "parser/arg.h"
 #include "parser/assigment.h"
+#include "parser/codeblock.h"
 #include "parser/function.h"
 #include "parser/metaparser.h"
 #include "parser/package.h"
@@ -150,9 +150,9 @@ TEST(Parser, varTest) {
     meta::Parser parser;
     std::unique_ptr<meta::AST> ast;
     ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parser.parse(input)));
-    auto packages = ast->getChildren<meta::Package>();
-    ASSERT_EQ(packages.size(), 1);
-    auto varDeclarations = packages.front()->getChildren<meta::VarDecl>(2);
+    auto blocks = ast->getChildren<meta::CodeBlock>(-1);
+    ASSERT_EQ(blocks.size(), 1);
+    auto varDeclarations = blocks.front()->getChildren<meta::VarDecl>(-1);
     ASSERT_EQ(varDeclarations.size(), 2);
     ASSERT_EQ(varDeclarations[0]->type(), "int");
     ASSERT_EQ(varDeclarations[0]->name(), "y");
@@ -162,7 +162,7 @@ TEST(Parser, varTest) {
     ASSERT_EQ(varDeclarations[1]->name(), "z");
     ASSERT_FALSE(varDeclarations[1]->inited());
 
-    auto assigments = packages.front()->getChildren<meta::Assigment>(-1);
+    auto assigments = blocks.front()->getChildren<meta::Assigment>(-1);
     ASSERT_EQ(assigments.size(), 1);
     ASSERT_EQ(assigments[0]->varName(), "z");
 }
@@ -181,9 +181,9 @@ TEST(Parser, assignAsExpr) {
     meta::Parser parser;
     std::unique_ptr<meta::AST> ast;
     ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parser.parse(input)));
-    auto packages = ast->getChildren<meta::Package>();
-    ASSERT_EQ(packages.size(), 1);
-    auto varDeclarations = packages.front()->getChildren<meta::VarDecl>(-1);
+    auto blocks = ast->getChildren<meta::CodeBlock>(-1);
+    ASSERT_EQ(blocks.size(), 1);
+    auto varDeclarations = blocks.front()->getChildren<meta::VarDecl>(-1);
     ASSERT_EQ(varDeclarations.size(), 2);
     ASSERT_EQ(varDeclarations[0]->type(), "int");
     ASSERT_EQ(varDeclarations[0]->name(), "y");
@@ -193,7 +193,7 @@ TEST(Parser, assignAsExpr) {
     ASSERT_EQ(varDeclarations[1]->name(), "z");
     ASSERT_FALSE(varDeclarations[1]->inited());
 
-    auto assigments = packages.front()->getChildren<meta::Assigment>(-1);
+    auto assigments = blocks.front()->getChildren<meta::Assigment>(-1);
     ASSERT_EQ(assigments.size(), 2);
     ASSERT_EQ(assigments[0]->varName(), "z");
     ASSERT_EQ(assigments[1]->varName(), "y");

@@ -5,10 +5,12 @@ Goal -> Package <eof>
 
 Package -> 'package' (<qname> | <identifier>) ';' [Function]... +> Package
 
-Function -> <identifier> <identifier> '(' [Arg]/','... ')' '{' (Statement)... '}' +> Function
-Arg -> <identifier> <identifier> +> Arg
+Function -> <identifier> <identifier> '(' [VarDecl]/','... ')' CodeBlock +> Function
+CodeBlock -> '{' (Statement)... '}' +> CodeBlock
+VarDecl -> <identifier> <identifier> ['=' Expr] +> VarDecl
 
-Statement -> <identifier> <identifier> ['=' Expr] ';' +> VarDecl
+Statement -> CodeBlock
+          -> VarDecl ';'
           -> Expr ';' +> ExprStatement
           -> 'return' Expr ';' +> Return
 
