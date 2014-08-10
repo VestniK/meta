@@ -9,7 +9,7 @@ class PrefixOp: public Node
 {
 meta_NODE
 public:
-    PrefixOp(AST &ast, const StackFrame *start, size_t size);
+    PrefixOp(AST *ast, const StackFrame *start, size_t size);
 
     enum Operation {negative, positive};
     Operation operation() const {return mOperation;}

@@ -4,7 +4,7 @@
 
 namespace meta {
 
-BinaryOp::BinaryOp(AST &ast, const StackFrame* start, size_t size): Node(ast, start, size)
+BinaryOp::BinaryOp(AST *ast, const StackFrame* start, size_t size): Node(ast, start, size)
 {
     assert(size == 3);
     static const size_t opPos = 1;

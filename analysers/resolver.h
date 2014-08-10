@@ -7,7 +7,7 @@ class AST;
 
 namespace analisers {
 
-void resolve(meta::AST &ast);
+void resolve(meta::AST *ast);
 
 } // namespace analisers
 

@@ -7,14 +7,14 @@
 
 namespace analisers {
 
-void resolve(meta::AST &ast)
+void resolve(meta::AST *ast)
 {
     std::vector<meta::Function*> functions;
-    for (auto pkg : ast.getChildren<meta::Package>()) {
+    for (auto pkg : ast->getChildren<meta::Package>()) {
         auto pkgFuncs = pkg->functions();
         functions.insert(functions.end(), pkgFuncs.begin(), pkgFuncs.end());
     }
-    ast.walkTopDown<meta::Call>([&functions](meta::Call *call) {
+    ast->walkTopDown<meta::Call>([&functions](meta::Call *call) {
         for (const auto func : functions) {
             if (call->functionName() != func->name())
                 continue;

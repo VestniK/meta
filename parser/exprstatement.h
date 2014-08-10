@@ -9,7 +9,7 @@ class ExprStatement: public Node
 {
 meta_NODE
 public:
-    ExprStatement(AST &ast, const StackFrame *start, size_t size);
+    ExprStatement(AST *ast, const StackFrame *start, size_t size);
 };
 
 } // namespace meta

@@ -5,7 +5,7 @@
 
 namespace meta {
 
-Function::Function(AST &ast, const StackFrame* start, size_t size): Node(ast, start, size)
+Function::Function(AST *ast, const StackFrame* start, size_t size): Node(ast, start, size)
 {
     static const size_t typePos = 0;
     static const size_t namePos = 1;

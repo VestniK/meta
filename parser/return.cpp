@@ -2,7 +2,7 @@
 
 namespace meta {
 
-Return::Return(AST &ast, const StackFrame* reduction, size_t size): Node(ast, reduction, size)
+Return::Return(AST *ast, const StackFrame* reduction, size_t size): Node(ast, reduction, size)
 {
 }
 

@@ -4,7 +4,7 @@
 
 namespace meta {
 
-VarDecl::VarDecl(AST &ast, const StackFrame* start, size_t size): Node(ast, start, size)
+VarDecl::VarDecl(AST *ast, const StackFrame* start, size_t size): Node(ast, start, size)
 {
     assert(size == 4);
     mType = start[0].tokens;

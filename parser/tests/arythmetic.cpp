@@ -64,10 +64,10 @@ TEST(Arythmetic, priorities)
 {
     const char *input = "package test; int foo() {return 5*2+7*8;}";
     meta::Parser parser;
-    meta::AST ast;
-    ASSERT_NO_THROW(ast = parser.parse(input));
+    std::unique_ptr<meta::AST> ast;
+    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parser.parse(input)));
     LoggingCalc calc;
-    ast.walk(&calc);
+    ast->walk(&calc);
     ASSERT_EQ(calc.calcSequence().size(), 3);
 
     ASSERT_EQ(calc.calcSequence()[0].operation, meta::BinaryOp::mul);
@@ -89,10 +89,10 @@ TEST(Arythmetic, parenthesis)
 {
     const char *input = "package test; int foo() {return 2*(11+5)/8;}";
     meta::Parser parser;
-    meta::AST ast;
-    ASSERT_NO_THROW(ast = parser.parse(input));
+    std::unique_ptr<meta::AST> ast;
+    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parser.parse(input)));
     LoggingCalc calc;
-    ast.walk(&calc);
+    ast->walk(&calc);
     ASSERT_EQ(calc.calcSequence().size(), 3);
 
     ASSERT_EQ(calc.calcSequence()[0].operation, meta::BinaryOp::add);
@@ -129,10 +129,10 @@ TEST_P(Arythmetic, calcTest)
     input += ";}";
 
     meta::Parser parser;
-    meta::AST ast;
-    ASSERT_NO_THROW(ast = parser.parse(input.c_str()));
+    std::unique_ptr<meta::AST> ast;
+    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parser.parse(input.c_str())));
     LoggingCalc calc;
-    ast.walk(&calc);
+    ast->walk(&calc);
     ASSERT_EQ(calc.result(), data.expectedResult);
 }
 

@@ -26,11 +26,11 @@ int main(int argc, char **argv)
         readWholeFile(argv[1], input);
         // parse
         meta::Parser parser;
-        auto ast = parser.parse(input.data(), input.size());
-        analisers::resolve(ast);
-        std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
+        std::unique_ptr<meta::AST> ast(parser.parse(input.data(), input.size()));
+        analisers::resolve(ast.get());
         // generate
-        auto package = ast.getChildren<meta::Package>();
+        std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
+        auto package = ast->getChildren<meta::Package>();
         assert(package.size() == 1);
         gen->generate(package.front(), argv[2]);
     } catch(const meta::SyntaxError &err) {
