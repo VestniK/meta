@@ -5,10 +5,10 @@ namespace meta {
 class AST;
 }
 
-namespace analisers {
+namespace analysers {
 
 void resolve(meta::AST *ast);
 
-} // namespace analisers
+} // namespace analysers
 
 #endif // RESOLVER_H

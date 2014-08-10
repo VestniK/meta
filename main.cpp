@@ -10,6 +10,7 @@
 #include "parser/package.h"
 
 #include "analysers/resolver.h"
+#include "analysers/semanticerror.h"
 
 #include "generators/llvmgen/generator.h"
 
@@ -28,7 +29,7 @@ int main(int argc, char **argv)
         meta::Parser parser;
         std::unique_ptr<meta::AST> ast(parser.parse(input.data(), input.size()));
         // analyse
-        analisers::resolve(ast.get());
+        analysers::resolve(ast.get());
         // generate
         std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
         gen->generate(ast.get(), argv[2]);
@@ -45,6 +46,12 @@ int main(int argc, char **argv)
             std::cerr << "Expected one of the following terms:" << std::endl << err.expected();
         if (verbosity > expectedTerms)
             std::cerr << "Parser stack dump:" << std::endl << err.parserStack();
+        return EXIT_FAILURE;
+    } catch(const analysers::SemanticError &err) {
+        if (verbosity > silent)
+            std::cerr << argv[1] << ':' << err.tokens().begin()->line << ':' << err.tokens().begin()->column << ": " << err.what() << (verbosity == brief ? "" : ":") << std::endl;
+        if (verbosity > brief)
+            std::cerr << std::string(err.tokens()) << std::endl;
         return EXIT_FAILURE;
     } catch(const std::exception &err) {
         std::cerr << "Internal compiler error: " << err.what() << std::endl;

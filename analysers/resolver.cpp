@@ -4,8 +4,9 @@
 #include "parser/package.h"
 
 #include "analysers/resolver.h"
+#include "analysers/semanticerror.h"
 
-namespace analisers {
+namespace analysers {
 
 void resolve(meta::AST *ast)
 {
@@ -22,8 +23,13 @@ void resolve(meta::AST *ast)
             break;
         }
         if (call->function() == nullptr)
-            throw std::runtime_error(std::string("Unresolved function call: ") + call->functionName());
+            throw SemanticError(call, std::string("Unresolved function call '") + call->functionName() + "'");
+        auto expectedArgs = call->function()->args();
+        auto passedArgs = call->getChildren<meta::Node>(1);
+        if (expectedArgs.size() != passedArgs.size())
+            throw SemanticError(call, std::string("Call to function '") + call->functionName() + "' with incorrect number of arguments");
+        /// @todo check types
     });
 }
 
-} // namespace analisers
+} // namespace analysers

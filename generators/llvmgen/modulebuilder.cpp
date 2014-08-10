@@ -55,12 +55,10 @@ llvm::Value *ModuleBuilder::call(meta::Call *node, const std::vector<llvm::Value
 {
     llvm::Function *func = env.module->getFunction(node->functionName());
     if (!func) {
-        assert(node->function() != nullptr); // all function calls must be resolved before trunslation
+        assert(node->function() != nullptr);
         func = env.addFunction(node->function());
     }
-    /// @todo this kind of checks should be done before generation
-    if (func->arg_size() != args.size())
-        throw std::runtime_error(std::string("Call of the function ") + node->functionName() + " with incorrect number of arguments");
+    assert(func->arg_size() == args.size());
     return builder.CreateCall(func, args);
 }
 
