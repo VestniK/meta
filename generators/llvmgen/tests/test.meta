@@ -1,5 +1,10 @@
 package test;
 
+int distCall(int x)
+{
+    return dist(x, x);
+}
+
 int dist(int x, int y)
 {
     return x*x + y*y;
@@ -14,11 +19,6 @@ int poly(int x)
 {
     int common = -x+3;
     return 5*common*common - 6*common + 3;
-}
-
-int distCall(int x)
-{
-    return dist(x, x);
 }
 
 int varsUsage(int x)
