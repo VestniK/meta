@@ -17,7 +17,7 @@ namespace analysers {
 class SemanticError: public std::exception
 {
 public:
-    SemanticError(meta::Node *node, const std::string &msg);
+    SemanticError(meta::Node *node, const char *format, ...) __attribute__((format(printf, 3, 4)));
     ~SemanticError();
 
     virtual const char *what() const noexcept override;

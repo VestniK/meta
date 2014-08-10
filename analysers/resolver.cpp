@@ -33,11 +33,11 @@ public:
             break;
         }
         if (node->function() == nullptr)
-            throw SemanticError(node, std::string("Unresolved function call '") + node->functionName() + "'");
+            throw SemanticError(node, "Unresolved function call '%s'", node->functionName().c_str());
         auto expectedArgs = node->function()->args();
         auto passedArgs = node->getChildren<meta::Node>(1);
         if (expectedArgs.size() != passedArgs.size())
-            throw SemanticError(node, std::string("Call to function '") + node->functionName() + "' with incorrect number of arguments");
+            throw SemanticError(node, "Call to function '%s' with incorrect number of arguments", node->functionName().c_str());
         /// @todo check types
     }
 
@@ -50,7 +50,10 @@ public:
     {
         auto prev = mVars.find(node->name());
         if (prev != mVars.end())
-            throw SemanticError(node, std::string("Redefinition of the variable '") + node->name() + "'");
+            throw SemanticError(
+                node, "Redefinition of the variable '%s' first defined at line %d, column %d",
+                node->name().c_str(), prev->second->tokens().begin()->line, prev->second->tokens().begin()->column
+            );
         mVars[node->name()] = node;
     }
 
@@ -58,7 +61,7 @@ public:
     {
         auto decl = mVars.find(node->name());
         if (decl == mVars.end())
-            throw SemanticError(node, std::string("Reference to undefined variable '") + node->name() + "'");
+            throw SemanticError(node, "Reference to undefined variable '%s'", node->name().c_str());
         node->setDeclaration(decl->second);
     }
 
@@ -66,9 +69,9 @@ public:
     {
         auto decl = mVars.find(node->varName());
         if (decl == mVars.end())
-            throw SemanticError(node, std::string("Reference to undefined variable '") + node->varName() + "'");
+            throw SemanticError(node, "Reference to undefined variable '%s'", node->varName().c_str());
         if (decl->second->is(meta::VarDecl::argument))
-            throw SemanticError(node, std::string("Attempt to modify function argument '") + node->varName() + "'");
+            throw SemanticError(node, "Attempt to modify function argument '%s'", node->varName().c_str());
         node->setDeclaration(decl->second);
     }
 
