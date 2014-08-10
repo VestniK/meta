@@ -27,12 +27,11 @@ int main(int argc, char **argv)
         // parse
         meta::Parser parser;
         std::unique_ptr<meta::AST> ast(parser.parse(input.data(), input.size()));
+        // analyse
         analisers::resolve(ast.get());
         // generate
         std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
-        auto package = ast->getChildren<meta::Package>();
-        assert(package.size() == 1);
-        gen->generate(package.front(), argv[2]);
+        gen->generate(ast.get(), argv[2]);
     } catch(const meta::SyntaxError &err) {
         if (verbosity > silent)
             std::cerr << argv[1] << ':' << err.token().line << ':' << err.token().column << ": " << err.what();

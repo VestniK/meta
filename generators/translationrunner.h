@@ -10,19 +10,13 @@
 
 #include "generators/translator.h"
 
-namespace meta {
-
-class Node;
-
-}
-
 namespace generators {
 
 template<typename Value>
 class TranslationRunner: private meta::Visitor
 {
 public:
-    void translate(meta::Node *ast, Translator<Value> *translator)
+    void translate(meta::AST *ast, Translator<Value> *translator)
     {
         this->translator = translator;
         ast->walk(this);

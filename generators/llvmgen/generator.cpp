@@ -11,12 +11,12 @@ namespace llvmgen {
 class LlvmGen: public generators::Generator
 {
 public:
-    virtual void generate(meta::Package *pkg, const std::string& output) override
+    virtual void generate(meta::AST *ast, const std::string &output) override
     {
-        Environment env(pkg->name());
+        Environment env(ast->getChildren<meta::Package>().front()->name());
         ModuleBuilder builder(env);
         generators::TranslationRunner<llvm::Value *> runner;
-        runner.translate(pkg, &builder);
+        runner.translate(ast, &builder);
         builder.save(output);
     }
 };

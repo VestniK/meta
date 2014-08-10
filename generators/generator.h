@@ -5,7 +5,7 @@
 #include <string>
 
 namespace meta {
-class Package;
+class AST;
 }
 
 namespace generators {
@@ -15,7 +15,7 @@ class Generator
 public:
     virtual ~Generator() {}
 
-    virtual void generate(meta::Package *pkg, const std::string &output) = 0;
+    virtual void generate(meta::AST *ast, const std::string &output) = 0;
 
 protected:
     Generator() {}
