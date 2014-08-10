@@ -20,7 +20,7 @@ Environment::~Environment()
 {
 }
 
-void Environment::addFunction(meta::Function *func)
+llvm::Function *Environment::addFunction(meta::Function *func)
 {
     const auto args = func->args();
     llvm::Type *intType = llvm::Type::getInt32Ty(context);
@@ -40,6 +40,7 @@ void Environment::addFunction(meta::Function *func)
         ++it;
     }
     assert(it == prototype->arg_end());
+    return prototype;
 }
 
 } // namespace llvmgen

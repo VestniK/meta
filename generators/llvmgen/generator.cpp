@@ -14,8 +14,6 @@ public:
     virtual void generate(meta::Package *pkg, const std::string& output) override
     {
         Environment env(pkg->name());
-        for (auto func : pkg->functions())
-            env.addFunction(func);
         ModuleBuilder builder(env);
         generators::TranslationRunner<llvm::Value *> runner;
         runner.translate(pkg, &builder);

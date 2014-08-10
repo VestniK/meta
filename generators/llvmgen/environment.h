@@ -26,7 +26,7 @@ struct Environment
     Environment(const std::string &moduleName);
     ~Environment();
 
-    void addFunction(meta::Function *func);
+    llvm::Function *addFunction(meta::Function *func);
 
     llvm::LLVMContext &context;
     std::unique_ptr<llvm::Module> module;

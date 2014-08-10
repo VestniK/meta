@@ -18,7 +18,8 @@ void ModuleBuilder::startFunction(meta::Function *node)
     regVarMap.clear();
     stackVarMap.clear();
     llvm::Function *func = env.module->getFunction(node->name());
-    assert(func); // All functions should be registered in the environment before generation
+    if (!func)
+        func = env.addFunction(node);
 
     llvm::Function::arg_iterator it = func->arg_begin();
     for (const auto arg : node->args()) {
@@ -53,9 +54,11 @@ void ModuleBuilder::returnValue(meta::Return *node, llvm::Value *val)
 llvm::Value *ModuleBuilder::call(meta::Call *node, const std::vector<llvm::Value*> &args)
 {
     llvm::Function *func = env.module->getFunction(node->functionName());
+    if (!func) {
+        assert(node->function() != nullptr); // all function calls must be resolved before trunslation
+        func = env.addFunction(node->function());
+    }
     /// @todo this kind of checks should be done before generation
-    if (func == nullptr)
-        throw std::runtime_error(std::string("Call of unknown function " + node->functionName()));
     if (func->arg_size() != args.size())
         throw std::runtime_error(std::string("Call of the function ") + node->functionName() + " with incorrect number of arguments");
     return builder.CreateCall(func, args);

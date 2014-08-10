@@ -9,6 +9,8 @@
 #include "parser/metaparser.h"
 #include "parser/package.h"
 
+#include "analysers/resolver.h"
+
 #include "generators/llvmgen/generator.h"
 
 int main(int argc, char **argv)
@@ -25,10 +27,11 @@ int main(int argc, char **argv)
         // parse
         meta::Parser parser;
         auto ast = parser.parse(input.data(), input.size());
+        analisers::resolve(ast);
+        std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
+        // generate
         auto package = ast.getChildren<meta::Package>();
         assert(package.size() == 1);
-        // generate
-        std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
         gen->generate(package.front(), argv[2]);
     } catch(const meta::SyntaxError &err) {
         if (verbosity > silent)
