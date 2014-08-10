@@ -12,9 +12,12 @@ public:
     Assigment(AST *ast, const StackFrame* start, size_t size);
 
     const std::string &varName() const {return mVarName;}
+    VarDecl *declaration() {return mDeclaration;}
+    void setDeclaration(VarDecl *decl) {mDeclaration = decl;}
 
 private:
     std::string mVarName;
+    VarDecl *mDeclaration;
 };
 
 }

@@ -14,9 +14,12 @@ public:
     Var(AST *ast, const StackFrame *start, size_t size);
 
     const std::string &name() const {return mName;}
+    meta::VarDecl *declaration() {return mDeclaration;}
+    void setDeclaration(meta::VarDecl *decl) {mDeclaration = decl;}
 
 private:
     std::string mName;
+    meta::VarDecl *mDeclaration;
 };
 
 }
