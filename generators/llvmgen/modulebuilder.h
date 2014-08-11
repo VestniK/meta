@@ -40,8 +40,7 @@ public:
 
 private:
     Environment &env;
-    std::map<std::string, llvm::Value*> regVarMap; // IR registry allocated
-    std::map<std::string, llvm::AllocaInst*> stackVarMap; // Stack allocated
+    std::map<meta::VarDecl *, llvm::Value *> mVarMap;
     llvm::IRBuilder<> builder;
 };
 

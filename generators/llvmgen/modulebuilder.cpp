@@ -15,15 +15,14 @@ namespace llvmgen {
 
 void ModuleBuilder::startFunction(meta::Function *node)
 {
-    regVarMap.clear();
-    stackVarMap.clear();
+    mVarMap.clear();
     llvm::Function *func = env.module->getFunction(node->name());
     if (!func)
         func = env.addFunction(node);
 
     llvm::Function::arg_iterator it = func->arg_begin();
     for (const auto arg : node->args()) {
-        regVarMap[arg->name()] = it; /// @todo check name collisions
+        mVarMap[arg] = it;
         assert(it != func->arg_end());
         ++it;
     }
@@ -33,17 +32,22 @@ void ModuleBuilder::startFunction(meta::Function *node)
     builder.SetInsertPoint(body);
 }
 
-void ModuleBuilder::declareVar(meta::VarDecl *node, llvm::Value *initialVal)
+static inline
+llvm::Value *addStackVar(llvm::IRBuilder<> &builder, llvm::LLVMContext &context, meta::VarDecl *decl)
 {
     llvm::Function *currFunc = builder.GetInsertBlock()->getParent();
     llvm::IRBuilder<> stackVarDeclBuilder(&(currFunc->getEntryBlock()), currFunc->getEntryBlock().begin());
-    llvm::Type *type = llvm::Type::getInt32Ty(env.context); // TODO use node->type() to calculate properly
-    llvm::AllocaInst *stackVar = stackVarDeclBuilder.CreateAlloca(type, 0, node->name().c_str());
+    llvm::Type *type = llvm::Type::getInt32Ty(context); // TODO use node->type() to calculate properly
+    return stackVarDeclBuilder.CreateAlloca(type, 0, decl->name().c_str());
+}
 
-    stackVarMap[node->name()] = stackVar;
-
-    if (node->inited())
-        builder.CreateStore(initialVal, stackVar);
+void ModuleBuilder::declareVar(meta::VarDecl *node, llvm::Value *initialVal)
+{
+    // TODO: there is no reason to have this as separate function. IN both situateions there should be call to assign(VarDecl *, Value*)
+    if (initialVal == nullptr) // Will be added on first usage
+        return;
+    llvm::Value *stackVar = mVarMap[node] = addStackVar(builder, env.context, node);
+    builder.CreateStore(initialVal, stackVar);
 }
 
 void ModuleBuilder::returnValue(meta::Return *node, llvm::Value *val)
@@ -70,21 +74,26 @@ llvm::Value *ModuleBuilder::number(meta::Number *node)
 
 llvm::Value *ModuleBuilder::var(meta::Var *node)
 {
-    auto itReg = regVarMap.find(node->name());
-    if (itReg != regVarMap.end())
-        return itReg->second;
+    assert(node->declaration());
+    auto it = mVarMap.find(node->declaration());
+    if (it == mVarMap.end()) { // TODO: Used without initialization and wihout assign value. Should it be handlad as error in analysers?
+        assert(!node->declaration()->is(meta::VarDecl::argument));
+        mVarMap[node->declaration()] = addStackVar(builder, env.context, node->declaration());
+        it = mVarMap.find(node->declaration());
+    }
 
-    auto itStack = stackVarMap.find(node->name());
-    if (itStack == stackVarMap.end())
-        throw std::runtime_error(std::string("Undefined variable ") + node->name());
-    return builder.CreateLoad(itStack->second);
+    return node->declaration()->is(meta::VarDecl::argument) ? it->second : builder.CreateLoad(it->second);
 }
 
 llvm::Value *ModuleBuilder::assign(meta::Assigment *node, llvm::Value *val)
 {
-    auto it = stackVarMap.find(node->varName());
-    if (it == stackVarMap.end())
-        throw std::runtime_error(std::string("Variable ") + node->varName() + " doesn't exists or not mutable");
+    assert(node->declaration());
+    assert(!node->declaration()->is(meta::VarDecl::argument));
+    auto it = mVarMap.find(node->declaration());
+    if (it == mVarMap.end()) {
+        mVarMap[node->declaration()] = addStackVar(builder, env.context, node->declaration());
+        it = mVarMap.find(node->declaration());
+    }
     builder.CreateStore(val, it->second);
     return val;
 }
