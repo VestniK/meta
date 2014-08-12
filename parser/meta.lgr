@@ -7,6 +7,13 @@ digit -> {'0'..'9'}
 letter -> {'a'..'z' | 'A'..'Z' | '_'}
 
 {whitespace} -> (\t | \r | \n | ' ')+
+{commentline} -> '/' '/' neol*
+{commentblock} -> '/' '*' na* '*'+ (nans na* '*'+)* '/'
+
+any -> { 1..255 }
+neol -> { any - \r - \n }
+na -> { any - '*' }
+nans -> { na - '/' }
 
 \t ->  9 // tab
 \n -> 10 // newline
