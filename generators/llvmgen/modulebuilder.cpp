@@ -32,24 +32,6 @@ void ModuleBuilder::startFunction(meta::Function *node)
     builder.SetInsertPoint(body);
 }
 
-static inline
-llvm::Value *addStackVar(llvm::IRBuilder<> &builder, llvm::LLVMContext &context, meta::VarDecl *decl)
-{
-    llvm::Function *currFunc = builder.GetInsertBlock()->getParent();
-    llvm::IRBuilder<> stackVarDeclBuilder(&(currFunc->getEntryBlock()), currFunc->getEntryBlock().begin());
-    llvm::Type *type = llvm::Type::getInt32Ty(context); // TODO use node->type() to calculate properly
-    return stackVarDeclBuilder.CreateAlloca(type, 0, decl->name().c_str());
-}
-
-void ModuleBuilder::declareVar(meta::VarDecl *node, llvm::Value *initialVal)
-{
-    // TODO: there is no reason to have this as separate function. IN both situateions there should be call to assign(VarDecl *, Value*)
-    if (initialVal == nullptr) // Will be added on first usage
-        return;
-    llvm::Value *stackVar = mVarMap[node] = addStackVar(builder, env.context, node);
-    builder.CreateStore(initialVal, stackVar);
-}
-
 void ModuleBuilder::returnValue(meta::Return *node, llvm::Value *val)
 {
     builder.CreateRet(val);
@@ -81,14 +63,16 @@ llvm::Value *ModuleBuilder::var(meta::Var *node)
     return node->declaration()->is(meta::VarDecl::argument) ? it->second : builder.CreateLoad(it->second);
 }
 
-llvm::Value *ModuleBuilder::assign(meta::Assigment *node, llvm::Value *val)
+llvm::Value *ModuleBuilder::assign(meta::VarDecl *node, llvm::Value *val)
 {
-    assert(node->declaration());
-    assert(!node->declaration()->is(meta::VarDecl::argument));
-    auto it = mVarMap.find(node->declaration());
+    assert(!node->is(meta::VarDecl::argument));
+    auto it = mVarMap.find(node);
     if (it == mVarMap.end()) {
-        mVarMap[node->declaration()] = addStackVar(builder, env.context, node->declaration());
-        it = mVarMap.find(node->declaration());
+        llvm::Function *currFunc = builder.GetInsertBlock()->getParent();
+        llvm::IRBuilder<> stackVarDeclBuilder(&(currFunc->getEntryBlock()), currFunc->getEntryBlock().begin());
+        llvm::Type *type = llvm::Type::getInt32Ty(env.context); // TODO use node->type() to calculate properly
+        mVarMap[node] = stackVarDeclBuilder.CreateAlloca(type, 0, node->name().c_str());
+        it = mVarMap.find(node);
     }
     builder.CreateStore(val, it->second);
     return val;

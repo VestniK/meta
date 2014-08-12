@@ -25,14 +25,13 @@ public:
 
     virtual void startFunction(meta::Function *node) override;
     // Value consumers
-    virtual void declareVar(meta::VarDecl *node, llvm::Value *initialVal) override;
     virtual void returnValue(meta::Return *node, llvm::Value *val) override;
     // Value providers
     virtual llvm::Value *number(meta::Number *node) override;
     virtual llvm::Value *var(meta::Var *node) override;
     // Operations on values
     virtual llvm::Value *call(meta::Call *node, const std::vector<llvm::Value*> &args) override;
-    virtual llvm::Value *assign(meta::Assigment *node, llvm::Value *val) override;
+    virtual llvm::Value *assign(meta::VarDecl *node, llvm::Value *val) override;
     virtual llvm::Value *binaryOp(meta::BinaryOp *node, llvm::Value *left, llvm::Value *right) override;
     virtual llvm::Value *prefixOp(meta::PrefixOp *node, llvm::Value *val);
 

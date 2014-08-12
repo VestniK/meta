@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "parser/metaparser.h"
+#include "parser/assigment.h"
 #include "parser/vardecl.h"
 
 #include "generators/translator.h"
@@ -73,16 +74,17 @@ private:
 
     virtual void leave(meta::VarDecl *node) override
     {
-        assert(stack.size() == node->inited() ? 1 : 0);
-        translator->declareVar(node, node->inited() ? stack.top() : nullptr);
-        if (node->inited())
-            stack.pop();
+        if (!node->inited() || node->is(meta::VarDecl::argument))
+            return;
+        assert(stack.size() == 1);
+        translator->assign(node, stack.top());
+        stack.pop();
     }
 
     virtual void leave(meta::Assigment *node) override
     {
         assert(stack.size() == 1);
-        stack.top() = translator->assign(node, stack.top());
+        stack.top() = translator->assign(node->declaration(), stack.top());
     }
 
     virtual void leave(meta::BinaryOp *node) override
