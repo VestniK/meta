@@ -76,11 +76,7 @@ llvm::Value *ModuleBuilder::var(meta::Var *node)
 {
     assert(node->declaration());
     auto it = mVarMap.find(node->declaration());
-    if (it == mVarMap.end()) { // TODO: Used without initialization and wihout assign value. Should it be handlad as error in analysers?
-        assert(!node->declaration()->is(meta::VarDecl::argument));
-        mVarMap[node->declaration()] = addStackVar(builder, env.context, node->declaration());
-        it = mVarMap.find(node->declaration());
-    }
+    assert(it != mVarMap.end()); // Use befor initialization should be checked by analizers
 
     return node->declaration()->is(meta::VarDecl::argument) ? it->second : builder.CreateLoad(it->second);
 }

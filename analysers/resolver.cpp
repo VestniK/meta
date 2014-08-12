@@ -65,15 +65,23 @@ public:
         mVars.clear();
     }
 
+    virtual void leave(meta::Function *) override
+    {
+        for (const auto &var : mVars) {
+            if (var.second.accessCount == 0)
+                throw SemanticError(var.second.decl, "Variable '%s' declared but never used", var.first.c_str());
+        }
+    }
+
     virtual void visit(meta::VarDecl *node) override
     {
         auto prev = mVars.find(node->name());
         if (prev != mVars.end())
             throw SemanticError(
                 node, "Redefinition of the variable '%s' first defined at line %d, column %d",
-                node->name().c_str(), prev->second->tokens().begin()->line, prev->second->tokens().begin()->column
+                node->name().c_str(), prev->second.decl->tokens().begin()->line, prev->second.decl->tokens().begin()->column
             );
-        mVars[node->name()] = node;
+        mVars[node->name()] = VarSrc(node);
     }
 
     virtual void visit(meta::Var *node) override
@@ -81,7 +89,10 @@ public:
         auto decl = mVars.find(node->name());
         if (decl == mVars.end())
             throw SemanticError(node, "Reference to undefined variable '%s'", node->name().c_str());
-        node->setDeclaration(decl->second);
+        if (decl->second.modifyCount == 0)
+            throw SemanticError(node, "Variable '%s' used before initialization", node->name().c_str());
+        node->setDeclaration(decl->second.decl);
+        ++decl->second.accessCount;
     }
 
     virtual void visit(meta::Assigment *node) override
@@ -89,14 +100,28 @@ public:
         auto decl = mVars.find(node->varName());
         if (decl == mVars.end())
             throw SemanticError(node, "Reference to undefined variable '%s'", node->varName().c_str());
-        if (decl->second->is(meta::VarDecl::argument))
+        if (decl->second.decl->is(meta::VarDecl::argument))
             throw SemanticError(node, "Attempt to modify function argument '%s'", node->varName().c_str());
-        node->setDeclaration(decl->second);
+        node->setDeclaration(decl->second.decl);
+        ++decl->second.modifyCount;
     }
 
 private:
+    struct VarSrc
+    {
+        VarSrc(meta::VarDecl *decl = nullptr):
+            decl(decl),
+            modifyCount(decl && (decl->inited() || decl->is(meta::VarDecl::argument)) ? 1 : 0),
+            accessCount(0)
+        {}
+
+        meta::VarDecl *decl;
+        unsigned modifyCount;
+        unsigned accessCount;
+    };
+
     std::vector<meta::Function*> mFunctions;
-    std::map<std::string, meta::VarDecl*> mVars;
+    std::map<std::string, VarSrc> mVars;
 };
 
 void resolve(meta::AST *ast)
