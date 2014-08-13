@@ -19,7 +19,6 @@ Expr -> UnaryExpr
      -> Expr '-' Expr +> BinaryOp
      -> Expr '*' Expr +> BinaryOp
      -> Expr '/' Expr +> BinaryOp
-     -> Call
      -> Var '=' Expr +> Assigment
 
 UnaryExpr -> '+' UnaryExpr +> PrefixOp
@@ -27,7 +26,6 @@ UnaryExpr -> '+' UnaryExpr +> PrefixOp
           -> <num> +> Number
           -> Var  +> Var
           -> '(' Expr ')'
+          ->  <identifier> '(' [Expr]/','... ')' +> Call
 
 Var -> <identifier>
-
-Call -> <identifier> '(' [Expr]/','... ')' +> Call

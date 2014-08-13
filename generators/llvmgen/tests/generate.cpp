@@ -58,7 +58,7 @@ int distCall(int x)
 
 int distCallFull(int x)
 {
-    return dist(x+5, x);
+    return -dist(x+5, x);
 }
 
 int varsUsage(int x)
