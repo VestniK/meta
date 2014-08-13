@@ -44,14 +44,16 @@ public:
     }
 
 private:
-    virtual void visit(meta::Function *node) override
+    virtual bool visit(meta::Function *node) override
     {
         translator->startFunction(node);
+        return true;
     }
 
-    virtual void visit(meta::Call *) override
+    virtual bool visit(meta::Call *) override
     {
         stack.push(nullptr);
+        return true;
     }
 
     virtual void leave(meta::Call *node) override
@@ -62,14 +64,20 @@ private:
         stack.top() = translator->call(node, args);
     }
 
-    virtual void visit(meta::Number *node) override
+    virtual void leave(meta::Number *node) override
     {
         stack.push(translator->number(node));
     }
 
-    virtual void visit(meta::Var *node) override
+    virtual void leave(meta::Var *node) override
     {
         stack.push(translator->var(node));
+    }
+
+    virtual bool visit(meta::VarDecl *node) override
+    {
+        // Do not generate argument default value calculation code at the begginig of the function
+        return !node->is(meta::VarDecl::argument);
     }
 
     virtual void leave(meta::VarDecl *node) override
@@ -108,6 +116,7 @@ private:
         translator->returnValue(node, stack.top());
         stack.pop();
     }
+
     virtual void leave (meta::ExprStatement *) override
     {
         assert(stack.size() == 1);

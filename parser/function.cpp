@@ -33,7 +33,7 @@ Function::Function(AST *ast, const StackFrame* start, size_t size): Node(ast, st
     mRetType = start[typePos].tokens;
     mName = start[namePos].tokens;
     for (auto arg : start[argsPos].nodes)
-        arg->walkTopDown<meta::VarDecl>([] (meta::VarDecl *node) {node->set(meta::VarDecl::argument);}, 1);
+        arg->walkTopDown<meta::VarDecl>([] (meta::VarDecl *node) {node->set(meta::VarDecl::argument); return false;}, 0);
 }
 
 std::vector<VarDecl*> Function::args()

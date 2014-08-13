@@ -43,7 +43,7 @@ public:
         }
     }
 
-    virtual void visit(meta::Call *node) override
+    virtual bool visit(meta::Call *node) override
     {
         for (const auto func : mFunctions) {
             if (node->functionName() != func->name())
@@ -58,11 +58,13 @@ public:
         if (expectedArgs.size() != passedArgs.size())
             throw SemanticError(node, "Call to function '%s' with incorrect number of arguments", node->functionName().c_str());
         /// @todo check types
+        return true;
     }
 
-    virtual void visit(meta::Function *) override
+    virtual bool visit(meta::Function *) override
     {
         mVars.clear();
+        return true;
     }
 
     virtual void leave(meta::Function *) override
@@ -73,7 +75,7 @@ public:
         }
     }
 
-    virtual void visit(meta::VarDecl *node) override
+    virtual bool visit(meta::VarDecl *node) override
     {
         auto prev = mVars.find(node->name());
         if (prev != mVars.end())
@@ -82,9 +84,10 @@ public:
                 node->name().c_str(), prev->second.decl->tokens().begin()->line, prev->second.decl->tokens().begin()->column
             );
         mVars[node->name()] = VarSrc(node);
+        return true;
     }
 
-    virtual void visit(meta::Var *node) override
+    virtual bool visit(meta::Var *node) override
     {
         auto decl = mVars.find(node->name());
         if (decl == mVars.end())
@@ -93,9 +96,10 @@ public:
             throw SemanticError(node, "Variable '%s' used before initialization", node->name().c_str());
         node->setDeclaration(decl->second.decl);
         ++decl->second.accessCount;
+        return true;
     }
 
-    virtual void visit(meta::Assigment *node) override
+    virtual bool visit(meta::Assigment *node) override
     {
         auto decl = mVars.find(node->varName());
         if (decl == mVars.end())
@@ -104,6 +108,7 @@ public:
             throw SemanticError(node, "Attempt to modify function argument '%s'", node->varName().c_str());
         node->setDeclaration(decl->second.decl);
         ++decl->second.modifyCount;
+        return true;
     }
 
 private:
