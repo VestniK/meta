@@ -61,8 +61,15 @@ public:
         return true;
     }
 
-    virtual bool visit(meta::Function *) override
+    virtual bool visit(meta::Function *node) override
     {
+        bool hasDefaultValues = false;
+        for (auto arg : node->args()) {
+            if (arg->inited())
+                hasDefaultValues = true;
+            if (hasDefaultValues && !arg->inited())
+                throw SemanticError(arg, "Argument '%s' has no default value while previous argument has", arg->name().c_str());
+        }
         mVars.clear();
         return true;
     }
