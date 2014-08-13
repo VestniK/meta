@@ -30,6 +30,8 @@ int dist(int x, int y);
 
 int distCall(int x);
 
+int distCallFull(int x);
+
 int varsUsage(int x);
 
 int assigment(int x);
@@ -44,14 +46,19 @@ int poly(int x)
     return 5*common*common - 6*common + 3;
 }
 
-int dist(int x, int y)
+int dist(int x, int y = 3)
 {
     return x*x + y*y;
 }
 
 int distCall(int x)
 {
-    return dist(x, x);
+    return dist(x+5);
+}
+
+int distCallFull(int x)
+{
+    return dist(x+5, x);
 }
 
 int varsUsage(int x)
@@ -94,8 +101,10 @@ TEST(BuilderTests, twoArgs)
 
 TEST(BuilderTests, functionWithCall)
 {
-    for (int x = -50; x < 50; ++x)
+    for (int x = -50; x < 50; ++x) {
         ASSERT_EQ(distCall(x), local::distCall(x));
+        ASSERT_EQ(distCallFull(x), local::distCallFull(x));
+    }
 }
 
 TEST(BuilderTests, varsUsage)

@@ -28,7 +28,6 @@ VarDecl::VarDecl(AST *ast, const StackFrame* start, size_t size): Node(ast, star
     assert(size == 3);
     mType = start[0].tokens;
     mName = start[1].tokens;
-    mInited = !start[2].tokens.empty(); // start[2] is optional initial assigment section "['=' Expr]"
 }
 
 bool VarDecl::is(VarDecl::Flags flag) const
@@ -39,6 +38,16 @@ bool VarDecl::is(VarDecl::Flags flag) const
 void VarDecl::set(VarDecl::Flags flag, bool val)
 {
     mFlags = val ? (mFlags | flag) : (mFlags & ~flag);
+}
+
+bool VarDecl::inited() const
+{
+    return !children.empty();
+}
+
+Node *VarDecl::initExpr()
+{
+    return children.empty() ? nullptr : children.front();
 }
 
 }

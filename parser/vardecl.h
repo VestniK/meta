@@ -39,14 +39,14 @@ public:
 
     const std::string &name() const {return mName;}
     const std::string &type() const {return mType;}
-    bool inited() const {return mInited;}
+    bool inited() const;
+    Node *initExpr();
     bool is(Flags flag) const;
     void set(Flags flag, bool val = true);
 
 private:
     std::string mName, mType;
     int mFlags;
-    bool mInited;
 };
 
 }

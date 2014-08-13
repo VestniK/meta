@@ -31,7 +31,7 @@ public:
 
     const std::string &functionName() const {return mFunctionName;}
     Function *function() const {return mFunction;}
-    void setFunction(Function *func) {mFunction = func;}
+    void setFunction(Function *func);
 
 private:
     std::string mFunctionName;

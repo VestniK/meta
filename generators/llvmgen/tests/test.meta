@@ -20,12 +20,17 @@ package test;
 
 int distCall(int x)
 {
-    return dist(x, x);
+    return dist(x+5);
 }
 
-int dist(int x, int y)
+int dist(int x, int y = 3)
 {
     return x*x + y*y;
+}
+
+int distCallFull(int x)
+{
+    return dist(x+5, x);
 }
 
 int constFoo()

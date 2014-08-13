@@ -19,7 +19,9 @@
 
 #include <cassert>
 
+#include "parser/function.h"
 #include "parser/call.h"
+#include "parser/vardecl.h"
 
 namespace meta {
 
@@ -29,6 +31,19 @@ Call::Call(AST *ast, const StackFrame* reduction, size_t size):
 {
     assert(size == 4);
     mFunctionName = reduction[0].tokens;
+}
+
+void Call::setFunction(Function *func)
+{
+    mFunction = func;
+    // use default args if needed and possible
+    auto declaredArgs = func->args();
+    for (size_t pos = children.size(); pos < declaredArgs.size(); ++pos) {
+        auto defaultVal = declaredArgs[pos]->initExpr();
+        if (!defaultVal)
+            break;
+        children.push_back(defaultVal);
+    }
 }
 
 }
