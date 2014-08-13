@@ -20,6 +20,7 @@
 #ifndef GENERATORS_TRANSLATION_RUNNER_H
 #define GENERATORS_TRANSLATION_RUNNER_H
 
+#include <algorithm>
 #include <cassert>
 #include <stack>
 #include <vector>
@@ -61,6 +62,7 @@ private:
         std::vector<Value> args;
         for (; stack.top() != nullptr; stack.pop())
             args.push_back(stack.top());
+        std::reverse(args.begin(), args.end());
         stack.top() = translator->call(node, args);
     }
 

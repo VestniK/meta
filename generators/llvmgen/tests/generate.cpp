@@ -48,7 +48,7 @@ int poly(int x)
 
 int dist(int x, int y = 3)
 {
-    return x*x + y*y;
+    return x*x + 2*y*y;
 }
 
 int distCall(int x)
