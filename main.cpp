@@ -69,8 +69,12 @@ int main(int argc, char **argv)
     } catch(const analysers::SemanticError &err) {
         if (verbosity > silent)
             std::cerr << argv[1] << ':' << err.tokens().begin()->line << ':' << err.tokens().begin()->column << ": " << err.what() << (verbosity == brief ? "" : ":") << std::endl;
-        if (verbosity > brief)
-            std::cerr << std::string(err.tokens()) << std::endl;
+        if (verbosity > brief) {
+            std::cerr << err.tokens().lineStr() << "..." << std::endl;
+            for (int i = 1; i < err.tokens().colnum(); ++i)
+                std::cerr << ' ';
+            std::cerr << '^' << std::endl;
+        }
         return EXIT_FAILURE;
     } catch(const std::exception &err) {
         std::cerr << "Internal compiler error: " << err.what() << std::endl;
