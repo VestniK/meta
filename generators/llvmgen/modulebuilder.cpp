@@ -6,6 +6,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
 
 #include "generators/llvmgen/modulebuilder.h"
@@ -103,7 +104,7 @@ llvm::Value *ModuleBuilder::prefixOp(meta::PrefixOp *node, llvm::Value *val)
 void ModuleBuilder::save(const std::string &path)
 {
     std::string errBuf;
-    llvm::raw_fd_ostream out(path.c_str(), errBuf, llvm::sys::fs::F_Binary);
+    llvm::raw_fd_ostream out(path.c_str(), errBuf, llvm::sys::fs::F_None);
     llvm::WriteBitcodeToFile(env.module.get(), out);
     out.close();
     if (out.has_error())
