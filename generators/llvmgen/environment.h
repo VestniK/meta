@@ -28,6 +28,7 @@ namespace llvm {
 
 class LLVMContext;
 class Module;
+class Type;
 
 }
 
@@ -46,6 +47,7 @@ struct Environment
     ~Environment();
 
     llvm::Function *addFunction(meta::Function *func);
+    llvm::Type *getType(const std::string &name);
 
     llvm::LLVMContext &context;
     std::unique_ptr<llvm::Module> module;

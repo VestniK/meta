@@ -42,15 +42,16 @@ Environment::~Environment()
 llvm::Function *Environment::addFunction(meta::Function *func)
 {
     const auto args = func->args();
-    llvm::Type *intType = llvm::Type::getInt32Ty(context);
     std::vector<llvm::Type *> argTypes;
     for (const auto arg : args) {
-        if (arg->type() == "int")
-            argTypes.push_back(intType);
-        else
+        auto type = getType(arg->type());
+        if (type == nullptr)
             throw std::runtime_error(std::string("Argument ") + arg->name() + " of the function " + func->name() + " is of unknown type " + arg->type()); /// @todo missing code position info
+        argTypes.push_back(type);
     }
-    llvm::FunctionType *funcType = llvm::FunctionType::get(intType, argTypes, false);
+    auto rettype = getType(func->retType());
+    assert(rettype != nullptr);
+    llvm::FunctionType *funcType = llvm::FunctionType::get(rettype, argTypes, false);
     llvm::Function *prototype = llvm::Function::Create(funcType, llvm::GlobalValue::ExternalLinkage, func->name(), module.get());
     llvm::Function::arg_iterator it = prototype->arg_begin();
     for (const auto arg : args) {
@@ -60,6 +61,16 @@ llvm::Function *Environment::addFunction(meta::Function *func)
     }
     assert(it == prototype->arg_end());
     return prototype;
+}
+
+llvm::Type *Environment::getType(const std::string &name)
+{
+    // built in types:
+    if (name == "int")
+        return llvm::Type::getInt32Ty(context);
+    if (name == "bool")
+        return llvm::Type::getInt1Ty(context);
+    return nullptr;
 }
 
 } // namespace llvmgen
