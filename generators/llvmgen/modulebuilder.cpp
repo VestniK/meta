@@ -10,6 +10,7 @@
 #include <llvm/Support/raw_ostream.h>
 
 #include "generators/llvmgen/modulebuilder.h"
+#include "generators/abi/mangling.h"
 
 namespace generators {
 namespace llvmgen {
@@ -17,7 +18,7 @@ namespace llvmgen {
 void ModuleBuilder::startFunction(meta::Function *node)
 {
     mVarMap.clear();
-    llvm::Function *func = env.module->getFunction(node->name());
+    llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node));
     if (!func)
         func = env.addFunction(node);
 
@@ -40,7 +41,7 @@ void ModuleBuilder::returnValue(meta::Return *node, llvm::Value *val)
 
 llvm::Value *ModuleBuilder::call(meta::Call *node, const std::vector<llvm::Value*> &args)
 {
-    llvm::Function *func = env.module->getFunction(node->functionName());
+    llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node->function()));
     if (!func) {
         assert(node->function() != nullptr);
         func = env.addFunction(node->function());

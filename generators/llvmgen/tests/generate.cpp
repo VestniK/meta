@@ -22,19 +22,19 @@
 // Functions from test.meta
 extern "C" {
 
-int constFoo();
+int test_constFoo();
 
-int poly(int x);
+int test_poly(int x);
 
-int dist(int x, int y);
+int test_dist(int x, int y);
 
-int distCall(int x);
+int test_distCall(int x);
 
-int distCallFull(int x);
+int test_distCallFull(int x);
 
-int varsUsage(int x);
+int test_varsUsage(int x);
 
-int assigment(int x);
+int test_assigment(int x);
 }
 
 // Functions with the same body as above funcs
@@ -82,40 +82,40 @@ int assigment(int x)
 
 TEST(BuilderTests, constFunc)
 {
-    ASSERT_EQ(constFoo(), 5);
+    ASSERT_EQ(test_constFoo(), 5);
 }
 
 TEST(BuilderTests, oneArg)
 {
     for (int i = -50; i < 50; ++i)
-        ASSERT_EQ(poly(i), local::poly(i));
+        ASSERT_EQ(test_poly(i), local::poly(i));
 }
 
 TEST(BuilderTests, twoArgs)
 {
     for (int x = -5; x < 5; ++x) {
         for (int y = -5; y < 5; ++y)
-            ASSERT_EQ(dist(x, y), local::dist(x, y));
+            ASSERT_EQ(test_dist(x, y), local::dist(x, y));
     }
 }
 
 TEST(BuilderTests, functionWithCall)
 {
     for (int x = -50; x < 50; ++x) {
-        ASSERT_EQ(distCall(x), local::distCall(x));
-        ASSERT_EQ(distCallFull(x), local::distCallFull(x));
+        ASSERT_EQ(test_distCall(x), local::distCall(x));
+        ASSERT_EQ(test_distCallFull(x), local::distCallFull(x));
     }
 }
 
 TEST(BuilderTests, varsUsage)
 {
     for (int x = -50; x < 50; ++x)
-        ASSERT_EQ(varsUsage(x), local::varsUsage(x));
+        ASSERT_EQ(test_varsUsage(x), local::varsUsage(x));
 }
 
 TEST(BuilderTests, assigment)
 {
     for (int x = -50; x < 50; ++x)
-        ASSERT_EQ(assigment(x), local::assigment(x));
+        ASSERT_EQ(test_assigment(x), local::assigment(x));
 }
 

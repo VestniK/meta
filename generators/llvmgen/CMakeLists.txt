@@ -16,6 +16,6 @@ set(SRC
 )
 
 add_library(llvmgenerator STATIC ${SRC})
-target_link_libraries(llvmgenerator ${LLVM_DEPS} ${LLVM_REQUIRED_LIBS} curses dl)
+target_link_libraries(llvmgenerator ${LLVM_DEPS} ${LLVM_REQUIRED_LIBS} curses dl abi)
 
 add_subdirectory(tests)

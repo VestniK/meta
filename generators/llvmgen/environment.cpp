@@ -24,6 +24,7 @@
 
 #include "parser/metanodes.h"
 
+#include "generators/abi/mangling.h"
 #include "generators/llvmgen/environment.h"
 
 namespace generators {
@@ -52,7 +53,7 @@ llvm::Function *Environment::addFunction(meta::Function *func)
     auto rettype = getType(func->retType());
     assert(rettype != nullptr);
     llvm::FunctionType *funcType = llvm::FunctionType::get(rettype, argTypes, false);
-    llvm::Function *prototype = llvm::Function::Create(funcType, llvm::GlobalValue::ExternalLinkage, func->name(), module.get());
+    llvm::Function *prototype = llvm::Function::Create(funcType, llvm::GlobalValue::ExternalLinkage, generators::abi::mangledName(func), module.get());
     llvm::Function::arg_iterator it = prototype->arg_begin();
     for (const auto arg : args) {
         it->setName(arg->name());
