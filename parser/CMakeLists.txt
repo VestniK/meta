@@ -4,6 +4,7 @@ find_package(lrstar)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(SRC
+  actions.cpp
   assigment.cpp
   binaryop.cpp
   call.cpp
@@ -11,7 +12,6 @@ set(SRC
   exprstatement.cpp
   function.cpp
   number.cpp
-  package.cpp
   prefixop.cpp
   return.cpp
   var.cpp

@@ -23,7 +23,6 @@
 #include "parser/call.h"
 #include "parser/function.h"
 #include "parser/metaparser.h"
-#include "parser/package.h"
 #include "parser/var.h"
 #include "parser/vardecl.h"
 
@@ -37,10 +36,8 @@ class ResolveVisitor: public meta::Visitor
 public:
     ResolveVisitor(meta::AST *ast)
     {
-        for (auto pkg : ast->getChildren<meta::Package>()) {
-            auto pkgFuncs = pkg->functions();
-            mFunctions.insert(mFunctions.end(), pkgFuncs.begin(), pkgFuncs.end());
-        }
+        auto funcs = ast->getChildren<meta::Function>(0);
+        mFunctions.insert(mFunctions.end(), funcs.begin(), funcs.end());
     }
 
     virtual bool visit(meta::Call *node) override

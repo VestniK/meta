@@ -3,7 +3,7 @@
 
 Goal -> Package <eof>
 
-Package -> 'package' (<qname> | <identifier>) ';' [Function]... +> Package
+Package -> 'package' (<qname> | <identifier>) ';' [Function]... => package
 
 Function -> <identifier> <identifier> '(' [VarDecl]/','... ')' CodeBlock +> Function
 CodeBlock -> '{' (Statement)... '}' +> CodeBlock

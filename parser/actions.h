@@ -1,6 +1,6 @@
 /*
- * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * <one line to give the program's name and a brief idea of what it does.>
+ * Copyright (C) 2014  Сергей Видюк <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,22 +17,15 @@
  *
  */
 
-#include <cassert>
+#ifndef ACTIONS_H
+#define ACTIONS_H
 
-#include "parser/function.h"
-#include "parser/package.h"
+#include "parser/metaparser.h"
 
-namespace meta {
-
-Package::Package(AST *ast, const StackFrame *start, size_t size): Node(ast, start, size)
+class Actions : public meta::ParseActions
 {
-    assert(size == 4);
-    mName = start[1].tokens;
-}
+public:
+    virtual void package(const meta::StackFrame *reduction, size_t size) override;
+};
 
-std::vector<Function*> Package::functions()
-{
-    return getChildren<Function>();
-}
-
-}
+#endif // ACTIONS_H

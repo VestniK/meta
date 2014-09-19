@@ -1,6 +1,6 @@
 /*
- * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * <one line to give the program's name and a brief idea of what it does.>
+ * Copyright (C) 2014  Сергей Видюк <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,29 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef PACKAGE_H
-#define PACKAGE_H
-
+#include <cassert>
 #include <string>
-#include <vector>
 
-#include "parser/metaparser.h"
+#include "parser/actions.h"
+#include "parser/function.h"
 
-namespace meta {
-
-class Package: public Node
+void Actions::package(const meta::StackFrame *reduction, size_t size)
 {
-meta_NODE
-public:
-    Package(AST *ast, const StackFrame *start, size_t size);
-
-    const std::string &name() const {return mName;}
-    std::vector<Function *> functions();
-private:
-    std::string mName;
-};
-
+    assert(size == 4);
+    std::string pkgName = reduction[1].tokens;
+    for (auto node : reduction[3].nodes)
+        node->walkTopDown<meta::Function>([&](meta::Function *func){func->setPackage(pkgName); return true;}, 0);
 }
-
-#endif // PACKAGE_H

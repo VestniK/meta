@@ -34,8 +34,11 @@ public:
 
     const std::string &name() const {return mName;}
     const std::string &retType() const {return mRetType;}
+    const std::string &package() const {return mPackage;}
+    void setPackage(const std::string &pkg) {mPackage = pkg;}
     std::vector<VarDecl*> args();
 private:
+    std::string mPackage;
     std::string mName;
     std::string mRetType;
 };

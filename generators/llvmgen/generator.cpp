@@ -13,7 +13,10 @@ class LlvmGen: public generators::Generator
 public:
     virtual void generate(meta::AST *ast, const std::string &output) override
     {
-        Environment env(ast->getChildren<meta::Package>().front()->name());
+        auto pos = output.rfind('/');
+        if (pos == std::string::npos)
+            pos = 0;
+        Environment env(output.substr(pos)); /// @todo strip extension as well
         ModuleBuilder builder(env);
         generators::TranslationRunner<llvm::Value *> runner;
         runner.translate(ast, &builder);

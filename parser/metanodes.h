@@ -27,7 +27,6 @@
 #include "parser/exprstatement.h"
 #include "parser/function.h"
 #include "parser/number.h"
-#include "parser/package.h"
 #include "parser/prefixop.h"
 #include "parser/return.h"
 #include "parser/var.h"
