@@ -3,9 +3,11 @@
 
 Goal -> Package <eof>
 
-Package -> 'package' (<qname> | <identifier>) ';' [Function]... => package
+Package -> Header [Function]...
 
-Function -> <identifier> <identifier> '(' [VarDecl]/','... ')' CodeBlock +> Function
+Header -> 'package' (<qname> | <identifier>) ';' => package
+
+Function -> <identifier> <identifier> '(' [VarDecl]/','... ')' CodeBlock *> Function
 CodeBlock -> '{' (Statement)... '}' +> CodeBlock
 VarDecl -> <identifier> <identifier> ['=' Expr] +> VarDecl
 

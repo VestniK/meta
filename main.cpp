@@ -26,7 +26,7 @@
 #include "fs/io.h"
 
 #include "parser/metaparser.h"
-#include "parser/actions.h"
+#include "parser/parse.h"
 
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
@@ -45,10 +45,7 @@ int main(int argc, char **argv)
         std::vector<char> input;
         readWholeFile(argv[1], input);
         // parse
-        meta::Parser parser;
-        Actions actions;
-        parser.setParseActions(&actions);
-        std::unique_ptr<meta::AST> ast(parser.parse(input.data(), input.size()));
+        std::unique_ptr<meta::AST> ast(parse(input.data(), input.size()));
         // analyse
         analysers::resolve(ast.get());
         // generate

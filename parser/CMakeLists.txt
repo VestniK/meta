@@ -12,6 +12,7 @@ set(SRC
   exprstatement.cpp
   function.cpp
   number.cpp
+  parse.cpp
   prefixop.cpp
   return.cpp
   var.cpp

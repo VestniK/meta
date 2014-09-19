@@ -17,21 +17,15 @@
  *
  */
 
-#ifndef ACTIONS_H
-#define ACTIONS_H
-
-#include <string>
-
+#include "parser/actions.h"
 #include "parser/metaparser.h"
+#include "parser/parse.h"
 
-class Actions : public meta::ParseActions, public meta::NodeActions
+meta::AST *parse(const char *input, size_t len)
 {
-public:
-    virtual void package(const meta::StackFrame *reduction, size_t size) override;
-    virtual void onFunction(meta::Function *node) override;
-
-private:
-    std::string mPackage;
-};
-
-#endif // ACTIONS_H
+    Actions act;
+    meta::Parser parser;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    return parser.parse(input, len);
+}
