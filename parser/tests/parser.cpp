@@ -18,12 +18,14 @@
  */
 
 #include <cassert>
+#include <cstdio>
 #include <string>
 #include <vector>
 
 #include <gtest/gtest.h>
 
 #include "parser/assigment.h"
+#include "parser/binaryop.h"
 #include "parser/codeblock.h"
 #include "parser/function.h"
 #include "parser/parse.h"
@@ -196,3 +198,42 @@ TEST(Parser, assignAsExpr) {
     ASSERT_EQ(assigments[0]->varName(), "z");
     ASSERT_EQ(assigments[1]->varName(), "y");
 }
+
+namespace {
+
+struct TestData
+{
+    const char *opStr;
+    meta::BinaryOp::Operation op;
+};
+
+class Parser: public testing::TestWithParam<TestData>
+{
+};
+
+}
+
+TEST_P(Parser, binaryOp) {
+    TestData data = GetParam();
+    const char *tmplt = "package test; int foo(int x, int y) {return x %s y;}";
+    char input[sizeof(tmplt) + strlen(data.opStr)];
+    sprintf(input, tmplt, data.opStr);
+    std::unique_ptr<meta::AST> ast;
+    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    auto binops = ast->getChildren<meta::BinaryOp>(-1);
+    ASSERT_EQ(binops.size(), 1);
+    ASSERT_EQ(binops[0]->operation(), data.op);
+}
+
+INSTANTIATE_TEST_CASE_P(BiaryOps, Parser, ::testing::Values(
+    TestData({"+", meta::BinaryOp::add}),
+    TestData({"-", meta::BinaryOp::sub}),
+    TestData({"*", meta::BinaryOp::mul}),
+    TestData({"/", meta::BinaryOp::div}),
+    TestData({"==", meta::BinaryOp::equal}),
+    TestData({"!=", meta::BinaryOp::noteq}),
+    TestData({"<", meta::BinaryOp::less}),
+    TestData({">", meta::BinaryOp::greater}),
+    TestData({"<=", meta::BinaryOp::lesseq}),
+    TestData({">=", meta::BinaryOp::greatereq})
+));

@@ -129,6 +129,8 @@ TEST(Arythmetic, parenthesis)
     ASSERT_EQ(calc.result(), 4);
 }
 
+namespace {
+
 struct TestData
 {
     const char *expression;
@@ -139,6 +141,8 @@ class Arythmetic: public ::testing::TestWithParam<TestData>
 {
 public:
 };
+
+}
 
 TEST_P(Arythmetic, calcTest)
 {
