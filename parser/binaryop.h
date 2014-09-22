@@ -28,9 +28,15 @@ class BinaryOp: public Node
 {
 meta_NODE
 public:
-    BinaryOp(AST *ast, const StackFrame *start, size_t size);
+    BinaryOp(AST *ast, const StackFrame *reduction, size_t size);
 
-    enum Operation {add, sub, mul, div};
+    enum Operation {
+        // Arythmetic
+        add, sub, mul, div,
+        // Comparisions
+        equal, noteq, less, greater, lesseq, greatereq,
+        operationsCount
+    };
     Operation operation() const {return mOp;}
 
 private:

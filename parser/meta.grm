@@ -21,6 +21,12 @@ Expr -> UnaryExpr
      -> Expr '-' Expr +> BinaryOp
      -> Expr '*' Expr +> BinaryOp
      -> Expr '/' Expr +> BinaryOp
+     -> Expr '==' Expr +> BinaryOp
+     -> Expr '!=' Expr +> BinaryOp
+     -> Expr '>' Expr +> BinaryOp
+     -> Expr '>=' Expr +> BinaryOp
+     -> Expr '<' Expr +> BinaryOp
+     -> Expr '<=' Expr +> BinaryOp
      -> Var '=' Expr +> Assigment
 
 UnaryExpr -> '+' UnaryExpr +> PrefixOp
