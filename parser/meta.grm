@@ -1,5 +1,7 @@
-{ '+' '-' } <<  // lower priority
-{ '*' '/' } <<  // higher priority
+{ '==' '!=' } << // lower priority
+{ '<' '<=' '>' '>=' } <<
+{ '+' '-' } <<
+{ '*' '/' } << // higher priority
 
 Goal -> Package <eof>
 
