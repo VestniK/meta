@@ -45,9 +45,9 @@ llvm::Function *Environment::addFunction(meta::Function *func)
     const auto args = func->args();
     std::vector<llvm::Type *> argTypes;
     for (const auto arg : args) {
-        auto type = getType(arg->type());
+        auto type = getType(arg->typeName());
         if (type == nullptr)
-            throw std::runtime_error(std::string("Argument ") + arg->name() + " of the function " + func->name() + " is of unknown type " + arg->type()); /// @todo missing code position info
+            throw std::runtime_error(std::string("Argument ") + arg->name() + " of the function " + func->name() + " is of unknown type " + arg->typeName()); /// @todo missing code position info
         argTypes.push_back(type);
     }
     auto rettype = getType(func->retType());

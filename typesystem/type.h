@@ -17,37 +17,40 @@
  *
  */
 
-#include <cassert>
+#ifndef TYPE_H
+#define TYPE_H
 
-#include "parser/vardecl.h"
+#include <memory>
+#include <string>
+#include <vector>
 
-namespace meta {
+namespace typesystem {
 
-VarDecl::VarDecl(AST *ast, const StackFrame* start, size_t size): Node(ast, start, size), mFlags(0)
-{
-    assert(size == 3);
-    mTypeName = start[0].tokens;
-    mName = start[1].tokens;
-}
+class Type {
+public:
+	enum TypeClass {
+		numeric = (1 << 5),
+		boolean = (1 << 6),
+		primitive = (1 << 7)
+	};
 
-bool VarDecl::is(VarDecl::Flags flag) const
-{
-    return (mFlags & flag) != 0;
-}
+	enum TypeId {
+		// incomplete types
+		Auto = -1,
 
-void VarDecl::set(VarDecl::Flags flag, bool val)
-{
-    mFlags = val ? (mFlags | flag) : (mFlags & ~flag);
-}
+		// Built in types
+		Void = 0,
+		Int = (1 | numeric | primitive),
+		Bool = (boolean | primitive)
+	};
 
-bool VarDecl::inited() const
-{
-    return !children.empty();
-}
+	virtual std::string name() const = 0;
+	virtual TypeId typeId() const = 0;
+	virtual bool is(TypeClass type) const;
 
-Node *VarDecl::initExpr()
-{
-    return children.empty() ? nullptr : children.front();
-}
+	virtual ~Type() {}
+};
 
-}
+} // namespace typesystem
+
+#endif

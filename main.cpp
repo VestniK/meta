@@ -28,8 +28,11 @@
 #include "parser/metaparser.h"
 #include "parser/parse.h"
 
+#include "typesystem/typesstore.h"
+
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
+#include "analysers/typechecker.h"
 
 #include "generators/llvmgen/generator.h"
 
@@ -48,6 +51,8 @@ int main(int argc, char **argv)
         std::unique_ptr<meta::AST> ast(parse(input.data(), input.size()));
         // analyse
         analysers::resolve(ast.get());
+        typesystem::TypesStore typestore;
+        analysers::checkTypes(ast.get(), typestore);
         // generate
         std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
         gen->generate(ast.get(), argv[2]);

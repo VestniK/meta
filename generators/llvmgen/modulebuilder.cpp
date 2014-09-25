@@ -72,7 +72,7 @@ llvm::Value *ModuleBuilder::assign(meta::VarDecl *node, llvm::Value *val)
     if (it == mVarMap.end()) {
         llvm::Function *currFunc = builder.GetInsertBlock()->getParent();
         llvm::IRBuilder<> stackVarDeclBuilder(&(currFunc->getEntryBlock()), currFunc->getEntryBlock().begin());
-        auto type = env.getType(node->type());
+        auto type = env.getType(node->typeName());
         assert(type != nullptr); // types integrity should be checked by analyzers
         mVarMap[node] = stackVarDeclBuilder.CreateAlloca(type, 0, node->name().c_str());
         it = mVarMap.find(node);

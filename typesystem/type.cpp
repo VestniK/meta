@@ -18,36 +18,15 @@
  */
 
 #include <cassert>
+#include <map>
 
-#include "parser/vardecl.h"
+#include "typesystem/type.h"
 
-namespace meta {
+namespace typesystem {
 
-VarDecl::VarDecl(AST *ast, const StackFrame* start, size_t size): Node(ast, start, size), mFlags(0)
+bool Type::is(Type::TypeClass type) const
 {
-    assert(size == 3);
-    mTypeName = start[0].tokens;
-    mName = start[1].tokens;
+    return (typeId() & type) != 0;
 }
 
-bool VarDecl::is(VarDecl::Flags flag) const
-{
-    return (mFlags & flag) != 0;
-}
-
-void VarDecl::set(VarDecl::Flags flag, bool val)
-{
-    mFlags = val ? (mFlags | flag) : (mFlags & ~flag);
-}
-
-bool VarDecl::inited() const
-{
-    return !children.empty();
-}
-
-Node *VarDecl::initExpr()
-{
-    return children.empty() ? nullptr : children.front();
-}
-
-}
+} // namespace typesystem

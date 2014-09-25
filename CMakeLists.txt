@@ -9,10 +9,11 @@ enable_testing()
 include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 add_definitions(-Wall -Werror -std=c++11)
 
-add_subdirectory(parser)
 add_subdirectory(fs)
-add_subdirectory(generators)
+add_subdirectory(parser)
+add_subdirectory(typesystem)
 add_subdirectory(analysers)
+add_subdirectory(generators)
 
 add_executable(meta main.cpp)
 target_link_libraries(meta parser fs analysers llvmgenerator)

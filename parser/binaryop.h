@@ -21,10 +21,11 @@
 #define BINARY_OP_H
 
 #include "parser/metaparser.h"
+#include "parser/typed.h"
 
 namespace meta {
 
-class BinaryOp: public Node
+class BinaryOp: public Node, public Typed
 {
 meta_NODE
 public:

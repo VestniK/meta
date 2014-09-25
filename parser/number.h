@@ -21,10 +21,11 @@
 #define NUMBER_H
 
 #include "parser/metaparser.h"
+#include "parser/typed.h"
 
 namespace meta {
 
-class Number: public Node
+class Number: public Node, public Typed
 {
 meta_NODE
 public:

@@ -17,37 +17,20 @@
  *
  */
 
-#include <cassert>
-
-#include "parser/vardecl.h"
+#ifndef TYPE_CHECKER_H
+#define TYPE_CHECKER_H
 
 namespace meta {
-
-VarDecl::VarDecl(AST *ast, const StackFrame* start, size_t size): Node(ast, start, size), mFlags(0)
-{
-    assert(size == 3);
-    mTypeName = start[0].tokens;
-    mName = start[1].tokens;
+class AST;
+}
+namespace typesystem {
+class TypesStore;
 }
 
-bool VarDecl::is(VarDecl::Flags flag) const
-{
-    return (mFlags & flag) != 0;
-}
+namespace analysers {
 
-void VarDecl::set(VarDecl::Flags flag, bool val)
-{
-    mFlags = val ? (mFlags | flag) : (mFlags & ~flag);
-}
+void checkTypes(meta::AST *ast, typesystem::TypesStore &types);
 
-bool VarDecl::inited() const
-{
-    return !children.empty();
-}
+} // namespace analysers
 
-Node *VarDecl::initExpr()
-{
-    return children.empty() ? nullptr : children.front();
-}
-
-}
+#endif //TYPE_CHECKER_H

@@ -17,37 +17,25 @@
  *
  */
 
-#include <cassert>
+#ifndef TYPED_H
+#define TYPED_H
 
-#include "parser/vardecl.h"
+namespace typesystem {
+class Type;
+}
 
 namespace meta {
 
-VarDecl::VarDecl(AST *ast, const StackFrame* start, size_t size): Node(ast, start, size), mFlags(0)
+class Typed
 {
-    assert(size == 3);
-    mTypeName = start[0].tokens;
-    mName = start[1].tokens;
-}
+public:
+    const typesystem::Type *type() const {return mType;}
+    void setType(typesystem::Type *type) {mType = type;}
 
-bool VarDecl::is(VarDecl::Flags flag) const
-{
-    return (mFlags & flag) != 0;
-}
+private:
+    typesystem::Type *mType = nullptr;
+};
 
-void VarDecl::set(VarDecl::Flags flag, bool val)
-{
-    mFlags = val ? (mFlags | flag) : (mFlags & ~flag);
-}
+} // namespace meta
 
-bool VarDecl::inited() const
-{
-    return !children.empty();
-}
-
-Node *VarDecl::initExpr()
-{
-    return children.empty() ? nullptr : children.front();
-}
-
-}
+#endif

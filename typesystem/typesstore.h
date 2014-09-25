@@ -17,37 +17,30 @@
  *
  */
 
-#include <cassert>
+#ifndef TYPESSTORE_H
+#define TYPESSTORE_H
 
-#include "parser/vardecl.h"
+#include <map>
+#include <memory>
+#include <string>
 
-namespace meta {
+#include "typesystem/type.h"
 
-VarDecl::VarDecl(AST *ast, const StackFrame* start, size_t size): Node(ast, start, size), mFlags(0)
+namespace typesystem {
+
+class TypesStore
 {
-    assert(size == 3);
-    mTypeName = start[0].tokens;
-    mName = start[1].tokens;
-}
+public:
+    TypesStore();
+    ~TypesStore();
 
-bool VarDecl::is(VarDecl::Flags flag) const
-{
-    return (mFlags & flag) != 0;
-}
+    Type *getByName(const std::string &name) const;
+    Type *getPrimitive(Type::TypeId id) const;
 
-void VarDecl::set(VarDecl::Flags flag, bool val)
-{
-    mFlags = val ? (mFlags | flag) : (mFlags & ~flag);
-}
+private:
+    std::map< std::string, std::unique_ptr<Type> > mTypes;
+};
 
-bool VarDecl::inited() const
-{
-    return !children.empty();
-}
+} // namespace typesystem
 
-Node *VarDecl::initExpr()
-{
-    return children.empty() ? nullptr : children.front();
-}
-
-}
+#endif // TYPESSTORE_H

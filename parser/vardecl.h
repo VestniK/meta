@@ -23,10 +23,11 @@
 #include <string>
 
 #include "parser/metaparser.h"
+#include "parser/typed.h"
 
 namespace meta {
 
-class VarDecl: public meta::Node
+class VarDecl: public meta::Node, public Typed
 {
 meta_NODE
 public:
@@ -38,14 +39,16 @@ public:
     };
 
     const std::string &name() const {return mName;}
-    const std::string &type() const {return mType;}
+
+    const std::string &typeName() const {return mTypeName;}
+
     bool inited() const;
     Node *initExpr();
     bool is(Flags flag) const;
     void set(Flags flag, bool val = true);
 
 private:
-    std::string mName, mType;
+    std::string mName, mTypeName;
     int mFlags;
 };
 

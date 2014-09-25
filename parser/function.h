@@ -23,10 +23,11 @@
 #include <string>
 
 #include "parser/metaparser.h"
+#include "parser/typed.h"
 
 namespace meta {
 
-class Function: public Node
+class Function: public Node, public Typed
 {
 meta_NODE
 public:

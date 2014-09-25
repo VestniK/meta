@@ -52,7 +52,7 @@ TEST(Parser, oneParamFunc) {
     ASSERT_EQ(functions[0]->package(), "test");
     const auto args = functions[0]->args();
     ASSERT_EQ(args.size(), 1);
-    ASSERT_EQ(args[0]->type(), "int");
+    ASSERT_EQ(args[0]->typeName(), "int");
     ASSERT_EQ(args[0]->name(), "x");
 }
 
@@ -66,9 +66,9 @@ TEST(Parser, twoParamFunc) {
     ASSERT_EQ(functions[0]->package(), "test");
     const auto args = functions[0]->args();
     ASSERT_EQ(args.size(), 2);
-    ASSERT_EQ(args[0]->type(), "int");
+    ASSERT_EQ(args[0]->typeName(), "int");
     ASSERT_EQ(args[0]->name(), "x");
-    ASSERT_EQ(args[1]->type(), "int");
+    ASSERT_EQ(args[1]->typeName(), "int");
     ASSERT_EQ(args[1]->name(), "y");
 }
 
@@ -83,14 +83,14 @@ TEST(Parser, twoFunc) {
     ASSERT_EQ(functions[0]->package(), "test");
     const auto args1 = functions[0]->args();
     ASSERT_EQ(args1.size(), 1);
-    ASSERT_EQ(args1[0]->type(), "int");
+    ASSERT_EQ(args1[0]->typeName(), "int");
     ASSERT_EQ(args1[0]->name(), "x");
 
     ASSERT_EQ(functions[1]->name(), "bar");
     ASSERT_EQ(functions[1]->package(), "test");
     const auto args2 = functions[1]->args();
     ASSERT_EQ(args2.size(), 1);
-    ASSERT_EQ(args2[0]->type(), "int");
+    ASSERT_EQ(args2[0]->typeName(), "int");
     ASSERT_EQ(args2[0]->name(), "x");
 }
 
@@ -105,14 +105,14 @@ TEST(Parser, funcCall) {
     ASSERT_EQ(functions[0]->package(), "test");
     const auto args1 = functions[0]->args();
     ASSERT_EQ(args1.size(), 1);
-    ASSERT_EQ(args1[0]->type(), "int");
+    ASSERT_EQ(args1[0]->typeName(), "int");
     ASSERT_EQ(args1[0]->name(), "x");
 
     ASSERT_EQ(functions[1]->name(), "bar");
     ASSERT_EQ(functions[1]->package(), "test");
     const auto args2 = functions[1]->args();
     ASSERT_EQ(args2.size(), 1);
-    ASSERT_EQ(args2[0]->type(), "int");
+    ASSERT_EQ(args2[0]->typeName(), "int");
     ASSERT_EQ(args2[0]->name(), "y");
 }
 
@@ -155,11 +155,11 @@ TEST(Parser, varTest) {
     ASSERT_EQ(blocks.size(), 1);
     auto varDeclarations = blocks.front()->getChildren<meta::VarDecl>(-1);
     ASSERT_EQ(varDeclarations.size(), 2);
-    ASSERT_EQ(varDeclarations[0]->type(), "int");
+    ASSERT_EQ(varDeclarations[0]->typeName(), "int");
     ASSERT_EQ(varDeclarations[0]->name(), "y");
     ASSERT_TRUE(varDeclarations[0]->inited());
 
-    ASSERT_EQ(varDeclarations[1]->type(), "int");
+    ASSERT_EQ(varDeclarations[1]->typeName(), "int");
     ASSERT_EQ(varDeclarations[1]->name(), "z");
     ASSERT_FALSE(varDeclarations[1]->inited());
 
@@ -185,11 +185,11 @@ TEST(Parser, assignAsExpr) {
     ASSERT_EQ(blocks.size(), 1);
     auto varDeclarations = blocks.front()->getChildren<meta::VarDecl>(-1);
     ASSERT_EQ(varDeclarations.size(), 2);
-    ASSERT_EQ(varDeclarations[0]->type(), "int");
+    ASSERT_EQ(varDeclarations[0]->typeName(), "int");
     ASSERT_EQ(varDeclarations[0]->name(), "y");
     ASSERT_FALSE(varDeclarations[0]->inited());
 
-    ASSERT_EQ(varDeclarations[1]->type(), "int");
+    ASSERT_EQ(varDeclarations[1]->typeName(), "int");
     ASSERT_EQ(varDeclarations[1]->name(), "z");
     ASSERT_FALSE(varDeclarations[1]->inited());
 
