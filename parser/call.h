@@ -33,6 +33,9 @@ public:
     Function *function() const {return mFunction;}
     void setFunction(Function *func);
 
+    Node *arg(size_t pos);
+    size_t argsCount() const;
+
 private:
     std::string mFunctionName;
     Function *mFunction;

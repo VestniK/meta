@@ -46,4 +46,16 @@ void Call::setFunction(Function *func)
     }
 }
 
+Node *Call::arg(size_t pos)
+{
+    if (pos < children.size())
+        return children[pos];
+    return nullptr;
+}
+
+size_t Call::argsCount() const
+{
+    return children.size();
+}
+
 }

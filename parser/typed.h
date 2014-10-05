@@ -30,10 +30,10 @@ class Typed
 {
 public:
     const typesystem::Type *type() const {return mType;}
-    void setType(typesystem::Type *type) {mType = type;}
+    void setType(const typesystem::Type *type) {mType = type;}
 
 private:
-    typesystem::Type *mType = nullptr;
+    const typesystem::Type *mType = nullptr;
 };
 
 } // namespace meta
