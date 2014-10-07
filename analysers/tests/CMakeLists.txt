@@ -3,6 +3,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 add_executable(AnalysersTests
   typechecker.cpp
+  resolver.cpp
 )
 target_link_libraries(AnalysersTests analysers parser fs ${GTEST_BOTH_LIBRARIES})
 add_test(NAME AnalysersTests

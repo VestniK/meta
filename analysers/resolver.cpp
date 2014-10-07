@@ -18,6 +18,8 @@
  */
 
 #include <map>
+#include <set>
+#include <algorithm>
 
 #include "parser/assigment.h"
 #include "parser/call.h"
@@ -36,8 +38,11 @@ class ResolveVisitor: public meta::Visitor
 public:
     ResolveVisitor(meta::AST *ast)
     {
-        auto funcs = ast->getChildren<meta::Function>(0);
-        mFunctions.insert(mFunctions.end(), funcs.begin(), funcs.end());
+        for (auto func : ast->getChildren<meta::Function>(0)) {
+            auto res = mFunctions.insert(func);
+            if (!res.second)
+                throw SemanticError(func, "Function '%s' redefinition", func->name().c_str());
+        }
     }
 
     virtual bool visit(meta::Call *node) override
@@ -129,7 +134,20 @@ private:
         unsigned accessCount;
     };
 
-    std::vector<meta::Function*> mFunctions;
+    class FuncComparator
+    {
+    public:
+        bool operator() (meta::Function *left, meta::Function *right) const
+        {
+            if (left->package().compare(right->package()) < 0)
+                return true;
+            if (left->name().compare(right->name()) < 0)
+                return true;
+            return false;
+        }
+    };
+
+    std::set<meta::Function*, FuncComparator> mFunctions;
     std::map<std::string, VarSrc> mVars;
 };
 
