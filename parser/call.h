@@ -17,6 +17,9 @@
  *
  */
 
+#ifndef CALL_H
+#define CALL_H
+
 #include <string>
 
 #include "parser/metaparser.h"
@@ -42,3 +45,5 @@ private:
 };
 
 }
+
+#endif // CALL_H

@@ -1,7 +1,5 @@
 #include "parser/metanodes.h"
 
-#include "generators/translationrunner.h"
-
 #include "generators/llvmgen/generator.h"
 #include "generators/llvmgen/modulebuilder.h"
 
@@ -18,8 +16,7 @@ public:
             pos = 0;
         Environment env(output.substr(pos)); /// @todo strip extension as well
         ModuleBuilder builder(env);
-        generators::TranslationRunner<llvm::Value *> runner;
-        runner.translate(ast, &builder);
+        ast->walk(&builder);
         builder.save(output);
     }
 };

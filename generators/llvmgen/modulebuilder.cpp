@@ -15,7 +15,7 @@
 namespace generators {
 namespace llvmgen {
 
-void ModuleBuilder::startFunction(meta::Function *node)
+bool ModuleBuilder::visit(meta::Function *node)
 {
     mVarMap.clear();
     llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node));
@@ -32,6 +32,7 @@ void ModuleBuilder::startFunction(meta::Function *node)
 
     llvm::BasicBlock *body = llvm::BasicBlock::Create(env.context, "", func);
     builder.SetInsertPoint(body);
+    return true;
 }
 
 void ModuleBuilder::returnValue(meta::Return *node, llvm::Value *val)
@@ -65,17 +66,31 @@ llvm::Value *ModuleBuilder::var(meta::Var *node)
     return node->declaration()->is(meta::VarDecl::argument) ? it->second : builder.CreateLoad(it->second);
 }
 
-llvm::Value *ModuleBuilder::assign(meta::VarDecl *node, llvm::Value *val)
+namespace {
+inline llvm::AllocaInst *addLocalVar(llvm::Function *func, llvm::Type *type, const std::string &name)
 {
-    assert(!node->is(meta::VarDecl::argument));
-    auto it = mVarMap.find(node);
+    llvm::IRBuilder<> builder(&(func->getEntryBlock()), func->getEntryBlock().begin());
+    return builder.CreateAlloca(type, 0, name.c_str());
+}
+}
+
+void ModuleBuilder::varInit(meta::VarDecl *node, llvm::Value *val)
+{
+    auto type = env.getType(node->typeName());
+    assert(type != nullptr); // types integrity should be checked by analyzers
+    auto allocaVal = mVarMap[node] = addLocalVar(builder.GetInsertBlock()->getParent(), type, node->name());
+    builder.CreateStore(val, allocaVal);
+}
+
+llvm::Value *ModuleBuilder::assign(meta::Assigment *node, llvm::Value *val)
+{
+    assert(!node->declaration()->is(meta::VarDecl::argument));
+    auto it = mVarMap.find(node->declaration());
     if (it == mVarMap.end()) {
-        llvm::Function *currFunc = builder.GetInsertBlock()->getParent();
-        llvm::IRBuilder<> stackVarDeclBuilder(&(currFunc->getEntryBlock()), currFunc->getEntryBlock().begin());
-        auto type = env.getType(node->typeName());
+        auto type = env.getType(node->declaration()->typeName());
         assert(type != nullptr); // types integrity should be checked by analyzers
-        mVarMap[node] = stackVarDeclBuilder.CreateAlloca(type, 0, node->name().c_str());
-        it = mVarMap.find(node);
+        mVarMap[node->declaration()] = addLocalVar(builder.GetInsertBlock()->getParent(), type, node->declaration()->name());
+        it = mVarMap.find(node->declaration());
     }
     builder.CreateStore(val, it->second);
     return val;
