@@ -29,6 +29,8 @@ namespace meta {
 class Typed
 {
 public:
+    virtual ~Typed() {}
+
     const typesystem::Type *type() const {return mType;}
     void setType(const typesystem::Type *type) {mType = type;}
 

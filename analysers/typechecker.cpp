@@ -213,20 +213,23 @@ public:
             case meta::BinaryOp::mul:
                 if (!left->is(typesystem::Type::numeric) || !right->is(typesystem::Type::numeric))
                     throw analysers::SemanticError(node, "Can't perform arythmetic operation on values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
-                return left; // TODO: should return widest type of left or right. Now there is only one numeric type so it's ok to return first arg type
+                node->setType(left);
+                return node->type(); // TODO: should return widest type of left or right. Now there is only one numeric type so it's ok to return first arg type
 
             case meta::BinaryOp::equal:
             case meta::BinaryOp::noteq:
                 if (left != right)
                     throw analysers::SemanticError(node, "Can't compare values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
-                return mTypes.getPrimitive(typesystem::Type::Bool);
+                node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
+                return node->type();
             case meta::BinaryOp::greater:
             case meta::BinaryOp::greatereq:
             case meta::BinaryOp::less:
             case meta::BinaryOp::lesseq:
                 if (!left->is(typesystem::Type::numeric) || !right->is(typesystem::Type::numeric))
                     throw analysers::SemanticError(node, "Can't compare values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
-                return mTypes.getPrimitive(typesystem::Type::Bool);
+                node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
+                return node->type();
 
             case meta::BinaryOp::operationsCount:
             default: break;
