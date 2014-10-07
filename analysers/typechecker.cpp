@@ -157,7 +157,7 @@ public:
         if (node->inited())
             return Evaluator<const typesystem::Type*>::leave(node);
         if (node->type()->typeId() == typesystem::Type::Auto)
-            throw analysers::SemanticError(node, "Can't deduce type of uninitialized variable '%s'.", node->name().c_str());
+            throw analysers::SemanticError(node, "Can't deduce variable '%s' type.", node->name().c_str());
     }
     virtual void varInit(meta::VarDecl *node, const typesystem::Type *val) override
     {
@@ -175,6 +175,8 @@ public:
     virtual void returnValue(meta::Return *node, const typesystem::Type *val) override
     {
         if (mCurrFunc->type()->typeId() == typesystem::Type::Auto) {
+            if (val->typeId() == typesystem::Type::Auto)
+                throw analysers::SemanticError(node, "Can't return value of incomplete type");
             mCurrFunc->setType(val);
             return;
         }

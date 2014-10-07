@@ -132,6 +132,7 @@ TEST_P(TypeChekerErrors, typeErrors) {
     typesystem::TypesStore typestore;
     try {
         analysers::checkTypes(ast.get(), typestore);
+        ASSERT_TRUE(false) << "Input code contains type integrity or deduce error which was not found";
     } catch (analysers::SemanticError &err) {
         ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << std::string(err.tokens());
         ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << std::string(err.tokens());
@@ -142,6 +143,8 @@ INSTANTIATE_TEST_CASE_P(inconsistentTypes, TypeChekerErrors, ::testing::Values(
     "package test; int foo(int x) {\nreturn x < 5;}", // wrrong return expr type
     "package test; auto foo(int x) {\nbool b = x; return b;}", // incorret type of init expr
     "package test; auto foo(int x) {bool b; \nb = x; return b;}", // incorret type of assign
+    // Deduce loops
+    "package test; auto foo() {return bar();} auto bar() {\nreturn foo();}",
     // arythmetic on incompatible
     "package test; auto foo(int x, bool y) {return \nx + y;}",
     "package test; auto foo(int x, bool y) {return \nx - y;}",
