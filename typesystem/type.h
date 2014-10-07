@@ -28,27 +28,27 @@ namespace typesystem {
 
 class Type {
 public:
-	enum TypeClass {
-		numeric = (1 << 5),
-		boolean = (1 << 6),
-		primitive = (1 << 7)
-	};
+    enum TypeClass {
+        numeric = (1 << 5),
+        boolean = (1 << 6),
+        primitive = (1 << 7)
+    };
 
-	enum TypeId {
-		// incomplete types
-		Auto = -1,
+    enum TypeId {
+        // incomplete types
+        Auto = -1,
 
-		// Built in types
-		Void = 0,
-		Int = (1 | numeric | primitive),
-		Bool = (boolean | primitive)
-	};
+        // Built in types
+        Void = 0,
+        Int = (1 | numeric | primitive),
+        Bool = (boolean | primitive)
+    };
 
-	virtual std::string name() const = 0;
-	virtual TypeId typeId() const = 0;
-	virtual bool is(TypeClass type) const;
+    virtual std::string name() const = 0;
+    virtual TypeId typeId() const = 0;
+    virtual bool is(TypeClass type) const;
 
-	virtual ~Type() {}
+    virtual ~Type() {}
 };
 
 } // namespace typesystem
