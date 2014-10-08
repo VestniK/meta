@@ -21,30 +21,27 @@
 
 #include "parser/binaryop.h"
 
-namespace {
-
-const char *operationsMap[meta::BinaryOp::operationsCount] = {
-    // Arythmetics
-    "+", "-", "*", "/",
-    // Comparisions
-    "==", "!=", "<", ">", "<=", ">="
-};
-
-}
-
 namespace meta {
 
 BinaryOp::BinaryOp(AST *ast, const StackFrame *reduction, size_t size): Node(ast, reduction, size)
 {
     assert(size == 3);
-    std::string opStr = reduction[1].tokens;
-    int opCode = 0;
-    for (; opCode < operationsCount; ++opCode) {
-        if (opStr == operationsMap[opCode])
-            break;
+    assert(reduction[1].symbol > 0);
+    switch (reduction[1].symbol) {
+        case meta::addOp: mOp = add; break;
+        case meta::subOp: mOp = sub; break;
+        case meta::mulOp: mOp = mul; break;
+        case meta::divOp: mOp = div; break;
+
+        case meta::eqOp: mOp = equal; break;
+        case meta::neqOp: mOp = noteq; break;
+        case meta::lessOp: mOp = less; break;
+        case meta::lesseqOp: mOp = lesseq; break;
+        case meta::greaterOp: mOp = greater; break;
+        case meta::greatereqOp: mOp = greatereq; break;
+
+        default: assert(false);
     }
-    assert(opCode < operationsCount);
-    mOp = static_cast<Operation>(opCode);
 }
 
 } // namespace meta

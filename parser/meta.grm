@@ -1,6 +1,16 @@
 // Named const for useful terminals
 trueVal 'true';
 falseVal 'false';
+addOp '+';
+subOp '-';
+mulOp '*';
+divOp '/';
+eqOp '==';
+neqOp '!=';
+greaterOp '>';
+greatereqOp '>=';
+lessOp '<';
+lesseqOp '<=';
 
 // Operations priority
 { '==' '!=' } << // lower priority

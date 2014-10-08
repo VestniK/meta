@@ -35,8 +35,7 @@ public:
         // Arythmetic
         add, sub, mul, div,
         // Comparisions
-        equal, noteq, less, greater, lesseq, greatereq,
-        operationsCount
+        equal, noteq, less, greater, lesseq, greatereq
     };
     Operation operation() const {return mOp;}
 

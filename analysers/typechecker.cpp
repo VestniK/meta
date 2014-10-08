@@ -153,9 +153,6 @@ public:
                     throw analysers::SemanticError(node, "Can't compare values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
                 node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
                 return node->type();
-
-            case meta::BinaryOp::operationsCount:
-            default: break;
         }
         assert(false);
         return nullptr;
