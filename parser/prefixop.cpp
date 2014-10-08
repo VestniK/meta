@@ -30,6 +30,7 @@ PrefixOp::PrefixOp(AST *ast, const StackFrame *reduction, size_t size): Node(ast
     switch (reduction[0].symbol) {
         case meta::subOp: mOperation = negative; break;
         case meta::addOp: mOperation = positive; break;
+        case meta::notOp: mOperation = boolnot; break;
         default: assert(false);
     }
 }

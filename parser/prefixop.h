@@ -31,7 +31,12 @@ meta_NODE
 public:
     PrefixOp(AST *ast, const StackFrame *start, size_t size);
 
-    enum Operation {negative, positive};
+    enum Operation {
+        // arithmetic
+        negative, positive,
+        // boolean
+        boolnot
+    };
     Operation operation() const {return mOperation;}
 
 private:

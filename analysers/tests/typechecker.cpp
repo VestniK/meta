@@ -104,7 +104,7 @@ INSTANTIATE_TEST_CASE_P(typeCheckAndDeduce, TypeCheker, ::testing::Values(
         NameTypeList({NameType("x", typesystem::Type::Int), NameType("y", typesystem::Type::Int), NameType("var", typesystem::Type::Int), NameType("flag", typesystem::Type::Bool)})
     ),
     TestData(
-        "package test; bool foo(auto x = 5, auto y = 5 < 2) {return y != x < 5;}",
+        "package test; bool foo(auto x = 5, auto y = !(5 < 2)) {return y != x < 5;}",
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("x", typesystem::Type::Int), NameType("y", typesystem::Type::Bool)})
     ),

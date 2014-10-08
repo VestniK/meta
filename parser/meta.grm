@@ -1,6 +1,7 @@
 // Named const for useful terminals
 trueVal 'true';
 falseVal 'false';
+
 addOp '+';
 subOp '-';
 mulOp '*';
@@ -11,6 +12,7 @@ greaterOp '>';
 greatereqOp '>=';
 lessOp '<';
 lesseqOp '<=';
+notOp '!';
 
 // Operations priority
 { '==' '!=' } << // lower priority
@@ -49,6 +51,7 @@ Expr -> UnaryExpr
 
 UnaryExpr -> '+' UnaryExpr +> PrefixOp
           -> '-' UnaryExpr +> PrefixOp
+          -> '!' UnaryExpr +> PrefixOp
           -> <num> +> Number
           -> ValueLiteral
           -> Var  +> Var

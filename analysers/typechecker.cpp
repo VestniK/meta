@@ -122,6 +122,11 @@ public:
             case meta::PrefixOp::negative:
                 if (!val->is(typesystem::Type::numeric))
                     throw analysers::SemanticError(node, "Can't perform arythmetic operation on value of type '%s'", val->name().c_str());
+                break;
+            case meta::PrefixOp::boolnot:
+                if (!val->is(typesystem::Type::boolean))
+                    throw analysers::SemanticError(node, "Can't perform boolean not operation on value of type '%s'", val->name().c_str());
+                break;
         }
         node->setType(val);
         return val;

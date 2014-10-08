@@ -64,6 +64,7 @@ public:
         switch(op->operation()) {
             case meta::PrefixOp::negative: mCalcStack.back() = - mCalcStack.back(); break;
             case meta::PrefixOp::positive: mCalcStack.back() = + mCalcStack.back(); break;
+            default: assert(false);
         }
     }
 

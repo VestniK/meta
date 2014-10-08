@@ -90,7 +90,7 @@ bool less(int x, int y)
 
 bool leftBound(int left, int val)
 {
-    auto lcheck = val >= left;
+    auto lcheck = !(val < left);
     return lcheck;
 }
 

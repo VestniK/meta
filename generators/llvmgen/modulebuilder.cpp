@@ -132,8 +132,9 @@ llvm::Value *ModuleBuilder::prefixOp(meta::PrefixOp *node, llvm::Value *val)
     switch (node->operation()) {
         case meta::PrefixOp::negative: return builder.CreateNeg(val);
         case meta::PrefixOp::positive: return val;
-        default: assert(false);
+        case meta::PrefixOp::boolnot: return builder.CreateNot(val);
     }
+    assert(false);
     return nullptr;
 }
 
