@@ -60,3 +60,14 @@ int assigment(int x)
     int c = a = b = x + 5;
     return a + b + c;
 }
+
+bool less(int x, int y)
+{
+    return x < y;
+}
+
+bool leftBound(int left, int val)
+{
+    bool lcheck = val >= left; // TODO: auto instead of bool when generator will be fixed
+    return lcheck;
+}

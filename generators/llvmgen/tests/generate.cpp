@@ -35,6 +35,11 @@ int test_distCallFull(int x);
 int test_varsUsage(int x);
 
 int test_assigment(int x);
+
+bool test_less(int x, int y);
+
+bool test_leftBound(int left, int val);
+
 }
 
 // Functions with the same body as above funcs
@@ -78,6 +83,17 @@ int assigment(int x)
     return a + b + c;
 }
 
+bool less(int x, int y)
+{
+    return x < y;
+}
+
+bool leftBound(int left, int val)
+{
+    auto lcheck = val >= left;
+    return lcheck;
+}
+
 }
 
 TEST(BuilderTests, constFunc)
@@ -117,5 +133,15 @@ TEST(BuilderTests, assigment)
 {
     for (int x = -50; x < 50; ++x)
         ASSERT_EQ(test_assigment(x), local::assigment(x));
+}
+
+TEST(BuilderTests, boolFuncs)
+{
+    for (int x = -5; x < 5; ++x) {
+        for (int y = -5; y < 5; ++y) {
+            ASSERT_EQ(test_less(x, y), local::less(x, y));
+            ASSERT_EQ(test_leftBound(x, y), local::leftBound(x, y));
+        }
+    }
 }
 

@@ -103,6 +103,14 @@ llvm::Value *ModuleBuilder::binaryOp(meta::BinaryOp *node, llvm::Value *left, ll
         case meta::BinaryOp::sub: return builder.CreateSub(left, right);
         case meta::BinaryOp::mul: return builder.CreateMul(left, right);
         case meta::BinaryOp::div: return builder.CreateSDiv(left, right);
+
+        case meta::BinaryOp::equal: return builder.CreateICmpEQ(left, right);
+        case meta::BinaryOp::noteq: return builder.CreateICmpNE(left, right);
+
+        case meta::BinaryOp::less: return builder.CreateICmpSLT(left, right);
+        case meta::BinaryOp::lesseq: return builder.CreateICmpSLE(left, right);
+        case meta::BinaryOp::greater: return builder.CreateICmpSGT(left, right);
+        case meta::BinaryOp::greatereq: return builder.CreateICmpSGE(left, right);
         default: assert(false);
     }
     return nullptr;
