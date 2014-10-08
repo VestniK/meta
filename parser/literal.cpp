@@ -17,20 +17,23 @@
  *
  */
 
-#ifndef META_NODES_H
-#define META_NODES_H
+#include <cassert>
 
-#include "parser/assigment.h"
-#include "parser/binaryop.h"
-#include "parser/call.h"
-#include "parser/codeblock.h"
-#include "parser/exprstatement.h"
-#include "parser/function.h"
+#include "typesystem/typesstore.h"
+
 #include "parser/literal.h"
-#include "parser/number.h"
-#include "parser/prefixop.h"
-#include "parser/return.h"
-#include "parser/var.h"
-#include "parser/vardecl.h"
 
-#endif // META_NODES_H
+namespace meta {
+
+Literal::Literal(AST *ast, const StackFrame *reduction, size_t size): Node(ast, reduction, size)
+{
+    assert(size == 1);
+    assert(reduction[0].symbol > 0); // symbol is terminal
+    switch (reduction[0].symbol) {
+        case meta::trueVal: mVal = trueVal; break;
+        case meta::falseVal: mVal = falseVal; break;
+        default: assert(false);
+    }
+}
+
+} // namespace meta

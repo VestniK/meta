@@ -112,6 +112,16 @@ INSTANTIATE_TEST_CASE_P(typeCheckAndDeduce, TypeCheker, ::testing::Values(
         "package test; auto foo() {auto val = 5; return val;}",
         NameTypeList({NameType("foo", typesystem::Type::Int)}),
         NameTypeList({NameType("val", typesystem::Type::Int)})
+    ),
+    TestData(
+        "package test; auto foo() {auto val = true; return val;}",
+        NameTypeList({NameType("foo", typesystem::Type::Bool)}),
+        NameTypeList({NameType("val", typesystem::Type::Bool)})
+    ),
+    TestData(
+        "package test; auto foo() {auto val = false; return val;}",
+        NameTypeList({NameType("foo", typesystem::Type::Bool)}),
+        NameTypeList({NameType("val", typesystem::Type::Bool)})
     )
 ));
 

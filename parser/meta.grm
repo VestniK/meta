@@ -1,8 +1,14 @@
+// Named const for useful terminals
+trueVal 'true';
+falseVal 'false';
+
+// Operations priority
 { '==' '!=' } << // lower priority
 { '<' '<=' '>' '>=' } <<
 { '+' '-' } <<
 { '*' '/' } << // higher priority
 
+// Grammar rules
 Goal -> Package <eof>
 
 Package -> Header [Function]...
@@ -34,8 +40,12 @@ Expr -> UnaryExpr
 UnaryExpr -> '+' UnaryExpr +> PrefixOp
           -> '-' UnaryExpr +> PrefixOp
           -> <num> +> Number
+          -> ValueLiteral
           -> Var  +> Var
           -> '(' Expr ')'
           ->  <identifier> '(' [Expr]/','... ')' +> Call
 
 Var -> <identifier>
+
+ValueLiteral -> 'true' +> Literal
+             -> 'false' +> Literal

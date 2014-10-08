@@ -17,20 +17,30 @@
  *
  */
 
-#ifndef META_NODES_H
-#define META_NODES_H
+#ifndef LITERAL_H
+#define LITERAL_H
 
-#include "parser/assigment.h"
-#include "parser/binaryop.h"
-#include "parser/call.h"
-#include "parser/codeblock.h"
-#include "parser/exprstatement.h"
-#include "parser/function.h"
-#include "parser/literal.h"
-#include "parser/number.h"
-#include "parser/prefixop.h"
-#include "parser/return.h"
-#include "parser/var.h"
-#include "parser/vardecl.h"
+#include "parser/metaparser.h"
+#include "parser/typed.h"
 
-#endif // META_NODES_H
+namespace meta {
+
+class Literal: public Node, public Typed
+{
+meta_NODE
+public:
+    Literal(AST *ast, const StackFrame *reduction, size_t size);
+
+    enum Value {
+        // boolean
+        trueVal, falseVal
+    };
+    Value value() const {return mVal;}
+
+private:
+    Value mVal;
+};
+
+} // namespace meta
+
+#endif // LITERAL_H

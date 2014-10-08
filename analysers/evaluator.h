@@ -38,6 +38,7 @@ public:
     virtual void varInit(meta::VarDecl *node, Value val) = 0;
     // Value providers
     virtual Value number(meta::Number *node) = 0;
+    virtual Value literal(meta::Literal *node) = 0;
     virtual Value var(meta::Var *node) = 0;
     // Operations on values
     virtual Value call(meta::Call *node, const std::vector<Value> &args) = 0;
@@ -47,6 +48,7 @@ public:
 
     // Visitor implementation
     virtual void leave(meta::Number *node) override {mStack.top().push_back(number(node));}
+    virtual void leave(meta::Literal *node) override {mStack.top().push_back(literal(node));}
     virtual void leave(meta::Var *node) override {mStack.top().push_back(var(node));}
     virtual bool visit(meta::Return *) override {mStack.push(std::vector<Value>()); return true;}
     virtual void leave(meta::Return *node) override

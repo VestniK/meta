@@ -53,8 +53,19 @@ llvm::Value *ModuleBuilder::call(meta::Call *node, const std::vector<llvm::Value
 
 llvm::Value *ModuleBuilder::number(meta::Number *node)
 {
-    llvm::Type *intType = llvm::Type::getInt32Ty(env.context);
-    return llvm::ConstantInt::get(intType, node->value(), true);
+    llvm::Type *type = env.getType(node->type());
+    return llvm::ConstantInt::get(type, node->value(), true);
+}
+
+llvm::Value *ModuleBuilder::literal(meta::Literal *node)
+{
+    llvm::Type *type = env.getType(node->type());
+    switch (node->value()) {
+        case meta::Literal::trueVal: return llvm::ConstantInt::getTrue(type);
+        case meta::Literal::falseVal:return llvm::ConstantInt::getFalse(type);
+    }
+    assert(false);
+    return nullptr;
 }
 
 llvm::Value *ModuleBuilder::var(meta::Var *node)

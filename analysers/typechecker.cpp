@@ -55,6 +55,14 @@ public:
         node->setType(mTypes.getPrimitive(typesystem::Type::Int));
         return node->type();
     }
+    virtual const typesystem::Type *literal(meta::Literal *node) override
+    {
+        switch (node->value()) {
+            case meta::Literal::trueVal:
+            case meta::Literal::falseVal: node->setType(mTypes.getPrimitive(typesystem::Type::Bool)); break;
+        }
+        return node->type();
+    }
     virtual const typesystem::Type *var(meta::Var *node) override
     {
         assert(node->declaration()->type() != nullptr); // declaration of unknown type should rize error before var usage
