@@ -38,6 +38,12 @@ class Function;
 
 }
 
+namespace typesystem {
+
+class Type;
+
+}
+
 namespace generators {
 namespace llvmgen {
 
@@ -47,7 +53,7 @@ struct Environment
     ~Environment();
 
     llvm::Function *addFunction(meta::Function *func);
-    llvm::Type *getType(const std::string &name);
+    llvm::Type *getType(const typesystem::Type *type);
 
     llvm::LLVMContext &context;
     std::unique_ptr<llvm::Module> module;

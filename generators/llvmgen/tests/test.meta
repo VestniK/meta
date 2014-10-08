@@ -40,7 +40,7 @@ int constFoo()
 
 int poly(int x)
 {
-    int common = -x+3;
+    auto common = -x+3;
     return 5*common*common - 6*common + 3;
 }
 
@@ -57,17 +57,17 @@ int assigment(int x)
 {
     int a;
     int b;
-    int c = a = b = x + 5;
+    auto c = a = b = x + 5;
     return a + b + c;
 }
 
-bool less(int x, int y)
+auto less(int x, int y)
 {
     return x < y;
 }
 
 bool leftBound(int left, int val)
 {
-    bool lcheck = val >= left; // TODO: auto instead of bool when generator will be fixed
+    auto lcheck = val >= left;
     return lcheck;
 }

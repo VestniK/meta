@@ -76,7 +76,7 @@ inline llvm::AllocaInst *addLocalVar(llvm::Function *func, llvm::Type *type, con
 
 void ModuleBuilder::varInit(meta::VarDecl *node, llvm::Value *val)
 {
-    auto type = env.getType(node->typeName());
+    auto type = env.getType(node->type());
     assert(type != nullptr); // types integrity should be checked by analyzers
     auto allocaVal = mVarMap[node] = addLocalVar(builder.GetInsertBlock()->getParent(), type, node->name());
     builder.CreateStore(val, allocaVal);
@@ -87,7 +87,7 @@ llvm::Value *ModuleBuilder::assign(meta::Assigment *node, llvm::Value *val)
     assert(!node->declaration()->is(meta::VarDecl::argument));
     auto it = mVarMap.find(node->declaration());
     if (it == mVarMap.end()) {
-        auto type = env.getType(node->declaration()->typeName());
+        auto type = env.getType(node->declaration()->type());
         assert(type != nullptr); // types integrity should be checked by analyzers
         mVarMap[node->declaration()] = addLocalVar(builder.GetInsertBlock()->getParent(), type, node->declaration()->name());
         it = mVarMap.find(node->declaration());

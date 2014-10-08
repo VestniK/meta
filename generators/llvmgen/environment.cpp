@@ -24,6 +24,8 @@
 
 #include "parser/metanodes.h"
 
+#include "typesystem/type.h"
+
 #include "generators/abi/mangling.h"
 #include "generators/llvmgen/environment.h"
 
@@ -45,12 +47,12 @@ llvm::Function *Environment::addFunction(meta::Function *func)
     const auto args = func->args();
     std::vector<llvm::Type *> argTypes;
     for (const auto arg : args) {
-        auto type = getType(arg->typeName());
+        auto type = getType(arg->type());
         if (type == nullptr)
             throw std::runtime_error(std::string("Argument ") + arg->name() + " of the function " + func->name() + " is of unknown type " + arg->typeName()); /// @todo missing code position info
         argTypes.push_back(type);
     }
-    auto rettype = getType(func->retType());
+    auto rettype = getType(func->type());
     assert(rettype != nullptr);
     llvm::FunctionType *funcType = llvm::FunctionType::get(rettype, argTypes, false);
     llvm::Function *prototype = llvm::Function::Create(funcType, llvm::GlobalValue::ExternalLinkage, generators::abi::mangledName(func), module.get());
@@ -64,13 +66,16 @@ llvm::Function *Environment::addFunction(meta::Function *func)
     return prototype;
 }
 
-llvm::Type *Environment::getType(const std::string &name)
+llvm::Type *Environment::getType(const typesystem::Type *type)
 {
     // built in types:
-    if (name == "int")
-        return llvm::Type::getInt32Ty(context);
-    if (name == "bool")
-        return llvm::Type::getInt1Ty(context);
+    switch (type->typeId()) {
+        case typesystem::Type::Int: return llvm::Type::getInt32Ty(context);
+        case typesystem::Type::Bool: return llvm::Type::getInt1Ty(context);
+
+        case typesystem::Type::Auto: assert(false);
+        case typesystem::Type::Void: break;
+    }
     return nullptr;
 }
 
