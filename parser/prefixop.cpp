@@ -23,12 +23,14 @@
 
 namespace meta {
 
-PrefixOp::PrefixOp(AST *ast, const StackFrame *start, size_t size): Node(ast, start, size)
+PrefixOp::PrefixOp(AST *ast, const StackFrame *reduction, size_t size): Node(ast, reduction, size)
 {
     assert(size == 2);
-    switch (*start[0].tokens.begin()->start) {
-        case '-': mOperation = negative; break;
-        case '+': mOperation = positive; break;
+    assert(reduction[0].symbol > 0); // symbol is terminal
+    switch (reduction[0].symbol) {
+        case meta::subOp: mOperation = negative; break;
+        case meta::addOp: mOperation = positive; break;
+        default: assert(false);
     }
 }
 
