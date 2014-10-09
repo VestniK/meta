@@ -119,9 +119,14 @@ INSTANTIATE_TEST_CASE_P(typeCheckAndDeduce, TypeCheker, ::testing::Values(
         NameTypeList({NameType("val", typesystem::Type::Bool)})
     ),
     TestData(
-        "package test; auto foo() {auto val = false; return val;}",
+        "package test; auto foo() {auto val = false; return val || true;}",
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("val", typesystem::Type::Bool)})
+    ),
+    TestData(
+        "package test; auto foo() {auto val = false; return val && true;}",
+             NameTypeList({NameType("foo", typesystem::Type::Bool)}),
+             NameTypeList({NameType("val", typesystem::Type::Bool)})
     )
 ));
 
@@ -171,5 +176,9 @@ INSTANTIATE_TEST_CASE_P(inconsistentTypes, TypeChekerErrors, ::testing::Values(
     "package test; auto foo(bool x, bool y) {return \nx <= y;}",
     // Equality on different types
     "package test; auto foo(int x, bool y) {return \nx == y;}",
-    "package test; auto foo(int x, bool y) {return \nx != y;}"
+    "package test; auto foo(int x, bool y) {return \nx != y;}",
+    // Bool operations on nonbool
+    "package test; auto foo(int x) {return \n!x;}",
+    "package test; auto foo(int x, int y) {return \nx && y;}",
+    "package test; auto foo(int x, int y) {return \nx || y;}"
 ));

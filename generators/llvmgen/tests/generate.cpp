@@ -38,7 +38,8 @@ int test_assigment(int x);
 
 bool test_less(int x, int y);
 
-bool test_leftBound(int left, int val);
+bool test_bound(int left, int right, int val);
+bool test_outOf(int left, int right, int val);
 
 }
 
@@ -88,10 +89,18 @@ bool less(int x, int y)
     return x < y;
 }
 
-bool leftBound(int left, int val)
+bool bound(int left, int right, int val)
 {
     auto lcheck = !(val < left);
-    return lcheck;
+    auto rcheck = val < right;
+    return lcheck && rcheck;
+}
+
+bool outOf(int left, int right, int val)
+{
+    auto lcheck = val < left;
+    auto rcheck = val >= right;
+    return lcheck || rcheck;
 }
 
 }
@@ -140,7 +149,10 @@ TEST(BuilderTests, boolFuncs)
     for (int x = -5; x < 5; ++x) {
         for (int y = -5; y < 5; ++y) {
             ASSERT_EQ(test_less(x, y), local::less(x, y));
-            ASSERT_EQ(test_leftBound(x, y), local::leftBound(x, y));
+            for (int val = -10; val < 10; ++ val) {
+                ASSERT_EQ(test_bound(x, y, val), local::bound(x, y, val));
+                ASSERT_EQ(test_outOf(x, y, val), local::outOf(x, y, val));
+            }
         }
     }
 }

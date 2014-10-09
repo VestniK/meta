@@ -122,8 +122,11 @@ llvm::Value *ModuleBuilder::binaryOp(meta::BinaryOp *node, llvm::Value *left, ll
         case meta::BinaryOp::lesseq: return builder.CreateICmpSLE(left, right);
         case meta::BinaryOp::greater: return builder.CreateICmpSGT(left, right);
         case meta::BinaryOp::greatereq: return builder.CreateICmpSGE(left, right);
-        default: assert(false);
+
+        case meta::BinaryOp::boolAnd: return builder.CreateAnd(left, right);
+        case meta::BinaryOp::boolOr: return builder.CreateOr(left,right);
     }
+    assert(false);
     return nullptr;
 }
 

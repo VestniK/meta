@@ -85,5 +85,8 @@ INSTANTIATE_TEST_CASE_P(Operations, Priority, ::testing::Values(
     TestData({"1>2 != 3>=5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::greater, meta::BinaryOp::greatereq, meta::BinaryOp::noteq})}),
 
     TestData({"1 == 2 != 3 == 4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::equal, meta::BinaryOp::noteq, meta::BinaryOp::equal})}),
-    TestData({"1 != 2 == 3 != 4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::noteq, meta::BinaryOp::equal, meta::BinaryOp::noteq})})
+    TestData({"1 != 2 == 3 != 4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::noteq, meta::BinaryOp::equal, meta::BinaryOp::noteq})}),
+
+    TestData({"1 < 2 && 3 != 4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::less, meta::BinaryOp::noteq, meta::BinaryOp::boolAnd})}),
+    TestData({"1+3 != 2 || 3 <= 4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::add, meta::BinaryOp::noteq, meta::BinaryOp::lesseq, meta::BinaryOp::boolOr})})
 ));

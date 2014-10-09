@@ -40,6 +40,9 @@ BinaryOp::BinaryOp(AST *ast, const StackFrame *reduction, size_t size): Node(ast
         case meta::greaterOp: mOp = greater; break;
         case meta::greatereqOp: mOp = greatereq; break;
 
+        case meta::andOp: mOp = boolAnd; break;
+        case meta::orOp: mOp = boolOr; break;
+
         default: assert(false);
     }
 }

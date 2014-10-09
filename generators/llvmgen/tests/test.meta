@@ -66,8 +66,16 @@ auto less(int x, int y)
     return x < y;
 }
 
-bool leftBound(int left, int val)
+bool bound(int left, int right, int val)
 {
     auto lcheck = !(val < left);
-    return lcheck;
+    auto rcheck = val < right;
+    return lcheck && rcheck;
+}
+
+bool outOf(int left, int right, int val)
+{
+    auto lcheck = val < left;
+    auto rcheck = val >= right;
+    return lcheck || rcheck;
 }

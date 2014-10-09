@@ -141,15 +141,15 @@ public:
             case meta::BinaryOp::mul:
                 if (!left->is(typesystem::Type::numeric) || !right->is(typesystem::Type::numeric))
                     throw analysers::SemanticError(node, "Can't perform arythmetic operation on values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
-                node->setType(left);
-                return node->type(); // TODO: should return widest type of left or right. Now there is only one numeric type so it's ok to return first arg type
+                node->setType(left); // TODO: should return widest type of left or right. Now there is only one numeric type so it's ok to return first arg type
+                break;
 
             case meta::BinaryOp::equal:
             case meta::BinaryOp::noteq:
                 if (left != right)
                     throw analysers::SemanticError(node, "Can't compare values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
                 node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
-                return node->type();
+                break;
             case meta::BinaryOp::greater:
             case meta::BinaryOp::greatereq:
             case meta::BinaryOp::less:
@@ -157,10 +157,17 @@ public:
                 if (!left->is(typesystem::Type::numeric) || !right->is(typesystem::Type::numeric))
                     throw analysers::SemanticError(node, "Can't compare values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
                 node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
-                return node->type();
+                break;
+
+            case meta::BinaryOp::boolAnd:
+            case meta::BinaryOp::boolOr:
+                if (!left->is(typesystem::Type::boolean) || !right->is(typesystem::Type::boolean))
+                    throw analysers::SemanticError(node, "Can't perform boolean operations on values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
+                node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
+                break;
         }
-        assert(false);
-        return nullptr;
+        assert(node->type() != nullptr);
+        return node->type();
     }
 
     virtual const typesystem::Type *call(meta::Call *node, const std::vector<const typesystem::Type *> &args)
