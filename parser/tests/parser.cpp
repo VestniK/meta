@@ -27,8 +27,10 @@
 #include "parser/assigment.h"
 #include "parser/binaryop.h"
 #include "parser/codeblock.h"
+#include "parser/if.h"
 #include "parser/function.h"
 #include "parser/parse.h"
+#include "parser/return.h"
 #include "parser/vardecl.h"
 
 TEST(Parser, zeroParamFunc) {
@@ -197,6 +199,118 @@ TEST(Parser, assignAsExpr) {
     ASSERT_EQ(assigments.size(), 2);
     ASSERT_EQ(assigments[0]->varName(), "z");
     ASSERT_EQ(assigments[1]->varName(), "y");
+}
+
+TEST(Parser, ifStatement) {
+    const char *input = R"META(
+        package test;
+        int abs(int x)
+        {
+            if (x < 0)
+                return -x;
+            return x;
+        }
+    )META";
+    std::unique_ptr<meta::AST> ast;
+    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    auto ifs = ast->getChildren<meta::If>(-1);
+    ASSERT_EQ(ifs.size(), 1);
+    auto returns = ast->getChildren<meta::Return>(-1);
+    auto condRets = ifs[0]->getChildren<meta::Return>(-1);
+    ASSERT_EQ(returns.size(), 2);
+    ASSERT_EQ(condRets.size(), 1);
+    ASSERT_EQ(condRets[0], returns[0]);
+    ASSERT_NE(condRets[0], returns[1]);
+}
+
+TEST(Parser, ifElseStatement) {
+    const char *input = R"META(
+        package test;
+        int abs(int x)
+        {
+            if (x < 0)
+                return -x;
+            else
+                return x;
+            return 0;
+        }
+    )META";
+    std::unique_ptr<meta::AST> ast;
+    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    auto ifs = ast->getChildren<meta::If>(-1);
+    ASSERT_EQ(ifs.size(), 1);
+    auto returns = ast->getChildren<meta::Return>(-1);
+    auto condRets = ifs[0]->getChildren<meta::Return>(-1);
+    ASSERT_EQ(returns.size(), 3);
+    ASSERT_EQ(condRets.size(), 2);
+
+    ASSERT_EQ(condRets[0], returns[0]);
+    ASSERT_NE(condRets[0], returns[2]);
+
+    ASSERT_EQ(condRets[1], returns[1]);
+    ASSERT_NE(condRets[1], returns[2]);
+}
+
+TEST(Parser, ifBlockStatement) {
+    const char *input = R"META(
+        package test;
+        int foo(int x)
+        {
+            int y = x;
+            if (x < 0) {
+                y = -x;
+                y = y + 1;
+            }
+            y = y + 10;
+            return y;
+        }
+    )META";
+    std::unique_ptr<meta::AST> ast;
+    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    auto ifs = ast->getChildren<meta::If>(-1);
+    ASSERT_EQ(ifs.size(), 1);
+    auto assigns = ast->getChildren<meta::Assigment>(-1);
+    auto condAssigns = ifs[0]->getChildren<meta::Assigment>(-1);
+    ASSERT_EQ(assigns.size(), 3);
+    ASSERT_EQ(condAssigns.size(), 2);
+
+    ASSERT_EQ(condAssigns[0], assigns[0]);
+    ASSERT_NE(condAssigns[0], assigns[2]);
+
+    ASSERT_EQ(condAssigns[1], assigns[1]);
+    ASSERT_NE(condAssigns[1], assigns[2]);
+}
+
+TEST(Parser, ifElseBlockStatement) {
+    const char *input = R"META(
+        package test;
+        int foo(int x)
+        {
+            int y = x;
+            if (x < 0) {
+                y = -x;
+                y = y + 1;
+            } else {
+                y = y + 2;
+                y = y/2;
+            }
+            y = y + 10;
+            return y;
+        }
+    )META";
+    std::unique_ptr<meta::AST> ast;
+    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    auto ifs = ast->getChildren<meta::If>(-1);
+    ASSERT_EQ(ifs.size(), 1);
+    auto assigns = ast->getChildren<meta::Assigment>(-1);
+    auto condAssigns = ifs[0]->getChildren<meta::Assigment>(-1);
+    ASSERT_EQ(assigns.size(), 5);
+    ASSERT_EQ(condAssigns.size(), 4);
+
+    for (size_t pos = 0; pos < condAssigns.size(); ++pos) {
+        ASSERT_EQ(condAssigns[pos], assigns[pos]);
+        ASSERT_NE(condAssigns[pos], assigns[assigns.size() - 1]);
+    }
 }
 
 namespace {

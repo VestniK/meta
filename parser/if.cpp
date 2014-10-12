@@ -17,21 +17,15 @@
  *
  */
 
-#ifndef META_NODES_H
-#define META_NODES_H
+#include <cassert>
 
-#include "parser/assigment.h"
-#include "parser/binaryop.h"
-#include "parser/call.h"
-#include "parser/codeblock.h"
-#include "parser/exprstatement.h"
-#include "parser/function.h"
 #include "parser/if.h"
-#include "parser/literal.h"
-#include "parser/number.h"
-#include "parser/prefixop.h"
-#include "parser/return.h"
-#include "parser/var.h"
-#include "parser/vardecl.h"
 
-#endif // META_NODES_H
+namespace meta {
+
+If::If(AST *ast, const StackFrame *reduction, size_t size): Node(ast, reduction, size)
+{
+
+}
+
+} // namespace meta

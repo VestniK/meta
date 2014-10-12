@@ -11,6 +11,7 @@ set(SRC
   codeblock.cpp
   exprstatement.cpp
   function.cpp
+  if.cpp
   literal.cpp
   number.cpp
   parse.cpp

@@ -36,9 +36,12 @@ CodeBlock -> '{' (Statement)... '}' +> CodeBlock
 VarDecl -> <identifier> <identifier> ['=' Expr] +> VarDecl
 
 Statement -> CodeBlock
+          -> If
           -> VarDecl ';'
           -> Expr ';' +> ExprStatement
           -> 'return' Expr ';' +> Return
+
+If -> 'if' '(' Expr ')' Statement ['else' Statement] +> If
 
 Expr -> UnaryExpr
      -> Expr '+' Expr +> BinaryOp
