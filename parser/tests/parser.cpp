@@ -349,5 +349,7 @@ INSTANTIATE_TEST_CASE_P(BiaryOps, Parser, ::testing::Values(
     TestData({"<", meta::BinaryOp::less}),
     TestData({">", meta::BinaryOp::greater}),
     TestData({"<=", meta::BinaryOp::lesseq}),
-    TestData({">=", meta::BinaryOp::greatereq})
+    TestData({">=", meta::BinaryOp::greatereq}),
+    TestData({"&&", meta::BinaryOp::boolAnd}),
+    TestData({"||", meta::BinaryOp::boolOr})
 ));
