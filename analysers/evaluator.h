@@ -56,6 +56,7 @@ public:
         assert(mStack.top().size() == 1);
         returnValue(node, mStack.top()[0]);
         mStack.pop();
+        assert(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
     }
     virtual bool visit(meta::VarDecl *node) override
     {
@@ -69,6 +70,8 @@ public:
             return;
         assert(mStack.top().size() == 1);
         varInit(node, mStack.top()[0]);
+        mStack.pop();
+        assert(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
     }
     virtual bool visit(meta::Call *) override {mStack.push(std::vector<Value>()); return true;}
     virtual void leave(meta::Call *node) override
@@ -102,7 +105,11 @@ public:
         mStack.top().push_back(res);
     }
     virtual bool visit(meta::ExprStatement *) override {mStack.push(std::vector<Value>()); return true;}
-    virtual void leave(meta::ExprStatement *) override {mStack.pop();}
+    virtual void leave(meta::ExprStatement *) override
+    {
+        mStack.pop();
+        assert(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
+    }
 
 private:
     std::stack< std::vector<Value> > mStack;
