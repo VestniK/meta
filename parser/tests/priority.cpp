@@ -22,8 +22,9 @@
 
 #include <gtest/gtest.h>
 
+#include "parser/actions.h"
 #include "parser/binaryop.h"
-#include "parser/parse.h"
+#include "parser/metaparser.h"
 
 namespace {
 
@@ -46,10 +47,14 @@ TEST_P(Priority, priority)
     const char *tmpl = "package test; int foo() {return %s;}";
     char input[sizeof(tmpl) + strlen(param.expr)];
     sprintf(input, tmpl, param.expr);
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     std::vector<meta::BinaryOp::Operation> opSequence;
-    ast->walkBottomUp<meta::BinaryOp>([&](meta::BinaryOp *node) {opSequence.push_back(node->operation());});
+    meta::walkBottomUp<meta::BinaryOp>(*ast, [&](meta::BinaryOp *node) {opSequence.push_back(node->operation());});
     ASSERT_EQ(opSequence, param.opSequence);
 }
 

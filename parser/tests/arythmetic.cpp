@@ -84,8 +84,8 @@ TEST(Arythmetic, parenthesis)
 {
     const char *input = "package test; int foo() {return 2*(11+5)/8;}";
     meta::Parser parser;
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parser.parse(input)));
+    ASSERT_NO_THROW(parser.parse(input));
+    auto ast = parser.ast();
     LoggingCalc calc;
     ast->walk(&calc);
     ASSERT_EQ(calc.calcSequence().size(), 3);
@@ -128,8 +128,8 @@ TEST_P(Arythmetic, calcTest)
     input += ";}";
 
     meta::Parser parser;
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parser.parse(input.c_str())));
+    ASSERT_NO_THROW(parser.parse(input.c_str()));
+    auto ast = parser.ast();
     LoggingCalc calc;
     ast->walk(&calc);
     ASSERT_EQ(calc.result(), data.expectedResult);

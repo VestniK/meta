@@ -23,7 +23,7 @@
 
 namespace meta {
 
-If::If(AST *ast, const StackFrame *reduction, size_t size): Node(ast, reduction, size)
+If::If(const StackFrame *reduction, size_t size): Node(reduction, size)
 {
 
 }

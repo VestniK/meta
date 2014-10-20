@@ -14,7 +14,6 @@ set(SRC
   if.cpp
   literal.cpp
   number.cpp
-  parse.cpp
   prefixop.cpp
   return.cpp
   var.cpp

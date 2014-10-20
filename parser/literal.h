@@ -29,7 +29,7 @@ class Literal: public Node, public Typed
 {
 meta_NODE
 public:
-    Literal(AST *ast, const StackFrame *reduction, size_t size);
+    Literal(const StackFrame *reduction, size_t size);
 
     enum Value {
         // boolean

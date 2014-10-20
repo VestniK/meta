@@ -21,7 +21,7 @@
 
 namespace meta {
 
-CodeBlock::CodeBlock(AST *ast, const StackFrame *start, size_t size): Node(ast, start, size)
+CodeBlock::CodeBlock(const StackFrame *start, size_t size): Node(start, size)
 {
 }
 

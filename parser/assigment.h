@@ -28,7 +28,7 @@ class Assigment: public Node
 {
 meta_NODE
 public:
-    Assigment(AST *ast, const StackFrame* start, size_t size);
+    Assigment(const StackFrame* start, size_t size);
 
     const std::string &varName() const {return mVarName;}
     VarDecl *declaration() {return mDeclaration;}

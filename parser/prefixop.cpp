@@ -23,7 +23,7 @@
 
 namespace meta {
 
-PrefixOp::PrefixOp(AST *ast, const StackFrame *reduction, size_t size): Node(ast, reduction, size)
+PrefixOp::PrefixOp(const StackFrame *reduction, size_t size): Node(reduction, size)
 {
     assert(size == 2);
     assert(reduction[0].symbol > 0); // symbol is terminal

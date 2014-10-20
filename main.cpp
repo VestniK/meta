@@ -25,8 +25,8 @@
 
 #include "fs/io.h"
 
+#include "parser/actions.h"
 #include "parser/metaparser.h"
-#include "parser/parse.h"
 
 #include "typesystem/typesstore.h"
 
@@ -38,24 +38,32 @@
 
 int main(int argc, char **argv)
 {
-    if (argc != 3) {
-        std::cerr << "Ussage: " << argv[0] << " SRC_FILE OUTPUT" << std::endl;
+    if (argc < 3) {
+        std::cerr << "Ussage: " << argv[0] << " SRC_FILE... OUTPUT" << std::endl;
         return EXIT_FAILURE;
     }
     const enum ErrorVerbosity {silent, brief, lineMarked, expectedTerms, parserStack} verbosity = expectedTerms;
     try {
         // read
-        std::vector<char> input;
-        readWholeFile(argv[1], input);
+        const int srcCount = argc - 2; // ommit argv[0] == 'self path' and argv[argc - 1] == 'output file'
+        std::vector<char> input[srcCount];
+        for (int i = 0; i < srcCount; ++i)
+            readWholeFile(argv[i + 1], input[i]);
         // parse
-        std::unique_ptr<meta::AST> ast(parse(input.data(), input.size()));
+        meta::Parser parser;
+        Actions act;
+        parser.setParseActions(&act);
+        parser.setNodeActions(&act);
+        for (int i = 0; i < srcCount; ++i)
+            parser.parse(input[i].data(), input[i].size());
+        auto ast = parser.ast();
         // analyse
-        analysers::resolve(ast.get());
+        analysers::resolve(ast);
         typesystem::TypesStore typestore;
-        analysers::checkTypes(ast.get(), typestore);
+        analysers::checkTypes(ast, typestore);
         // generate
         std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
-        gen->generate(ast.get(), argv[2]);
+        gen->generate(ast, argv[srcCount + 1]);
     } catch(const meta::SyntaxError &err) {
         if (verbosity > silent)
             std::cerr << argv[1] << ':' << err.token().line << ':' << err.token().column << ": " << err.what();

@@ -24,19 +24,24 @@
 
 #include <gtest/gtest.h>
 
+#include "parser/actions.h"
 #include "parser/assigment.h"
 #include "parser/binaryop.h"
 #include "parser/codeblock.h"
 #include "parser/if.h"
 #include "parser/function.h"
-#include "parser/parse.h"
+#include "parser/metaparser.h"
 #include "parser/return.h"
 #include "parser/vardecl.h"
 
 TEST(Parser, zeroParamFunc) {
     const char *input = "package test; int foo() {return 5;}";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     const auto functions = ast->getChildren<meta::Function>(0);
     ASSERT_EQ(functions.size(), 1);
     ASSERT_EQ(functions[0]->name(), "foo");
@@ -46,8 +51,12 @@ TEST(Parser, zeroParamFunc) {
 
 TEST(Parser, oneParamFunc) {
     const char *input = "package test; int foo(int x) {return 5*x*x - 2*x + 3;}";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     const auto functions = ast->getChildren<meta::Function>();
     ASSERT_EQ(functions.size(), 1);
     ASSERT_EQ(functions[0]->name(), "foo");
@@ -60,8 +69,12 @@ TEST(Parser, oneParamFunc) {
 
 TEST(Parser, twoParamFunc) {
     const char *input = "package test; int foo(int x, int y) {return 5*x + 6/y;}";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     const auto functions = ast->getChildren<meta::Function>();
     ASSERT_EQ(functions.size(), 1);
     ASSERT_EQ(functions[0]->name(), "foo");
@@ -76,8 +89,12 @@ TEST(Parser, twoParamFunc) {
 
 TEST(Parser, twoFunc) {
     const char *input = "package test; int foo(int x) {return 5*x;}\nint bar(int x) {return x/5;}";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     const auto functions = ast->getChildren<meta::Function>();
     ASSERT_EQ(functions.size(), 2);
 
@@ -98,8 +115,12 @@ TEST(Parser, twoFunc) {
 
 TEST(Parser, funcCall) {
     const char *input = "package test; int foo(int x) {return 5*x;}\nint bar(int y) {return 5*foo(y/5);}";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     const auto functions = ast->getChildren<meta::Function>();
     ASSERT_EQ(functions.size(), 2);
 
@@ -120,16 +141,24 @@ TEST(Parser, funcCall) {
 
 TEST(Parser, emptyPackage) {
     const char *input = "package test.test;";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     const auto functions = ast->getChildren<meta::Function>();
     ASSERT_EQ(functions.size(), 0);
 }
 
 TEST(Parser, funcRetType) {
     const char *input = "package example.test; int iFoo() {return 0;}\ndouble dFoo() {return 0;}";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     const auto functions = ast->getChildren<meta::Function>();
     ASSERT_EQ(functions.size(), 2);
     ASSERT_EQ(functions[0]->name(), "iFoo");
@@ -151,8 +180,12 @@ TEST(Parser, varTest) {
             return z + y - 3;
         }
     )META";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     auto blocks = ast->getChildren<meta::CodeBlock>(-1);
     ASSERT_EQ(blocks.size(), 1);
     auto varDeclarations = blocks.front()->getChildren<meta::VarDecl>(-1);
@@ -181,8 +214,12 @@ TEST(Parser, assignAsExpr) {
             return z + y - 3;
         }
     )META";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     auto blocks = ast->getChildren<meta::CodeBlock>(-1);
     ASSERT_EQ(blocks.size(), 1);
     auto varDeclarations = blocks.front()->getChildren<meta::VarDecl>(-1);
@@ -211,8 +248,12 @@ TEST(Parser, ifStatement) {
             return x;
         }
     )META";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     auto ifs = ast->getChildren<meta::If>(-1);
     ASSERT_EQ(ifs.size(), 1);
     auto returns = ast->getChildren<meta::Return>(-1);
@@ -235,8 +276,12 @@ TEST(Parser, ifElseStatement) {
             return 0;
         }
     )META";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     auto ifs = ast->getChildren<meta::If>(-1);
     ASSERT_EQ(ifs.size(), 1);
     auto returns = ast->getChildren<meta::Return>(-1);
@@ -265,8 +310,12 @@ TEST(Parser, ifBlockStatement) {
             return y;
         }
     )META";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     auto ifs = ast->getChildren<meta::If>(-1);
     ASSERT_EQ(ifs.size(), 1);
     auto assigns = ast->getChildren<meta::Assigment>(-1);
@@ -298,8 +347,12 @@ TEST(Parser, ifElseBlockStatement) {
             return y;
         }
     )META";
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     auto ifs = ast->getChildren<meta::If>(-1);
     ASSERT_EQ(ifs.size(), 1);
     auto assigns = ast->getChildren<meta::Assigment>(-1);
@@ -330,10 +383,14 @@ class Parser: public testing::TestWithParam<TestData>
 TEST_P(Parser, binaryOp) {
     TestData data = GetParam();
     const char *tmplt = "package test; int foo(int x, int y) {return x %s y;}";
-    char input[sizeof(tmplt) + strlen(data.opStr)];
+    char input[strlen(tmplt) + strlen(data.opStr)];
     sprintf(input, tmplt, data.opStr);
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     auto binops = ast->getChildren<meta::BinaryOp>(-1);
     ASSERT_EQ(binops.size(), 1);
     ASSERT_EQ(binops[0]->operation(), data.op);

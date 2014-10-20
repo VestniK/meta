@@ -31,7 +31,7 @@ class Function: public Node, public Typed
 {
 meta_NODE
 public:
-    Function(AST *ast, const StackFrame *start, size_t size);
+    Function(const StackFrame *start, size_t size);
 
     const std::string &name() const {return mName;}
     const std::string &retType() const {return mRetType;}

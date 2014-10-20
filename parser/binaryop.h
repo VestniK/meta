@@ -29,7 +29,7 @@ class BinaryOp: public Node, public Typed
 {
 meta_NODE
 public:
-    BinaryOp(AST *ast, const StackFrame *reduction, size_t size);
+    BinaryOp(const StackFrame *reduction, size_t size);
 
     enum Operation {
         // Arythmetic

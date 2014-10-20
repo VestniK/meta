@@ -23,10 +23,10 @@
 #include "analysers/semanticerror.h"
 #include "analysers/typechecker.h"
 
+#include "parser/actions.h"
 #include "parser/binaryop.h"
 #include "parser/function.h"
 #include "parser/metaparser.h"
-#include "parser/parse.h"
 #include "parser/vardecl.h"
 
 #include "typesystem/typesstore.h"
@@ -60,11 +60,15 @@ public:
 
 TEST_P(TypeCheker, typeCheck) {
     auto param = GetParam();
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(param.src, strlen(param.src))));
-    ASSERT_NO_THROW(analysers::resolve(ast.get()));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(param.src, strlen(param.src)));
+    auto ast = parser.ast();
+    ASSERT_NO_THROW(analysers::resolve(ast));
     typesystem::TypesStore typestore;
-    ASSERT_NO_THROW(analysers::checkTypes(ast.get(), typestore));
+    ASSERT_NO_THROW(analysers::checkTypes(ast, typestore));
     auto functions = ast->getChildren<meta::Function>();
     ASSERT_EQ(functions.size(), param.functions.size());
     for (size_t pos = 0; pos < functions.size(); ++pos) {
@@ -80,7 +84,7 @@ TEST_P(TypeCheker, typeCheck) {
     }
 
     std::vector<meta::Typed*> exprs;
-    ast->walkTopDown<meta::Node>([&exprs](meta::Node *node){auto typed = dynamic_cast<meta::Typed*>(node); if (typed) exprs.push_back(typed); return true;});
+    meta::walkTopDown<meta::Node>(*ast, [&exprs](meta::Node *node){auto typed = dynamic_cast<meta::Typed*>(node); if (typed) exprs.push_back(typed); return true;});
     for (auto typed : exprs) {
         ASSERT_NE(typed->type(), nullptr) << "Type not set for node of type " << typeid(*typed).name();
         ASSERT_NE(typed->type()->typeId(), typesystem::Type::Auto) << "Type is incomplete for node of type " << typeid(*typed).name();
@@ -141,12 +145,16 @@ public:
 
 TEST_P(TypeChekerErrors, typeErrors) {
     const char *input = GetParam();
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
-    ASSERT_NO_THROW(analysers::resolve(ast.get()));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
+    ASSERT_NO_THROW(analysers::resolve(ast));
     typesystem::TypesStore typestore;
     try {
-        analysers::checkTypes(ast.get(), typestore);
+        analysers::checkTypes(ast, typestore);
         ASSERT_TRUE(false) << "Input code contains type integrity or deduce error which was not found";
     } catch (analysers::SemanticError &err) {
         ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << std::string(err.tokens());

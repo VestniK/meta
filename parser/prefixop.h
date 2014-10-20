@@ -29,7 +29,7 @@ class PrefixOp: public Node, public Typed
 {
 meta_NODE
 public:
-    PrefixOp(AST *ast, const StackFrame *start, size_t size);
+    PrefixOp(const StackFrame *start, size_t size);
 
     enum Operation {
         // arithmetic

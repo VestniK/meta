@@ -28,7 +28,7 @@ class Return: public Node
 {
 meta_NODE
 public:
-    Return(AST *ast, const StackFrame *reduction, size_t size);
+    Return(const StackFrame *reduction, size_t size);
 };
 
 }

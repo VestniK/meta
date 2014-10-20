@@ -28,7 +28,7 @@ class CodeBlock: public Node
 {
 meta_NODE
 public:
-    CodeBlock(AST *ast, const StackFrame *start, size_t size);
+    CodeBlock(const StackFrame *start, size_t size);
 };
 
 } // namespace meta

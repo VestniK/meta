@@ -31,7 +31,7 @@ class VarDecl: public meta::Node, public Typed
 {
 meta_NODE
 public:
-    VarDecl(AST *ast, const StackFrame* start, size_t size);
+    VarDecl(const StackFrame* start, size_t size);
 
     enum Flags
     {

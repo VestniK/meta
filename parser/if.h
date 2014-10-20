@@ -28,7 +28,7 @@ class If: public Node
 {
 meta_NODE
 public:
-    If(AST *ast, const StackFrame *reduction, size_t size);
+    If(const StackFrame *reduction, size_t size);
 
 private:
 };

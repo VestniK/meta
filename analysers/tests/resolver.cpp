@@ -24,8 +24,8 @@
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
 
+#include "parser/actions.h"
 #include "parser/metaparser.h"
-#include "parser/parse.h"
 
 namespace {
 
@@ -38,10 +38,14 @@ public:
 
 TEST_P(Resolver, resolveErrors) {
     const char *input = GetParam();
-    std::unique_ptr<meta::AST> ast;
-    ASSERT_NO_THROW(ast = std::unique_ptr<meta::AST>(parse(input, strlen(input))));
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
     try {
-        analysers::resolve(ast.get());
+        analysers::resolve(ast);
         ASSERT_TRUE(false) << "Input code contains symbol resolvation errors which were not found";
     } catch (analysers::SemanticError &err) {
         ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << std::string(err.tokens());

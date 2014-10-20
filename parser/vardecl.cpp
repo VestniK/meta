@@ -23,7 +23,7 @@
 
 namespace meta {
 
-VarDecl::VarDecl(AST *ast, const StackFrame* start, size_t size): Node(ast, start, size), mFlags(0)
+VarDecl::VarDecl(const StackFrame* start, size_t size): Node(start, size), mFlags(0)
 {
     assert(size == 3);
     mTypeName = start[0].tokens;

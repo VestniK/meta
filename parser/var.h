@@ -30,7 +30,7 @@ class Var: public Node
 {
 meta_NODE
 public:
-    Var(AST *ast, const StackFrame *start, size_t size);
+    Var(const StackFrame *start, size_t size);
 
     const std::string &name() const {return mName;}
     meta::VarDecl *declaration() {return mDeclaration;}
