@@ -30,6 +30,10 @@ meta_NODE
 public:
     If(const StackFrame *reduction, size_t size);
 
+    Node *condition();
+    Node *thenBlock();
+    Node *elseBlock();
+
 private:
 };
 

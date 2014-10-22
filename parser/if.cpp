@@ -25,7 +25,25 @@ namespace meta {
 
 If::If(const StackFrame *reduction, size_t size): Node(reduction, size)
 {
+}
 
+Node *If::condition()
+{
+    assert(children.size() > 1);
+    return children[0];
+}
+
+Node *If::thenBlock()
+{
+    assert(children.size() > 1);
+    return children[1];
+}
+
+Node *If::elseBlock()
+{
+    if (children.size() < 3)
+        return nullptr;
+    return children[2];
 }
 
 } // namespace meta

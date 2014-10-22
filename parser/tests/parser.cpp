@@ -27,6 +27,7 @@
 #include "parser/actions.h"
 #include "parser/assigment.h"
 #include "parser/binaryop.h"
+#include "parser/call.h"
 #include "parser/codeblock.h"
 #include "parser/if.h"
 #include "parser/function.h"
@@ -241,11 +242,12 @@ TEST(Parser, assignAsExpr) {
 TEST(Parser, ifStatement) {
     const char *input = R"META(
         package test;
-        int abs(int x)
+
+        void foo0(int x)
         {
             if (x < 0)
-                return -x;
-            return x;
+                foo1(x);
+            foo2(x);
         }
     )META";
     meta::Parser parser;
@@ -256,24 +258,29 @@ TEST(Parser, ifStatement) {
     auto ast = parser.ast();
     auto ifs = ast->getChildren<meta::If>(-1);
     ASSERT_EQ(ifs.size(), 1);
-    auto returns = ast->getChildren<meta::Return>(-1);
-    auto condRets = ifs[0]->getChildren<meta::Return>(-1);
-    ASSERT_EQ(returns.size(), 2);
-    ASSERT_EQ(condRets.size(), 1);
-    ASSERT_EQ(condRets[0], returns[0]);
-    ASSERT_NE(condRets[0], returns[1]);
+    auto calls = ast->getChildren<meta::Call>(-1);
+    ASSERT_EQ(calls.size(), 2);
+    ASSERT_EQ(calls[0]->functionName(), "foo1");
+    ASSERT_EQ(calls[1]->functionName(), "foo2");
+
+    ASSERT_NE(ifs[0]->condition(), nullptr);
+    ASSERT_NE(ifs[0]->thenBlock(), nullptr);
+    ASSERT_EQ(ifs[0]->elseBlock(), nullptr);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1)[0], calls[0]);
 }
 
 TEST(Parser, ifElseStatement) {
     const char *input = R"META(
         package test;
-        int abs(int x)
+
+        void foo0(int x)
         {
             if (x < 0)
-                return -x;
+                foo1(x);
             else
-                return x;
-            return 0;
+                foo2(x);
+            foo3(x);
         }
     )META";
     meta::Parser parser;
@@ -284,29 +291,32 @@ TEST(Parser, ifElseStatement) {
     auto ast = parser.ast();
     auto ifs = ast->getChildren<meta::If>(-1);
     ASSERT_EQ(ifs.size(), 1);
-    auto returns = ast->getChildren<meta::Return>(-1);
-    auto condRets = ifs[0]->getChildren<meta::Return>(-1);
-    ASSERT_EQ(returns.size(), 3);
-    ASSERT_EQ(condRets.size(), 2);
+    auto calls = ast->getChildren<meta::Call>(-1);
+    ASSERT_EQ(calls.size(), 3);
+    ASSERT_EQ(calls[0]->functionName(), "foo1");
+    ASSERT_EQ(calls[1]->functionName(), "foo2");
+    ASSERT_EQ(calls[2]->functionName(), "foo3");
 
-    ASSERT_EQ(condRets[0], returns[0]);
-    ASSERT_NE(condRets[0], returns[2]);
-
-    ASSERT_EQ(condRets[1], returns[1]);
-    ASSERT_NE(condRets[1], returns[2]);
+    ASSERT_NE(ifs[0]->condition(), nullptr);
+    ASSERT_NE(ifs[0]->thenBlock(), nullptr);
+    ASSERT_NE(ifs[0]->elseBlock(), nullptr);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1)[0], calls[0]);
+    ASSERT_EQ(ifs[0]->elseBlock()->getChildren<meta::Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->elseBlock()->getChildren<meta::Call>(-1)[0], calls[1]);
 }
 
 TEST(Parser, ifBlockStatement) {
     const char *input = R"META(
         package test;
-        int foo(int x)
+        int foo0(int x)
         {
             int y = x;
             if (x < 0) {
                 y = -x;
-                y = y + 1;
+                y = foo1(y);
             }
-            y = y + 10;
+            y = foo2(y);
             return y;
         }
     )META";
@@ -318,32 +328,32 @@ TEST(Parser, ifBlockStatement) {
     auto ast = parser.ast();
     auto ifs = ast->getChildren<meta::If>(-1);
     ASSERT_EQ(ifs.size(), 1);
-    auto assigns = ast->getChildren<meta::Assigment>(-1);
-    auto condAssigns = ifs[0]->getChildren<meta::Assigment>(-1);
-    ASSERT_EQ(assigns.size(), 3);
-    ASSERT_EQ(condAssigns.size(), 2);
+    auto calls = ast->getChildren<meta::Call>(-1);
+    ASSERT_EQ(calls.size(), 2);
+    ASSERT_EQ(calls[0]->functionName(), "foo1");
+    ASSERT_EQ(calls[1]->functionName(), "foo2");
 
-    ASSERT_EQ(condAssigns[0], assigns[0]);
-    ASSERT_NE(condAssigns[0], assigns[2]);
-
-    ASSERT_EQ(condAssigns[1], assigns[1]);
-    ASSERT_NE(condAssigns[1], assigns[2]);
+    ASSERT_NE(ifs[0]->condition(), nullptr);
+    ASSERT_NE(ifs[0]->thenBlock(), nullptr);
+    ASSERT_EQ(ifs[0]->elseBlock(), nullptr);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1)[0], calls[0]);
 }
 
 TEST(Parser, ifElseBlockStatement) {
     const char *input = R"META(
         package test;
-        int foo(int x)
+        int foo0(int x)
         {
             int y = x;
             if (x < 0) {
                 y = -x;
-                y = y + 1;
+                y = foo1(y);
             } else {
                 y = y + 2;
-                y = y/2;
+                y = foo2(y);
             }
-            y = y + 10;
+            y = foo3(y);
             return y;
         }
     )META";
@@ -355,15 +365,19 @@ TEST(Parser, ifElseBlockStatement) {
     auto ast = parser.ast();
     auto ifs = ast->getChildren<meta::If>(-1);
     ASSERT_EQ(ifs.size(), 1);
-    auto assigns = ast->getChildren<meta::Assigment>(-1);
-    auto condAssigns = ifs[0]->getChildren<meta::Assigment>(-1);
-    ASSERT_EQ(assigns.size(), 5);
-    ASSERT_EQ(condAssigns.size(), 4);
+    auto calls = ast->getChildren<meta::Call>(-1);
+    ASSERT_EQ(calls.size(), 3);
+    ASSERT_EQ(calls[0]->functionName(), "foo1");
+    ASSERT_EQ(calls[1]->functionName(), "foo2");
+    ASSERT_EQ(calls[2]->functionName(), "foo3");
 
-    for (size_t pos = 0; pos < condAssigns.size(); ++pos) {
-        ASSERT_EQ(condAssigns[pos], assigns[pos]);
-        ASSERT_NE(condAssigns[pos], assigns[assigns.size() - 1]);
-    }
+    ASSERT_NE(ifs[0]->condition(), nullptr);
+    ASSERT_NE(ifs[0]->thenBlock(), nullptr);
+    ASSERT_NE(ifs[0]->elseBlock(), nullptr);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1)[0], calls[0]);
+    ASSERT_EQ(ifs[0]->elseBlock()->getChildren<meta::Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->elseBlock()->getChildren<meta::Call>(-1)[0], calls[1]);
 }
 
 namespace {
