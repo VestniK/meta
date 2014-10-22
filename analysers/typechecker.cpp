@@ -93,6 +93,15 @@ public:
             );
     }
 
+    virtual void ifCond(meta::If *node, const typesystem::Type *val) override
+    {
+        if (!val->is(typesystem::Type::boolean))
+            throw SemanticError(node->condition(), "If statement can't work with condition of type '%s'", val->name().c_str());
+        node->thenBlock()->walk(this);
+        if (node->elseBlock())
+            node->elseBlock()->walk(this);
+    }
+
     virtual void returnValue(meta::Return *node, const typesystem::Type *val) override
     {
         if (mCurrFunc->type()->typeId() == typesystem::Type::Auto) {

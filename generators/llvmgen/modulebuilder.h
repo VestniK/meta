@@ -26,6 +26,7 @@ public:
     // Value consumers
     virtual void returnValue(meta::Return *node, llvm::Value *val) override;
     virtual void varInit(meta::VarDecl *node, llvm::Value *val) override;
+    virtual void ifCond (meta::If *node, llvm::Value *val) override;
     // Value providers
     virtual llvm::Value *number(meta::Number *node) override;
     virtual llvm::Value *literal(meta::Literal *node) override;

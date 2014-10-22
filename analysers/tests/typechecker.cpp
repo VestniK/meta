@@ -128,9 +128,24 @@ INSTANTIATE_TEST_CASE_P(typeCheckAndDeduce, TypeCheker, ::testing::Values(
         NameTypeList({NameType("val", typesystem::Type::Bool)})
     ),
     TestData(
-        "package test; auto foo() {auto val = false; return val && true;}",
-             NameTypeList({NameType("foo", typesystem::Type::Bool)}),
-             NameTypeList({NameType("val", typesystem::Type::Bool)})
+        "package test; auto foo() {auto val = false; if (val) val = false; return val && true;}",
+         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
+         NameTypeList({NameType("val", typesystem::Type::Bool)})
+    ),
+    TestData(
+        "package test; auto foo() {auto val = false; if (val) {int x = 5; return x > 2;} return val && true;}",
+        NameTypeList({NameType("foo", typesystem::Type::Bool)}),
+        NameTypeList({NameType("val", typesystem::Type::Bool), NameType("x", typesystem::Type::Int)})
+    ),
+    TestData(
+        "package test; auto foo() {auto val = false; if (val) val = false; else return val || true; return val && true;}",
+         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
+         NameTypeList({NameType("val", typesystem::Type::Bool)})
+    ),
+    TestData(
+        "package test; auto foo() {auto val = false; if (val) {int x = 5; return x > 2;} else {int y = 7; val = val && y < 5;} return val && true;}",
+        NameTypeList({NameType("foo", typesystem::Type::Bool)}),
+        NameTypeList({NameType("val", typesystem::Type::Bool), NameType("x", typesystem::Type::Int), NameType("y", typesystem::Type::Int)})
     )
 ));
 
@@ -188,5 +203,13 @@ INSTANTIATE_TEST_CASE_P(inconsistentTypes, TypeChekerErrors, ::testing::Values(
     // Bool operations on nonbool
     "package test; auto foo(int x) {return \n!x;}",
     "package test; auto foo(int x, int y) {return \nx && y;}",
-    "package test; auto foo(int x, int y) {return \nx || y;}"
+    "package test; auto foo(int x, int y) {return \nx || y;}",
+    "package test; int foo(int x) {if (\nx) return 1; return 0;}",
+    // Types are checked inside if branches
+    "package test; bool foo(int x, int y) {if (true) return \nx && y; return false;}",
+    "package test; bool foo(int x, int y) {if (true) {auto z = x+y; return \nz && y;} return false;}",
+    "package test; bool foo(int x, int y) {if (true) return true; else return \nx && y; return false;}",
+    "package test; bool foo(int x, int y) {if (true) {auto res = x < y; return res;} else {return \nx && y;} return false;}",
+    "package test; bool foo(int x, int y) {if (true) return \nx && y; else return true; return false;}",
+    "package test; bool foo(int x, int y) {if (true) {auto z = x+y; return \nz && y;} else {auto res = x != y; return res;} return false;}"
 ));

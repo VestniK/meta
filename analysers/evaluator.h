@@ -36,6 +36,7 @@ public:
     // Value consumers
     virtual void returnValue(meta::Return *node, Value val) = 0;
     virtual void varInit(meta::VarDecl *node, Value val) = 0;
+    virtual void ifCond(meta::If *node, Value val) = 0;
     // Value providers
     virtual Value number(meta::Number *node) = 0;
     virtual Value literal(meta::Literal *node) = 0;
@@ -57,6 +58,17 @@ public:
         returnValue(node, mStack.top()[0]);
         mStack.pop();
         assert(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
+    }
+    virtual bool visit(meta::If *node) override
+    {
+        mStack.push(std::vector<Value>());
+        node->condition()->walk(this);
+        assert(mStack.top().size() == 1);
+        auto val = mStack.top()[0];
+        mStack.pop(); // clean stack to be able to assert stack corruption in other statement visit/leave functions
+        ifCond(node, val);
+        assert(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
+        return false; // do not evaluate both then and else branches they must be evaluated in subclass ifCond implementation
     }
     virtual bool visit(meta::VarDecl *node) override
     {

@@ -40,6 +40,11 @@ void ModuleBuilder::returnValue(meta::Return *node, llvm::Value *val)
     builder.CreateRet(val);
 }
 
+void ModuleBuilder::ifCond(meta::If *, llvm::Value *)
+{
+    // TODO: implement
+}
+
 llvm::Value *ModuleBuilder::call(meta::Call *node, const std::vector<llvm::Value*> &args)
 {
     llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node->function()));
