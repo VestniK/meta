@@ -36,7 +36,7 @@ Node *If::condition()
 Node *If::thenBlock()
 {
     assert(children.size() > 1);
-    return children[1];
+    return children[1]; // TODO: can we have empty then block???: "if (cond) ; else doSmth();" in this case children[1] is the else block!!!
 }
 
 Node *If::elseBlock()

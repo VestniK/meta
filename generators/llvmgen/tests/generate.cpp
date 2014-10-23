@@ -36,6 +36,8 @@ int test_varsUsage(int x);
 
 int test_assigment(int x);
 
+int test_abs(int x);
+
 bool test_less(int x, int y);
 
 bool test_bound(int left, int right, int val);
@@ -82,6 +84,14 @@ int assigment(int x)
     int b;
     int c = a = b = x + 5;
     return a + b + c;
+}
+
+int abs(int x)
+{
+    auto res = x;
+    if (x < 0)
+        res = -x;
+    return res;
 }
 
 bool less(int x, int y)
@@ -142,6 +152,12 @@ TEST(BuilderTests, assigment)
 {
     for (int x = -50; x < 50; ++x)
         ASSERT_EQ(test_assigment(x), local::assigment(x));
+}
+
+TEST(BuilderTests, abs)
+{
+    for (int x = -50; x < 50; ++x)
+        ASSERT_EQ(test_abs(x), local::abs(x));
 }
 
 TEST(BuilderTests, boolFuncs)

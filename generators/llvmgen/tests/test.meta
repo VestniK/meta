@@ -53,6 +53,14 @@ int varsUsage(int x)
     return x + y + z;
 }
 
+int abs(int x)
+{
+    auto res = x;
+    if (x < 0)
+        res = -x;
+    return res;
+}
+
 int assigment(int x)
 {
     int a;

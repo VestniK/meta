@@ -37,12 +37,36 @@ bool ModuleBuilder::visit(meta::Function *node)
 
 void ModuleBuilder::returnValue(meta::Return *node, llvm::Value *val)
 {
-    builder.CreateRet(val);
+    builder.CreateRet(val); // TODO: rest of the current block should be skipped. Otherwise there will be segfault
 }
 
-void ModuleBuilder::ifCond(meta::If *, llvm::Value *)
+void ModuleBuilder::ifCond(meta::If *node, llvm::Value *val)
 {
-    // TODO: implement
+    if (!node->thenBlock() && !node->elseBlock()) // "if (cond) ;" || "if (cond) ; else ;" no additional generation needed
+        return;
+    llvm::Function *func = builder.GetInsertBlock()->getParent();
+    auto mergeBB = llvm::BasicBlock::Create(env.context, "merge");
+    auto thenBB = node->thenBlock() ? llvm::BasicBlock::Create(env.context, "then") : mergeBB;
+    auto elseBB = node->elseBlock() ? llvm::BasicBlock::Create(env.context, "else") : mergeBB;
+
+    builder.CreateCondBr(val, thenBB, elseBB);
+
+    if (node->thenBlock()) {
+        func->getBasicBlockList().push_back(thenBB);
+        builder.SetInsertPoint(thenBB);
+        node->thenBlock()->walk(this);
+        // TODO: leads to segfaults in llvm tools ifblocks ends with return: "if (cond) return val;" due to 2 exit instructions in the block
+        builder.CreateBr(mergeBB);
+    }
+    if (node->elseBlock()) {
+        func->getBasicBlockList().push_back(elseBB);
+        builder.SetInsertPoint(elseBB);
+        node->elseBlock()->walk(this);
+        // TODO: same as for then. return statement in the end of block leads to segfaults in the llvm tools
+        builder.CreateBr(mergeBB);
+    }
+    func->getBasicBlockList().push_back(mergeBB);
+    builder.SetInsertPoint(mergeBB);
 }
 
 llvm::Value *ModuleBuilder::call(meta::Call *node, const std::vector<llvm::Value*> &args)
