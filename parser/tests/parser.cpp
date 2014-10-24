@@ -270,6 +270,34 @@ TEST(Parser, ifStatement) {
     ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1)[0], calls[0]);
 }
 
+TEST(Parser, ifWithEmptyStatement) {
+    const char *input = R"META(
+        package test;
+
+        void foo0(int x)
+        {
+            if (x < 0)
+                ;
+            foo1(x);
+        }
+    )META";
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
+    auto ifs = ast->getChildren<meta::If>(-1);
+    ASSERT_EQ(ifs.size(), 1);
+    auto calls = ast->getChildren<meta::Call>(-1);
+    ASSERT_EQ(calls.size(), 1);
+    ASSERT_EQ(calls[0]->functionName(), "foo1");
+
+    ASSERT_NE(ifs[0]->condition(), nullptr);
+    ASSERT_EQ(ifs[0]->thenBlock(), nullptr);
+    ASSERT_EQ(ifs[0]->elseBlock(), nullptr);
+}
+
 TEST(Parser, ifElseStatement) {
     const char *input = R"META(
         package test;
@@ -304,6 +332,69 @@ TEST(Parser, ifElseStatement) {
     ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1)[0], calls[0]);
     ASSERT_EQ(ifs[0]->elseBlock()->getChildren<meta::Call>(-1).size(), 1);
     ASSERT_EQ(ifs[0]->elseBlock()->getChildren<meta::Call>(-1)[0], calls[1]);
+}
+
+TEST(Parser, ifElseEmptyStatement) {
+    const char *input = R"META(
+        package test;
+
+        void foo0(int x)
+        {
+            if (x < 0)
+                foo1(x);
+            else
+                ;
+            foo2(x);
+        }
+    )META";
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
+    auto ifs = ast->getChildren<meta::If>(-1);
+    ASSERT_EQ(ifs.size(), 1);
+    auto calls = ast->getChildren<meta::Call>(-1);
+    ASSERT_EQ(calls.size(), 2);
+    ASSERT_EQ(calls[0]->functionName(), "foo1");
+    ASSERT_EQ(calls[1]->functionName(), "foo2");
+
+    ASSERT_NE(ifs[0]->condition(), nullptr);
+    ASSERT_NE(ifs[0]->thenBlock(), nullptr);
+    ASSERT_EQ(ifs[0]->elseBlock(), nullptr);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<meta::Call>(-1)[0], calls[0]);
+}
+
+TEST(Parser, ifElseBothEmptyStatements) {
+    const char *input = R"META(
+        package test;
+
+        void foo0(int x)
+        {
+            if (x < 0)
+                ;
+            else
+                ;
+            foo1(x);
+        }
+    )META";
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
+    auto ifs = ast->getChildren<meta::If>(-1);
+    ASSERT_EQ(ifs.size(), 1);
+    auto calls = ast->getChildren<meta::Call>(-1);
+    ASSERT_EQ(calls.size(), 1);
+    ASSERT_EQ(calls[0]->functionName(), "foo1");
+
+    ASSERT_NE(ifs[0]->condition(), nullptr);
+    ASSERT_EQ(ifs[0]->thenBlock(), nullptr);
+    ASSERT_EQ(ifs[0]->elseBlock(), nullptr);
 }
 
 TEST(Parser, ifBlockStatement) {

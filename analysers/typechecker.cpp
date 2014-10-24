@@ -97,7 +97,8 @@ public:
     {
         if (!val->is(typesystem::Type::boolean))
             throw SemanticError(node->condition(), "If statement can't work with condition of type '%s'", val->name().c_str());
-        node->thenBlock()->walk(this);
+        if (node->thenBlock())
+            node->thenBlock()->walk(this);
         if (node->elseBlock())
             node->elseBlock()->walk(this);
     }

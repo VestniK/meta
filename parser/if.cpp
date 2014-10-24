@@ -25,25 +25,23 @@ namespace meta {
 
 If::If(const StackFrame *reduction, size_t size): Node(reduction, size)
 {
+    assert(size == 6);
+    const size_t thenStatementPos = 4;
+    const size_t elseStatementPos = 5;
+    if (!reduction[thenStatementPos].nodes.empty()) {
+        assert(reduction[thenStatementPos].nodes.size() == 1);
+        mThen = reduction[thenStatementPos].nodes[0];
+    }
+    if (!reduction[elseStatementPos].nodes.empty()) {
+        assert(reduction[elseStatementPos].nodes.size() == 1);
+        mElse = reduction[elseStatementPos].nodes[0];
+    }
 }
 
 Node *If::condition()
 {
-    assert(children.size() > 1);
+    assert(!children.empty());
     return children[0];
-}
-
-Node *If::thenBlock()
-{
-    assert(children.size() > 1);
-    return children[1]; // TODO: can we have empty then block???: "if (cond) ; else doSmth();" in this case children[1] is the else block!!!
-}
-
-Node *If::elseBlock()
-{
-    if (children.size() < 3)
-        return nullptr;
-    return children[2];
 }
 
 } // namespace meta

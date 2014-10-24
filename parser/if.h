@@ -31,10 +31,12 @@ public:
     If(const StackFrame *reduction, size_t size);
 
     Node *condition();
-    Node *thenBlock();
-    Node *elseBlock();
+    Node *thenBlock() {return mThen;}
+    Node *elseBlock() {return mElse;}
 
 private:
+    Node *mThen = nullptr;
+    Node *mElse = nullptr;
 };
 
 } // namespace meta
