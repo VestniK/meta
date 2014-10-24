@@ -1,4 +1,5 @@
 set(SRC
+  reachabilitychecker.cpp
   resolver.cpp
   semanticerror.cpp
   typechecker.cpp

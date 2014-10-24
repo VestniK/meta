@@ -30,6 +30,7 @@
 
 #include "typesystem/typesstore.h"
 
+#include "analysers/reachabilitychecker.h"
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
 #include "analysers/typechecker.h"
@@ -58,6 +59,7 @@ int main(int argc, char **argv)
             parser.parse(input[i].data(), input[i].size());
         auto ast = parser.ast();
         // analyse
+        analysers::checkReachability(ast);
         analysers::resolve(ast);
         typesystem::TypesStore typestore;
         analysers::checkTypes(ast, typestore);
