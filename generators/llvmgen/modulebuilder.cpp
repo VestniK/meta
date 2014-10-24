@@ -17,6 +17,7 @@ namespace llvmgen {
 
 bool ModuleBuilder::visit(meta::Function *node)
 {
+    mCurrBlockTerminated = false;
     mVarMap.clear();
     llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node));
     if (!func)
@@ -37,7 +38,8 @@ bool ModuleBuilder::visit(meta::Function *node)
 
 void ModuleBuilder::returnValue(meta::Return *node, llvm::Value *val)
 {
-    builder.CreateRet(val); // TODO: rest of the current block should be skipped. Otherwise there will be segfault
+    builder.CreateRet(val);
+    mCurrBlockTerminated = true;
 }
 
 void ModuleBuilder::ifCond(meta::If *node, llvm::Value *val)
@@ -55,15 +57,17 @@ void ModuleBuilder::ifCond(meta::If *node, llvm::Value *val)
         func->getBasicBlockList().push_back(thenBB);
         builder.SetInsertPoint(thenBB);
         node->thenBlock()->walk(this);
-        // TODO: leads to segfaults in llvm tools ifblocks ends with return: "if (cond) return val;" due to 2 exit instructions in the block
-        builder.CreateBr(mergeBB);
+        if (!mCurrBlockTerminated)
+            builder.CreateBr(mergeBB);
+        mCurrBlockTerminated = false;
     }
     if (node->elseBlock()) {
         func->getBasicBlockList().push_back(elseBB);
         builder.SetInsertPoint(elseBB);
         node->elseBlock()->walk(this);
-        // TODO: same as for then. return statement in the end of block leads to segfaults in the llvm tools
-        builder.CreateBr(mergeBB);
+        if (!mCurrBlockTerminated)
+            builder.CreateBr(mergeBB);
+        mCurrBlockTerminated = false;
     }
     func->getBasicBlockList().push_back(mergeBB);
     builder.SetInsertPoint(mergeBB);

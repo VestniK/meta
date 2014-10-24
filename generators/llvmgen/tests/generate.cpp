@@ -38,6 +38,8 @@ int test_assigment(int x);
 
 int test_abs(int x);
 
+int test_sign(int x);
+
 bool test_less(int x, int y);
 
 bool test_bound(int left, int right, int val);
@@ -92,6 +94,15 @@ int abs(int x)
     if (x < 0)
         res = -x;
     return res;
+}
+
+int sign(int x)
+{
+    if (x < 0)
+        return -1;
+    else if (x > 0)
+        return +1;
+    return 0;
 }
 
 bool less(int x, int y)
@@ -158,6 +169,12 @@ TEST(BuilderTests, abs)
 {
     for (int x = -50; x < 50; ++x)
         ASSERT_EQ(test_abs(x), local::abs(x));
+}
+
+TEST(BuilderTests, sign)
+{
+    for (int x = -50; x < 50; ++x)
+        ASSERT_EQ(test_sign(x), local::sign(x));
 }
 
 TEST(BuilderTests, boolFuncs)

@@ -50,6 +50,7 @@ private:
     Environment &env;
     std::map<meta::VarDecl *, llvm::Value *> mVarMap;
     llvm::IRBuilder<> builder;
+    bool mCurrBlockTerminated = false;
 };
 
 } // namespace llvmgen
