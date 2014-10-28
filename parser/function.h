@@ -24,6 +24,7 @@
 
 #include "parser/metaparser.h"
 #include "parser/typed.h"
+#include "parser/visibility.h"
 
 namespace meta {
 
@@ -38,10 +39,14 @@ public:
     const std::string &package() const {return mPackage;}
     void setPackage(const std::string &pkg) {mPackage = pkg;}
     std::vector<VarDecl*> args();
+    Visibility visibility() const {return mVisibility;}
+    void setVisibility(Visibility val) {mVisibility = val;}
+
 private:
     std::string mPackage;
     std::string mName;
     std::string mRetType;
+    Visibility mVisibility = Visibility::Default;
 };
 
 } // namespace meta

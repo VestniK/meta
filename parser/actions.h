@@ -23,15 +23,18 @@
 #include <string>
 
 #include "parser/metaparser.h"
+#include "parser/visibility.h"
 
 class Actions : public meta::ParseActions, public meta::NodeActions
 {
 public:
     virtual void package(const meta::StackFrame *reduction, size_t size) override;
+    virtual void changeVisibility(const meta::StackFrame *reduction, size_t size) override;
     virtual void onFunction(meta::Function *node) override;
 
 private:
     std::string mPackage;
+    meta::Visibility mDefaultVisibility = meta::Visibility::Private;
 };
 
 #endif // ACTIONS_H

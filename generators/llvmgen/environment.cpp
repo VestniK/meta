@@ -47,15 +47,16 @@ llvm::Function *Environment::addFunction(meta::Function *func)
     const auto args = func->args();
     std::vector<llvm::Type *> argTypes;
     for (const auto arg : args) {
+        assert(arg->type() != nullptr); // must be set during type integryty checks
         auto type = getType(arg->type());
-        if (type == nullptr)
-            throw std::runtime_error(std::string("Argument ") + arg->name() + " of the function " + func->name() + " is of unknown type " + arg->typeName()); /// @todo missing code position info
+        assert(type != nullptr); // all known types should be mapped to llvm types
         argTypes.push_back(type);
     }
     auto rettype = getType(func->type());
     assert(rettype != nullptr);
     llvm::FunctionType *funcType = llvm::FunctionType::get(rettype, argTypes, false);
-    llvm::Function *prototype = llvm::Function::Create(funcType, llvm::GlobalValue::ExternalLinkage, generators::abi::mangledName(func), module.get());
+    const llvm::GlobalValue::LinkageTypes linkType = func->visibility() == meta::Visibility::Export ? llvm::GlobalValue::ExternalLinkage : llvm::GlobalValue::PrivateLinkage;
+    llvm::Function *prototype = llvm::Function::Create(funcType, linkType, generators::abi::mangledName(func), module.get());
     llvm::Function::arg_iterator it = prototype->arg_begin();
     for (const auto arg : args) {
         it->setName(arg->name());

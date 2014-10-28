@@ -2,6 +2,11 @@
 trueVal 'true';
 falseVal 'false';
 
+Export 'export';
+Public 'public';
+Protected 'protected';
+Private 'private';
+
 addOp '+';
 subOp '-';
 mulOp '*';
@@ -27,11 +32,19 @@ orOp '||';
 // Grammar rules
 Goal -> Package <eof>
 
-Package -> Header [Function]...
+Package -> Header [Declaration | VisibilityChange]...
 
 Header -> 'package' (<qname> | <identifier>) ';' => package
 
-Function -> <identifier> <identifier> '(' [VarDecl]/','... ')' CodeBlock *> Function
+VisibilityChange -> Visibility ':' => changeVisibility
+Visibility -> 'export'
+           -> 'public'
+           -> 'protected'
+           -> 'private'
+
+Declaration -> Function
+
+Function -> [Visibility] <identifier> <identifier> '(' [VarDecl]/','... ')' CodeBlock *> Function
 CodeBlock -> '{' (Statement)... '}' +> CodeBlock
 VarDecl -> <identifier> <identifier> ['=' Expr] +> VarDecl
 

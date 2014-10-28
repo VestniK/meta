@@ -26,8 +26,6 @@ int test_constFoo();
 
 int test_poly(int x);
 
-int test_dist(int x, int y);
-
 int test_distCall(int x);
 
 int test_distCallFull(int x);
@@ -135,14 +133,6 @@ TEST(BuilderTests, oneArg)
 {
     for (int i = -50; i < 50; ++i)
         ASSERT_EQ(test_poly(i), local::poly(i));
-}
-
-TEST(BuilderTests, twoArgs)
-{
-    for (int x = -5; x < 5; ++x) {
-        for (int y = -5; y < 5; ++y)
-            ASSERT_EQ(test_dist(x, y), local::dist(x, y));
-    }
 }
 
 TEST(BuilderTests, functionWithCall)

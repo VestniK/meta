@@ -24,15 +24,19 @@
 
 namespace meta {
 
-Function::Function(const StackFrame* start, size_t size): Node(start, size)
+Function::Function(const StackFrame *reduction, size_t size): Node(reduction, size)
 {
-    static const size_t typePos = 0;
-    static const size_t namePos = 1;
-    static const size_t argsPos = 3;
+    static const size_t visibilityPos = 0;
+    static const size_t typePos = 1;
+    static const size_t namePos = 2;
+    static const size_t argsPos = 4;
     assert(size > argsPos + 1);
-    mRetType = start[typePos].tokens;
-    mName = start[namePos].tokens;
-    for (auto arg : start[argsPos].nodes)
+    auto visTokenIt = reduction[visibilityPos].tokens.begin();
+    if (visTokenIt != reduction[visibilityPos].tokens.end())
+        mVisibility = fromToken(*visTokenIt);
+    mRetType = reduction[typePos].tokens;
+    mName = reduction[namePos].tokens;
+    for (auto arg : reduction[argsPos].nodes)
         walkTopDown<meta::VarDecl>(*arg, [] (meta::VarDecl *node) {node->set(meta::VarDecl::argument); return false;}, 0);
 }
 

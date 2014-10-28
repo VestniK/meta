@@ -27,7 +27,17 @@ void Actions::package(const meta::StackFrame *reduction, size_t size)
     mPackage = reduction[1].tokens;
 }
 
+void Actions::changeVisibility(const meta::StackFrame *reduction, size_t size)
+{
+    assert(size == 2);
+    assert(reduction[0].tokens.begin() != reduction[0].tokens.end());
+    auto token = *(reduction[0].tokens.begin());
+    mDefaultVisibility = meta::fromToken(token);
+}
+
 void Actions::onFunction(meta::Function *node)
 {
     node->setPackage(mPackage);
+    if (node->visibility() == meta::Visibility::Default)
+        node->setVisibility(mDefaultVisibility);
 }

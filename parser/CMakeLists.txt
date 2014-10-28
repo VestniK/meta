@@ -18,6 +18,7 @@ set(SRC
   return.cpp
   var.cpp
   vardecl.cpp
+  visibility.cpp
 )
 
 lrstar_grammar(GRM_SRC meta SKEL c++11)
