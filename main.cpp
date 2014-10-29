@@ -45,18 +45,18 @@ int main(int argc, char **argv)
     }
     const enum ErrorVerbosity {silent, brief, lineMarked, expectedTerms, parserStack} verbosity = expectedTerms;
     try {
-        // read
+        // parse
         const int srcCount = argc - 2; // ommit argv[0] == 'self path' and argv[argc - 1] == 'output file'
         std::vector<char> input[srcCount];
-        for (int i = 0; i < srcCount; ++i)
-            readWholeFile(argv[i + 1], input[i]);
-        // parse
         meta::Parser parser;
         Actions act;
         parser.setParseActions(&act);
         parser.setNodeActions(&act);
-        for (int i = 0; i < srcCount; ++i)
+        for (int i = 0; i < srcCount; ++i) {
+            readWholeFile(argv[i + 1], input[i]);
+            parser.setSourcePath(argv[i + 1]);
             parser.parse(input[i].data(), input[i].size());
+        }
         auto ast = parser.ast();
         // analyse
         analysers::checkReachability(ast);
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
         gen->generate(ast, argv[srcCount + 1]);
     } catch(const meta::SyntaxError &err) {
         if (verbosity > silent)
-            std::cerr << argv[1] << ':' << err.token().line << ':' << err.token().column << ": " << err.what();
+            std::cerr << err.sourcePath() << ':' << err.token().line << ':' << err.token().column << ": " << err.what();
         if (verbosity == brief)
             std::cerr << std::endl;
         if (verbosity > brief) {
@@ -82,7 +82,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     } catch(const analysers::SemanticError &err) {
         if (verbosity > silent)
-            std::cerr << argv[1] << ':' << err.tokens().begin()->line << ':' << err.tokens().begin()->column << ": " << err.what() << (verbosity == brief ? "" : ":") << std::endl;
+            std::cerr << err.sourcePath() << ':' << err.tokens().begin()->line << ':' << err.tokens().begin()->column << ": " << err.what() << (verbosity == brief ? "" : ":") << std::endl;
         if (verbosity > brief) {
             std::cerr << err.tokens().lineStr() << "..." << std::endl;
             for (int i = 1; i < err.tokens().colnum(); ++i)

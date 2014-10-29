@@ -471,6 +471,35 @@ TEST(Parser, ifElseBlockStatement) {
     ASSERT_EQ(ifs[0]->elseBlock()->getChildren<meta::Call>(-1)[0], calls[1]);
 }
 
+TEST(Parser, multipleFiles) {
+    const char *src1 = "package test; int foo() {return 0;}";
+    const char *src2 = "package test; bool bar() {return false;}";
+
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    parser.setSourcePath("src1");
+    ASSERT_NO_THROW(parser.parse(src1, strlen(src1)));
+    parser.setSourcePath("src2");
+    ASSERT_NO_THROW(parser.parse(src2, strlen(src2)));
+
+    auto ast = parser.ast();
+    meta::Function *foo = nullptr;
+    meta::Function *bar = nullptr;
+    meta::walkTopDown<meta::Function>(*ast, [&foo, &bar](meta::Function *node) {
+        if (node->name() == "foo")
+            foo = node;
+        else if (node->name() == "bar")
+            bar = node;
+        return false;
+    });
+    ASSERT_NE(foo, nullptr);
+    ASSERT_EQ(foo->sourcePath(), "src1");
+    ASSERT_NE(bar, nullptr);
+    ASSERT_EQ(bar->sourcePath(), "src2");
+}
+
 namespace {
 
 struct TestData

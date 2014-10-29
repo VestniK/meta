@@ -41,11 +41,13 @@ public:
 
     virtual const char *what() const noexcept override;
     const meta::TokenSequence &tokens() const {return mTokens;}
+    const std::string &sourcePath() const {return mSrc;}
 
 private:
     std::string mMsg;
     std::string mErrContext;
     meta::TokenSequence mTokens;
+    std::string mSrc;
 };
 
 } // namespace analysers

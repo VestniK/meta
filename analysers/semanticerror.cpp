@@ -27,7 +27,7 @@
 namespace analysers {
 
 SemanticError::SemanticError(meta::Node *node, const char *format, ...):
-    mTokens(node->tokens())
+    mTokens(node->tokens()), mSrc(node->sourcePath())
 {
     va_list args;
     va_start(args, format);
