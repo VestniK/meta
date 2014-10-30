@@ -38,7 +38,7 @@ class ResolveVisitor: public meta::Visitor
 public:
     ResolveVisitor(meta::AST *ast)
     {
-        for (auto func : ast->getChildren<meta::Function>(0)) {
+        for (auto func : ast->getChildren<meta::Function>(1)) {
             auto res = mFunctions.insert(func);
             if (!res.second)
                 throw SemanticError(func, "Function '%s' redefinition", func->name().c_str());

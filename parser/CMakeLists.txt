@@ -12,10 +12,12 @@ set(SRC
   exprstatement.cpp
   function.cpp
   if.cpp
+  import.cpp
   literal.cpp
   number.cpp
   prefixop.cpp
   return.cpp
+  sourcefile.cpp
   var.cpp
   vardecl.cpp
   visibility.cpp

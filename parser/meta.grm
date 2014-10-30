@@ -1,4 +1,6 @@
 // Named const for useful terminals
+identifier <identifier>;
+
 trueVal 'true';
 falseVal 'false';
 
@@ -30,11 +32,16 @@ orOp '||';
 { '*' '/' } << // higher priority
 
 // Grammar rules
-Goal -> Package <eof>
+Goal -> Source <eof>
 
-Package -> Header [Declaration | VisibilityChange]...
+Source -> PackageHdr [Import]... [Declaration | VisibilityChange]... +> SourceFile
 
-Header -> 'package' (<qname> | <identifier>) ';' => package
+PackageHdr -> 'package' QualifiedName ';' => package
+
+QualifiedName -> <identifier>/'.'...
+
+Import -> 'import' QualifiedName ';' +> Import
+       -> 'import' QualifiedName as <identifier> ';' +> Import
 
 VisibilityChange -> Visibility ':' => changeVisibility
 Visibility -> 'export'

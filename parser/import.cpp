@@ -17,23 +17,26 @@
  *
  */
 
-#ifndef META_NODES_H
-#define META_NODES_H
+#include <cassert>
 
-#include "parser/assigment.h"
-#include "parser/binaryop.h"
-#include "parser/call.h"
-#include "parser/codeblock.h"
-#include "parser/exprstatement.h"
-#include "parser/function.h"
-#include "parser/if.h"
-#include "parser/import.h"
-#include "parser/literal.h"
-#include "parser/number.h"
-#include "parser/prefixop.h"
-#include "parser/return.h"
-#include "parser/sourcefile.h"
-#include "parser/var.h"
-#include "parser/vardecl.h"
+#include "import.h"
 
-#endif // META_NODES_H
+namespace meta {
+
+Import::Import(const StackFrame *reduction, size_t size): Node(reduction, size)
+{
+    assert(size == 3 || size == 5);
+    mTarget = reduction[1].tokens;
+    if (size == 3) {
+        Token lastName;
+        for (auto token : reduction[1].tokens) {
+            if (token.termNum == meta::identifier)
+                lastName = token;
+        }
+        mName = lastName;
+    } else if (size == 5)
+        mName = reduction[3].tokens;
+}
+
+} // namespace meta
+

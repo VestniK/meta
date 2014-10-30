@@ -17,23 +17,20 @@
  *
  */
 
-#ifndef META_NODES_H
-#define META_NODES_H
+#ifndef META_SOURCEFILE_H
+#define META_SOURCEFILE_H
 
-#include "parser/assigment.h"
-#include "parser/binaryop.h"
-#include "parser/call.h"
-#include "parser/codeblock.h"
-#include "parser/exprstatement.h"
-#include "parser/function.h"
-#include "parser/if.h"
-#include "parser/import.h"
-#include "parser/literal.h"
-#include "parser/number.h"
-#include "parser/prefixop.h"
-#include "parser/return.h"
-#include "parser/sourcefile.h"
-#include "parser/var.h"
-#include "parser/vardecl.h"
+#include "parser/metaparser.h"
 
-#endif // META_NODES_H
+namespace meta {
+
+class SourceFile: public Node
+{
+meta_NODE
+public:
+    SourceFile(const StackFrame *reduction, size_t size);
+};
+
+} // namespace meta
+
+#endif // META_SOURCEFILE_H

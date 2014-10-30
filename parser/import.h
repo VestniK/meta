@@ -17,23 +17,29 @@
  *
  */
 
-#ifndef META_NODES_H
-#define META_NODES_H
+#ifndef META_IMPORT_H
+#define META_IMPORT_H
 
-#include "parser/assigment.h"
-#include "parser/binaryop.h"
-#include "parser/call.h"
-#include "parser/codeblock.h"
-#include "parser/exprstatement.h"
-#include "parser/function.h"
-#include "parser/if.h"
-#include "parser/import.h"
-#include "parser/literal.h"
-#include "parser/number.h"
-#include "parser/prefixop.h"
-#include "parser/return.h"
-#include "parser/sourcefile.h"
-#include "parser/var.h"
-#include "parser/vardecl.h"
+#include <string>
 
-#endif // META_NODES_H
+#include "parser/metaparser.h"
+
+namespace meta {
+
+class Import: public Node
+{
+meta_NODE
+public:
+    Import(const StackFrame *reduction, size_t size);
+
+    const std::string &name() const {return mName;}
+    const std::string &target() const {return mTarget;}
+
+private:
+    std::string mTarget;
+    std::string mName;
+};
+
+} // namespace meta
+
+#endif // META_IMPORT_H

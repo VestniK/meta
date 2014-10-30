@@ -30,6 +30,7 @@
 #include "parser/call.h"
 #include "parser/codeblock.h"
 #include "parser/if.h"
+#include "parser/import.h"
 #include "parser/function.h"
 #include "parser/metaparser.h"
 #include "parser/return.h"
@@ -43,11 +44,27 @@ TEST(Parser, zeroParamFunc) {
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
     auto ast = parser.ast();
-    const auto functions = ast->getChildren<meta::Function>(0);
+    const auto functions = ast->getChildren<meta::Function>();
     ASSERT_EQ(functions.size(), 1);
     ASSERT_EQ(functions[0]->name(), "foo");
     ASSERT_EQ(functions[0]->package(), "test");
     ASSERT_EQ(functions[0]->args().size(), 0);
+}
+
+TEST(Parser, imports) {
+    const char *input = "package test; import pkg.bar; import pkg.subpkg.bar as bar1; int foo() {return 5;}";
+    meta::Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
+    const auto imports = ast->getChildren<meta::Import>(-1);
+    ASSERT_EQ(imports.size(), 2);
+    ASSERT_EQ(imports[0]->name(), "bar");
+    ASSERT_EQ(imports[0]->target(), "pkg.bar");
+    ASSERT_EQ(imports[1]->name(), "bar1");
+    ASSERT_EQ(imports[1]->target(), "pkg.subpkg.bar");
 }
 
 TEST(Parser, oneParamFunc) {
