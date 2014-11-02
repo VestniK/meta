@@ -62,9 +62,11 @@ TEST(Parser, imports) {
     const auto imports = ast->getChildren<meta::Import>(-1);
     ASSERT_EQ(imports.size(), 2);
     ASSERT_EQ(imports[0]->name(), "bar");
-    ASSERT_EQ(imports[0]->target(), "pkg.bar");
+    ASSERT_EQ(imports[0]->target(), "bar");
+    ASSERT_EQ(imports[0]->targetPackage(), "pkg");
     ASSERT_EQ(imports[1]->name(), "bar1");
-    ASSERT_EQ(imports[1]->target(), "pkg.subpkg.bar");
+    ASSERT_EQ(imports[1]->target(), "bar");
+    ASSERT_EQ(imports[1]->targetPackage(), "pkg.subpkg");
 }
 
 TEST(Parser, oneParamFunc) {

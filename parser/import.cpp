@@ -26,15 +26,17 @@ namespace meta {
 Import::Import(const StackFrame *reduction, size_t size): Node(reduction, size)
 {
     assert(size == 3 || size == 5);
-    mTarget = reduction[1].tokens;
-    if (size == 3) {
-        Token lastName;
-        for (auto token : reduction[1].tokens) {
-            if (token.termNum == meta::identifier)
-                lastName = token;
-        }
-        mName = lastName;
-    } else if (size == 5)
+    Token target;
+    TokenSequence package;
+    for (auto token : reduction[1].tokens) {
+        if (token.termNum != meta::identifier)
+            continue;
+        package.setLast(target);
+        target = token;
+    }
+    mName = mTarget = target;
+    mPackage = package;
+    if (size == 5)
         mName = reduction[3].tokens;
 }
 

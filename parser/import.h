@@ -33,9 +33,11 @@ public:
     Import(const StackFrame *reduction, size_t size);
 
     const std::string &name() const {return mName;}
+    const std::string &targetPackage() const {return mPackage;}
     const std::string &target() const {return mTarget;}
 
 private:
+    std::string mPackage;
     std::string mTarget;
     std::string mName;
 };
