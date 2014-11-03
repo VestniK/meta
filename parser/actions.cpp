@@ -20,6 +20,9 @@
 
 #include "parser/actions.h"
 #include "parser/function.h"
+#include "parser/sourcefile.h"
+
+namespace meta {
 
 void Actions::package(const meta::StackFrame *reduction, size_t size)
 {
@@ -40,4 +43,13 @@ void Actions::onFunction(meta::Function *node)
     node->setPackage(mPackage);
     if (node->visibility() == meta::Visibility::Default)
         node->setVisibility(mDefaultVisibility);
+    assert(mDictionary[mPackage].count(node->name()) == 0); /// @todo support for function overloads instead of assert here!!!
+    mDictionary[mPackage].insert({node->name(), node});
 }
+
+void Actions::onSourceFile(SourceFile *node)
+{
+    node->setPackage(mPackage);
+}
+
+} // namespace meta

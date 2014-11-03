@@ -61,12 +61,12 @@ public:
 TEST_P(TypeCheker, typeCheck) {
     auto param = GetParam();
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(param.src, strlen(param.src)));
     auto ast = parser.ast();
-    ASSERT_NO_THROW(analysers::resolve(ast));
+    ASSERT_NO_THROW(analysers::resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;
     ASSERT_NO_THROW(analysers::checkTypes(ast, typestore));
     auto functions = ast->getChildren<meta::Function>();
@@ -161,12 +161,12 @@ public:
 TEST_P(TypeChekerErrors, typeErrors) {
     const char *input = GetParam();
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
     auto ast = parser.ast();
-    ASSERT_NO_THROW(analysers::resolve(ast));
+    ASSERT_NO_THROW(analysers::resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;
     try {
         analysers::checkTypes(ast, typestore);

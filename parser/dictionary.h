@@ -17,26 +17,19 @@
  *
  */
 
-#ifndef META_SOURCEFILE_H
-#define META_SOURCEFILE_H
+#ifndef DICTIONARY_H
+#define DICTIONARY_H
 
-#include "parser/metaparser.h"
+#include <map>
+#include <string>
 
 namespace meta {
 
-class SourceFile: public Node
-{
-meta_NODE
-public:
-    SourceFile(const StackFrame *reduction, size_t size);
+class Function;
 
-    void setPackage(const std::string &val) {mPackage = val;}
-    const std::string &package() const {return mPackage;}
-
-private:
-    std::string mPackage;
-};
+typedef std::multimap<std::string, meta::Function*> DeclarationsDict;
+typedef std::map<std::string, DeclarationsDict> Dictionary;
 
 } // namespace meta
 
-#endif // META_SOURCEFILE_H
+#endif // DICTIONARY_H

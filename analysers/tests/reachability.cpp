@@ -37,7 +37,7 @@ public:
 TEST_P(Reachability, resolveErrors) {
     const char *input = GetParam();
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));

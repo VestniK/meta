@@ -34,7 +34,7 @@ orOp '||';
 // Grammar rules
 Goal -> Source <eof>
 
-Source -> PackageHdr [Import]... [Declaration | VisibilityChange]... +> SourceFile
+Source -> PackageHdr [Import]... [Declaration | VisibilityChange]... *> SourceFile
 
 PackageHdr -> 'package' QualifiedName ';' => package
 

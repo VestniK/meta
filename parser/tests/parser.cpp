@@ -39,7 +39,7 @@
 TEST(Parser, zeroParamFunc) {
     const char *input = "package test; int foo() {return 5;}";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -54,7 +54,7 @@ TEST(Parser, zeroParamFunc) {
 TEST(Parser, imports) {
     const char *input = "package test; import pkg.bar; import pkg.subpkg.bar as bar1; int foo() {return 5;}";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -72,7 +72,7 @@ TEST(Parser, imports) {
 TEST(Parser, oneParamFunc) {
     const char *input = "package test; int foo(int x) {return 5*x*x - 2*x + 3;}";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -90,7 +90,7 @@ TEST(Parser, oneParamFunc) {
 TEST(Parser, twoParamFunc) {
     const char *input = "package test; int foo(int x, int y) {return 5*x + 6/y;}";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -110,7 +110,7 @@ TEST(Parser, twoParamFunc) {
 TEST(Parser, twoFunc) {
     const char *input = "package test; int foo(int x) {return 5*x;}\nint bar(int x) {return x/5;}";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -136,7 +136,7 @@ TEST(Parser, twoFunc) {
 TEST(Parser, funcCall) {
     const char *input = "package test; int foo(int x) {return 5*x;}\nint bar(int y) {return 5*foo(y/5);}";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -162,7 +162,7 @@ TEST(Parser, funcCall) {
 TEST(Parser, emptyPackage) {
     const char *input = "package test.test;";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -174,7 +174,7 @@ TEST(Parser, emptyPackage) {
 TEST(Parser, funcRetType) {
     const char *input = "package example.test; int iFoo() {return 0;}\ndouble dFoo() {return 0;}";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -201,7 +201,7 @@ TEST(Parser, varTest) {
         }
     )META";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -235,7 +235,7 @@ TEST(Parser, assignAsExpr) {
         }
     )META";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -270,7 +270,7 @@ TEST(Parser, ifStatement) {
         }
     )META";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -301,7 +301,7 @@ TEST(Parser, ifWithEmptyStatement) {
         }
     )META";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -331,7 +331,7 @@ TEST(Parser, ifElseStatement) {
         }
     )META";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -367,7 +367,7 @@ TEST(Parser, ifElseEmptyStatement) {
         }
     )META";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -400,7 +400,7 @@ TEST(Parser, ifElseBothEmptyStatements) {
         }
     )META";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -431,7 +431,7 @@ TEST(Parser, ifBlockStatement) {
         }
     )META";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -468,7 +468,7 @@ TEST(Parser, ifElseBlockStatement) {
         }
     )META";
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
@@ -495,7 +495,7 @@ TEST(Parser, multipleFiles) {
     const char *src2 = "package test; bool bar() {return false;}";
 
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     parser.setSourcePath("src1");
@@ -539,7 +539,7 @@ TEST_P(Parser, binaryOp) {
     char input[strlen(tmplt) + strlen(data.opStr)];
     sprintf(input, tmplt, data.opStr);
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));

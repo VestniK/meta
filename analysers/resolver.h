@@ -20,13 +20,15 @@
 #ifndef RESOLVER_H
 #define RESOLVER_H
 
+#include "parser/dictionary.h"
+
 namespace meta {
 class AST;
 }
 
 namespace analysers {
 
-void resolve(meta::AST *ast);
+void resolve(meta::AST *ast, meta::Dictionary &dict);
 
 } // namespace analysers
 

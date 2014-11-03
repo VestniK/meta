@@ -17,14 +17,18 @@
  *
  */
 
+#include <cassert>
 #include <map>
 #include <set>
 #include <algorithm>
 
+#include "parser/actions.h"
 #include "parser/assigment.h"
 #include "parser/call.h"
 #include "parser/function.h"
+#include "parser/import.h"
 #include "parser/metaparser.h"
+#include "parser/sourcefile.h"
 #include "parser/var.h"
 #include "parser/vardecl.h"
 
@@ -33,33 +37,68 @@
 
 namespace analysers {
 
+namespace
+{
+
+inline
+bool isChildPackage(const std::string &subpkg, const std::string &parentpkg)
+{
+    /// @todo rewrite using meta::TokenSequence
+    if (parentpkg.length() > subpkg.length())
+        return false;
+    size_t pos = 0;
+    for (; pos < parentpkg.length(); ++pos) {
+        if (subpkg[pos] != parentpkg[pos])
+            return false;
+    }
+    return subpkg[pos] == '.';
+}
+
+}
+
 class ResolveVisitor: public meta::Visitor
 {
 public:
-    ResolveVisitor(meta::AST *ast)
+    ResolveVisitor(meta::AST *ast, meta::Dictionary &dict): mGlobalDict(dict)
     {
-        for (auto func : ast->getChildren<meta::Function>(1)) {
-            auto res = mFunctions.insert(func);
-            if (!res.second)
-                throw SemanticError(func, "Function '%s' redefinition", func->name().c_str());
+    }
+
+    virtual bool visit(meta::SourceFile *node) override
+    {
+        mCurrDecls.clear();
+        mCurrDecls = mGlobalDict[node->package()];
+        mCurrSrcPackage = node->package();
+        return true;
+    }
+
+    virtual void leave(meta::Import *node) override
+    {
+        if (node->targetPackage() == mCurrSrcPackage)
+            return;
+        for (auto it = mGlobalDict[node->targetPackage()].lower_bound(node->target()); it != mGlobalDict[node->targetPackage()].upper_bound(node->target()); ++it) {
+            meta::Function *func = it->second;
+            if (func->visibility() == meta::Visibility::Private)
+                throw SemanticError(node, "Can't import private declaration '%s.%s'", func->package().c_str(), func->name().c_str());
+            if (func->visibility() == meta::Visibility::Protected && !isChildPackage(mCurrSrcPackage, node->targetPackage()))
+                throw SemanticError(
+                    node, "Can't import protected declaration '%s.%s' from package '%s' which is not a subpackage of '%s'",
+                    func->package().c_str(), func->name().c_str(), mCurrSrcPackage.c_str(), node->targetPackage().c_str()
+                );
+            assert(mCurrDecls.count(node->name()) == 0); /// @todo support for function overloads instead of assert here!!!
+            mCurrDecls.insert({node->name(), it->second});
         }
     }
 
     virtual bool visit(meta::Call *node) override
     {
-        for (const auto func : mFunctions) {
-            if (node->functionName() != func->name())
-                continue;
-            node->setFunction(func);
-            break;
-        }
-        if (node->function() == nullptr)
+        auto it = mCurrDecls.lower_bound(node->functionName());
+        if (it == mCurrDecls.end())
             throw SemanticError(node, "Unresolved function call '%s'", node->functionName().c_str());
+        node->setFunction(it->second); /// @todo: handle overloads
         auto expectedArgs = node->function()->args();
         auto passedArgs = node->getChildren<meta::Node>(1);
         if (expectedArgs.size() != passedArgs.size())
             throw SemanticError(node, "Call to function '%s' with incorrect number of arguments", node->functionName().c_str());
-        /// @todo check types
         return true;
     }
 
@@ -147,13 +186,15 @@ private:
         }
     };
 
-    std::set<meta::Function*, FuncComparator> mFunctions;
+    meta::Dictionary &mGlobalDict;
+    meta::DeclarationsDict mCurrDecls;
+    std::string mCurrSrcPackage;
     std::map<std::string, VarSrc> mVars;
 };
 
-void resolve(meta::AST *ast)
+void resolve(meta::AST *ast, meta::Dictionary &dict)
 {
-    ResolveVisitor resolver(ast);
+    ResolveVisitor resolver(ast, dict);
     ast->walk(&resolver);
 }
 

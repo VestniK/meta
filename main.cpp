@@ -49,7 +49,7 @@ int main(int argc, char **argv)
         const int srcCount = argc - 2; // ommit argv[0] == 'self path' and argv[argc - 1] == 'output file'
         std::vector<char> input[srcCount];
         meta::Parser parser;
-        Actions act;
+        meta::Actions act;
         parser.setParseActions(&act);
         parser.setNodeActions(&act);
         for (int i = 0; i < srcCount; ++i) {
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
         auto ast = parser.ast();
         // analyse
         analysers::checkReachability(ast);
-        analysers::resolve(ast);
+        analysers::resolve(ast, act.dictionary());
         typesystem::TypesStore typestore;
         analysers::checkTypes(ast, typestore);
         // generate

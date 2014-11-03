@@ -48,7 +48,7 @@ TEST_P(Priority, priority)
     char input[sizeof(tmpl) + strlen(param.expr)];
     sprintf(input, tmpl, param.expr);
     meta::Parser parser;
-    Actions act;
+    meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));

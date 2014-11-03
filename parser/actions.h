@@ -22,8 +22,11 @@
 
 #include <string>
 
+#include "parser/dictionary.h"
 #include "parser/metaparser.h"
 #include "parser/visibility.h"
+
+namespace meta {
 
 class Actions : public meta::ParseActions, public meta::NodeActions
 {
@@ -31,10 +34,16 @@ public:
     virtual void package(const meta::StackFrame *reduction, size_t size) override;
     virtual void changeVisibility(const meta::StackFrame *reduction, size_t size) override;
     virtual void onFunction(meta::Function *node) override;
+    virtual void onSourceFile(meta::SourceFile *node) override;
+
+    Dictionary &dictionary() {return mDictionary;}
 
 private:
     std::string mPackage;
     meta::Visibility mDefaultVisibility = meta::Visibility::Private;
+    Dictionary mDictionary;
 };
+
+} // namespace meta
 
 #endif // ACTIONS_H
