@@ -43,6 +43,10 @@ bool test_boolops_less(int x, int y);
 bool test_boolops_bound(int left, int right, int val);
 bool test_boolops_outOf(int left, int right, int val);
 
+// Import tests:
+int test_imports_foo(int x);
+int test_imports_impl_fooExport(int x);
+
 }
 
 // Functions with the same body as above funcs
@@ -122,7 +126,43 @@ bool outOf(int left, int right, int val)
     return lcheck || rcheck;
 }
 
+// Functions from imports.meta and importsImpl.meta
+namespace imports {
+
+int fooProtected(int x);
+
+int fooPrivate(int x)
+{
+    return x*fooProtected(x);
 }
+
+int fooExport(int x)
+{
+    return fooPrivate(2*x);
+}
+
+int fooPublic(int x)
+{
+    return fooPrivate(x*x);
+}
+
+int fooProtected(int x)
+{
+    return x*x - 2*x;
+}
+
+int foo(int x)
+{
+    if (x < 0)
+        return fooExport(x);
+    if (x == 0)
+        return fooPublic(x);
+    return fooProtected(x);
+}
+
+} // namespace imports
+
+} // namespace local
 
 TEST(BuilderTests, constFunc)
 {
@@ -180,3 +220,10 @@ TEST(BuilderTests, boolFuncs)
     }
 }
 
+TEST(BuilderTests, imports)
+{
+    for (int x = -50; x < 50; ++x) {
+        ASSERT_EQ(test_imports_foo(x), local::imports::foo(x)) << "x: " << x;
+        ASSERT_EQ(test_imports_impl_fooExport(x), local::imports::fooExport(x)) << "x: " << x;
+    }
+}
