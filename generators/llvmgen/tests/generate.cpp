@@ -22,26 +22,26 @@
 // Functions from test.meta
 extern "C" {
 
-int test_constFoo();
+int test_intops_constFoo();
 
-int test_poly(int x);
+int test_intops_poly(int x);
 
-int test_distCall(int x);
+int test_intops_distCall(int x);
 
-int test_distCallFull(int x);
+int test_intops_distCallFull(int x);
 
-int test_varsUsage(int x);
+int test_intops_varsUsage(int x);
 
-int test_assigment(int x);
+int test_intops_assigment(int x);
 
-int test_abs(int x);
+int test_intops_abs(int x);
 
-int test_sign(int x);
+int test_intops_sign(int x);
 
-bool test_less(int x, int y);
+bool test_boolops_less(int x, int y);
 
-bool test_bound(int left, int right, int val);
-bool test_outOf(int left, int right, int val);
+bool test_boolops_bound(int left, int right, int val);
+bool test_boolops_outOf(int left, int right, int val);
 
 }
 
@@ -126,55 +126,55 @@ bool outOf(int left, int right, int val)
 
 TEST(BuilderTests, constFunc)
 {
-    ASSERT_EQ(test_constFoo(), 5);
+    ASSERT_EQ(test_intops_constFoo(), 5);
 }
 
 TEST(BuilderTests, oneArg)
 {
     for (int i = -50; i < 50; ++i)
-        ASSERT_EQ(test_poly(i), local::poly(i));
+        ASSERT_EQ(test_intops_poly(i), local::poly(i));
 }
 
 TEST(BuilderTests, functionWithCall)
 {
     for (int x = -50; x < 50; ++x) {
-        ASSERT_EQ(test_distCall(x), local::distCall(x));
-        ASSERT_EQ(test_distCallFull(x), local::distCallFull(x));
+        ASSERT_EQ(test_intops_distCall(x), local::distCall(x));
+        ASSERT_EQ(test_intops_distCallFull(x), local::distCallFull(x));
     }
 }
 
 TEST(BuilderTests, varsUsage)
 {
     for (int x = -50; x < 50; ++x)
-        ASSERT_EQ(test_varsUsage(x), local::varsUsage(x));
+        ASSERT_EQ(test_intops_varsUsage(x), local::varsUsage(x));
 }
 
 TEST(BuilderTests, assigment)
 {
     for (int x = -50; x < 50; ++x)
-        ASSERT_EQ(test_assigment(x), local::assigment(x));
+        ASSERT_EQ(test_intops_assigment(x), local::assigment(x));
 }
 
 TEST(BuilderTests, abs)
 {
     for (int x = -50; x < 50; ++x)
-        ASSERT_EQ(test_abs(x), local::abs(x));
+        ASSERT_EQ(test_intops_abs(x), local::abs(x));
 }
 
 TEST(BuilderTests, sign)
 {
     for (int x = -50; x < 50; ++x)
-        ASSERT_EQ(test_sign(x), local::sign(x));
+        ASSERT_EQ(test_intops_sign(x), local::sign(x));
 }
 
 TEST(BuilderTests, boolFuncs)
 {
     for (int x = -5; x < 5; ++x) {
         for (int y = -5; y < 5; ++y) {
-            ASSERT_EQ(test_less(x, y), local::less(x, y));
+            ASSERT_EQ(test_boolops_less(x, y), local::less(x, y));
             for (int val = -10; val < 10; ++ val) {
-                ASSERT_EQ(test_bound(x, y, val), local::bound(x, y, val));
-                ASSERT_EQ(test_outOf(x, y, val), local::outOf(x, y, val));
+                ASSERT_EQ(test_boolops_bound(x, y, val), local::bound(x, y, val));
+                ASSERT_EQ(test_boolops_outOf(x, y, val), local::outOf(x, y, val));
             }
         }
     }

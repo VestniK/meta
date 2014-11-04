@@ -3,9 +3,14 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 find_program(LLC llc)
 
+set(meta_SRC
+  ${CMAKE_CURRENT_SOURCE_DIR}/int.meta
+  ${CMAKE_CURRENT_SOURCE_DIR}/bool.meta
+)
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test.bc
-  COMMAND meta ${CMAKE_CURRENT_SOURCE_DIR}/test.meta ${CMAKE_CURRENT_BINARY_DIR}/test.bc
-  MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/test.meta
+  COMMAND meta ${meta_SRC} ${CMAKE_CURRENT_BINARY_DIR}/test.bc
+  MAIN_DEPENDENCY ${meta_SRC}
   DEPENDS meta
 )
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test.o
