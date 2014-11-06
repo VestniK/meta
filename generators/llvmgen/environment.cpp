@@ -78,7 +78,7 @@ llvm::Type *Environment::getType(const typesystem::Type *type)
         case typesystem::Type::Bool: return llvm::Type::getInt1Ty(context);
 
         case typesystem::Type::Auto: assert(false);
-        case typesystem::Type::Void: break;
+        case typesystem::Type::Void: return llvm::Type::getVoidTy(context);
     }
     return nullptr;
 }
