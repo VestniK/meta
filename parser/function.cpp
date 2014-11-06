@@ -45,5 +45,12 @@ std::vector<VarDecl*> Function::args()
     return getChildren<VarDecl>();
 }
 
+CodeBlock *Function::body()
+{
+    CodeBlock *res = nullptr;
+    meta::walkTopDown<CodeBlock>(*this, [&res](CodeBlock *node){res = node; return false;}, 1);
+    return res;
+}
+
 } // namespace meta
 

@@ -43,7 +43,6 @@ void Actions::onFunction(meta::Function *node)
     node->setPackage(mPackage);
     if (node->visibility() == meta::Visibility::Default)
         node->setVisibility(mDefaultVisibility);
-    assert(mDictionary[mPackage].count(node->name()) == 0); /// @todo support for function overloads instead of assert here!!!
     mDictionary[mPackage].insert({node->name(), node});
 }
 

@@ -6,6 +6,7 @@ find_program(LLC llc)
 set(meta_SRC
   ${CMAKE_CURRENT_SOURCE_DIR}/int.meta
   ${CMAKE_CURRENT_SOURCE_DIR}/bool.meta
+  ${CMAKE_CURRENT_SOURCE_DIR}/ccall.meta
   ${CMAKE_CURRENT_SOURCE_DIR}/imports.meta
   ${CMAKE_CURRENT_SOURCE_DIR}/importsImpl.meta
 )

@@ -91,6 +91,7 @@ public:
 
     virtual bool visit(meta::Call *node) override
     {
+        assert(mCurrDecls.count(node->functionName()) == 1); /// @todo support for function overloads instead of assert here!!!
         auto it = mCurrDecls.lower_bound(node->functionName());
         if (it == mCurrDecls.end())
             throw SemanticError(node, "Unresolved function call '%s'", node->functionName().c_str());
@@ -104,6 +105,11 @@ public:
 
     virtual bool visit(meta::Function *node) override
     {
+        if (node->visibility() != meta::Visibility::Extern && node->body() == nullptr)
+            throw SemanticError(node, "Implementation missing for the function '%s'", node->name().c_str());
+        if (node->visibility() == meta::Visibility::Extern && node->body() != nullptr)
+            throw SemanticError(node, "Extern function '%s' must not have implementation", node->name().c_str());
+
         bool hasDefaultValues = false;
         for (auto arg : node->args()) {
             if (arg->inited())
@@ -115,8 +121,10 @@ public:
         return true;
     }
 
-    virtual void leave(meta::Function *) override
+    virtual void leave(meta::Function *node) override
     {
+        if (node->visibility() == meta::Visibility::Extern)
+            return; // Skip check for unused arguments on extern functions since they have no implementation to use them
         for (const auto &var : mVars) {
             if (var.second.accessCount == 0)
                 throw SemanticError(var.second.decl, "Variable '%s' declared but never used", var.first.c_str());

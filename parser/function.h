@@ -39,6 +39,8 @@ public:
     const std::string &package() const {return mPackage;}
     void setPackage(const std::string &pkg) {mPackage = pkg;}
     std::vector<VarDecl*> args();
+    CodeBlock *body();
+
     Visibility visibility() const {return mVisibility;}
     void setVisibility(Visibility val) {mVisibility = val;}
 

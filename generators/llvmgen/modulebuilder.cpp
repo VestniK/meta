@@ -22,6 +22,8 @@ bool ModuleBuilder::visit(meta::Function *node)
     llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node));
     if (!func)
         func = env.addFunction(node);
+    if (node->visibility() == meta::Visibility::Extern)
+        return false;
 
     llvm::Function::arg_iterator it = func->arg_begin();
     for (const auto arg : node->args()) {

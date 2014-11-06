@@ -55,7 +55,10 @@ llvm::Function *Environment::addFunction(meta::Function *func)
     auto rettype = getType(func->type());
     assert(rettype != nullptr);
     llvm::FunctionType *funcType = llvm::FunctionType::get(rettype, argTypes, false);
-    const llvm::GlobalValue::LinkageTypes linkType = func->visibility() == meta::Visibility::Export ? llvm::GlobalValue::ExternalLinkage : llvm::GlobalValue::PrivateLinkage;
+    const llvm::GlobalValue::LinkageTypes linkType = func->visibility() == meta::Visibility::Export || func->visibility() == meta::Visibility::Extern ?
+        llvm::GlobalValue::ExternalLinkage :
+        llvm::GlobalValue::PrivateLinkage
+    ;
     llvm::Function *prototype = llvm::Function::Create(funcType, linkType, generators::abi::mangledName(func), module.get());
     llvm::Function::arg_iterator it = prototype->arg_begin();
     for (const auto arg : args) {

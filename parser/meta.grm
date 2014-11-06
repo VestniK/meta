@@ -4,6 +4,7 @@ identifier <identifier>;
 trueVal 'true';
 falseVal 'false';
 
+Extern 'extern';
 Export 'export';
 Public 'public';
 Protected 'protected';
@@ -44,14 +45,15 @@ Import -> 'import' QualifiedName ';' +> Import
        -> 'import' QualifiedName as <identifier> ';' +> Import
 
 VisibilityChange -> Visibility ':' => changeVisibility
-Visibility -> 'export'
+Visibility -> 'extern'
+           -> 'export'
            -> 'public'
            -> 'protected'
            -> 'private'
 
 Declaration -> Function
 
-Function -> [Visibility] <identifier> <identifier> '(' [VarDecl]/','... ')' CodeBlock *> Function
+Function -> [Visibility] <identifier> <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') *> Function
 CodeBlock -> '{' (Statement)... '}' +> CodeBlock
 VarDecl -> <identifier> <identifier> ['=' Expr] +> VarDecl
 

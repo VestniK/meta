@@ -8,10 +8,11 @@ namespace meta {
 Visibility fromToken(const Token &token)
 {
     switch (token.termNum) {
-        case meta::Export: return meta::Visibility::Export;
-        case meta::Public: return meta::Visibility::Public;
-        case meta::Protected: return meta::Visibility::Protected;
-        case meta::Private: return meta::Visibility::Private;
+        case Extern: return Visibility::Extern;
+        case Export: return Visibility::Export;
+        case Public: return Visibility::Public;
+        case Protected: return Visibility::Protected;
+        case Private: return Visibility::Private;
         default: break;
     }
     assert(false && "unexpected token for visibility name");

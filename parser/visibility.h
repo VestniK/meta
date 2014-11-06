@@ -7,6 +7,7 @@ struct Token;
 
 enum class Visibility {
     Default,
+    Extern,
     Export,
     Public,
     Protected,

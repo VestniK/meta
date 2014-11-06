@@ -19,7 +19,7 @@
 
 #include <gtest/gtest.h>
 
-// Functions from test.meta
+// Functions from *.meta files
 extern "C" {
 
 int test_intops_constFoo();
@@ -46,6 +46,19 @@ bool test_boolops_outOf(int left, int right, int val);
 // Import tests:
 int test_imports_foo(int x);
 int test_imports_impl_fooExport(int x);
+
+// C call tests:
+int test_ccall_caller(int x);
+
+}
+
+// Functions exported to the *.meta tests files
+extern "C" {
+
+int test_ccall_sqr(int x)
+{
+    return x*x;
+}
 
 }
 
@@ -162,6 +175,15 @@ int foo(int x)
 
 } // namespace imports
 
+namespace ccall {
+
+int caller(int x)
+{
+    return test_ccall_sqr(x);
+}
+
+}
+
 } // namespace local
 
 TEST(BuilderTests, constFunc)
@@ -226,4 +248,10 @@ TEST(BuilderTests, imports)
         ASSERT_EQ(test_imports_foo(x), local::imports::foo(x)) << "x: " << x;
         ASSERT_EQ(test_imports_impl_fooExport(x), local::imports::fooExport(x)) << "x: " << x;
     }
+}
+
+TEST(BuilderTests, ccall)
+{
+    for (int x = -50; x < 50; ++x)
+        ASSERT_EQ(test_ccall_caller(x), local::ccall::caller(x)) << "x: " << x;
 }
