@@ -17,9 +17,10 @@
  *
  */
 
-#include <cassert>
 #include <stack>
 #include <vector>
+
+#include "utils/contract.h"
 
 #include "typesystem/type.h"
 #include "typesystem/typesstore.h"
@@ -45,8 +46,11 @@ public:
         mCurrFunc = node;
         return true;
     }
-    virtual void leave(meta::Function *) override
+    virtual void leave(meta::Function *node) override
     {
+        POSTCONDITION(node->type() != nullptr);
+        POSTCONDITION(node->type()->typeId() != typesystem::Type::Auto);
+
         mCurrFunc = nullptr;
     }
 
@@ -65,13 +69,18 @@ public:
     }
     virtual const typesystem::Type *var(meta::Var *node) override
     {
-        assert(node->declaration()->type() != nullptr); // declaration of unknown type should rize error before var usage
-        assert(node->declaration()->type()->typeId() != typesystem::Type::Auto); // unresolved auto should rize error on declaration
+        PRECONDITION(node->declaration() != nullptr);
+        PRECONDITION(node->declaration()->type() != nullptr);
+        PRECONDITION(node->declaration()->type()->typeId() != typesystem::Type::Auto);
+
         return node->declaration()->type();
     }
 
     virtual void leave(meta::VarDecl *node) override
     {
+        POSTCONDITION(node->type() != nullptr);
+        POSTCONDITION(node->type()->typeId() != typesystem::Type::Auto);
+
         node->setType(mTypes.getByName(node->typeName()));
         if (node->type() == nullptr)
             throw analysers::SemanticError(node, "Variable '%s' has unknown type '%s'", node->name().c_str(), node->typeName().c_str());
@@ -144,6 +153,8 @@ public:
 
     virtual const typesystem::Type *binaryOp(meta::BinaryOp *node, const typesystem::Type *left, const typesystem::Type *right) override
     {
+        POSTCONDITION(node->type() != nullptr);
+
         switch (node->operation()) {
             case meta::BinaryOp::add:
             case meta::BinaryOp::div:
@@ -176,18 +187,19 @@ public:
                 node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
                 break;
         }
-        assert(node->type() != nullptr);
         return node->type();
     }
 
     virtual const typesystem::Type *call(meta::Call *node, const std::vector<const typesystem::Type *> &args)
     {
+        PRECONDITION(node->function()->args().size() == args.size());
+        PRECONDITION(args.size() == node->argsCount());
+
         if (node->function()->type() == nullptr) {
             TypeChecker subchecker(mTypes);
             node->function()->walk(&subchecker);
         }
         auto argdecls = node->function()->args();
-        assert(argdecls.size() == args.size() && args.size() == node->argsCount()); // Incorrect number of arguments should be checked during resolve phase
         for (size_t i = 0; i < args.size(); ++i) {
             if (argdecls[i]->type() != args[i])
                 throw analysers::SemanticError(
