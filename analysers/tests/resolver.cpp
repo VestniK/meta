@@ -72,5 +72,10 @@ INSTANTIATE_TEST_CASE_P(semanticErrors, Resolver, ::testing::Values(
     "package test; auto foo() {int x = 0; \nbool x; return x;}", // shadow another var
     "package test; auto foo(int x) {\nbool b; return x;}", // never used
     "package test; import some.lib.foo1; import some.lib.foo2; \nimport some.lib.foo3; int foo(int x) {return foo1(x) + foo2(x) + foo3(x);}", // import ptotected func
-    "package some.lib.subpkg; import some.lib.foo1; import some.lib.foo2; import some.lib.foo3; \nimport some.lib.foo4; int foo() {return foo1(x) + foo2(x) + foo3(x) + foo4(x);}" // import private func
+    "package some.lib.subpkg; import some.lib.foo1; import some.lib.foo2; import some.lib.foo3; \nimport some.lib.foo4; int foo() {return foo1(x) + foo2(x) + foo3(x) + foo4(x);}", // import private func
+    "package test; \nextern int foo() {return 5;}", // extern with body
+    "package test; \nexport int foo();", // local function without body
+    "package test; \npublic int foo();", // local function without body
+    "package test; \nprotected int foo();", // local function without body
+    "package test; \nprivate int foo();" // local function without body
 ));
