@@ -25,6 +25,7 @@
 #include <gtest/gtest.h>
 
 #include "parser/actions.h"
+#include "parser/annotation.h"
 #include "parser/assigment.h"
 #include "parser/binaryop.h"
 #include "parser/call.h"
@@ -35,6 +36,64 @@
 #include "parser/metaparser.h"
 #include "parser/return.h"
 #include "parser/vardecl.h"
+
+/**
+ * @class meta::Parser
+ * @test This test checks that all possible function delaration syntaxes are parsed correctly and visibility
+ * is set properly for functions with and with no annotations.
+ */
+TEST(Parser, funcDeclarationsAndVisibilities)
+{
+    const char *input = R"META(
+        package test;
+
+        int privateByDefault() {return 5;}
+
+        protected:
+
+        int protectedByModifiedDefault1() {return 5;}
+
+        public int pubExplicitly() {return 5;}
+
+        @some
+        int protectedByModifiedDefault2() {return 5;}
+
+        @some
+        @other
+        private int privateExplicitly() {return 5;}
+    )META";
+    meta::Parser parser;
+    meta::Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    auto ast = parser.ast();
+    const auto functions = ast->getChildren<meta::Function>();
+    ASSERT_EQ(functions.size(), 5);
+
+    ASSERT_EQ(functions[0]->name(), "privateByDefault");
+    ASSERT_EQ(functions[0]->visibility(), meta::Visibility::Private);
+    ASSERT_EQ(functions[0]->getChildren<meta::Annotation>().size(), 0);
+
+    ASSERT_EQ(functions[1]->name(), "protectedByModifiedDefault1");
+    ASSERT_EQ(functions[1]->visibility(), meta::Visibility::Protected);
+    ASSERT_EQ(functions[1]->getChildren<meta::Annotation>().size(), 0);
+
+    ASSERT_EQ(functions[2]->name(), "pubExplicitly");
+    ASSERT_EQ(functions[2]->visibility(), meta::Visibility::Public);
+    ASSERT_EQ(functions[2]->getChildren<meta::Annotation>().size(), 0);
+
+    ASSERT_EQ(functions[3]->name(), "protectedByModifiedDefault2");
+    ASSERT_EQ(functions[3]->visibility(), meta::Visibility::Protected);
+    ASSERT_EQ(functions[3]->getChildren<meta::Annotation>().size(), 1);
+    ASSERT_EQ(functions[3]->getChildren<meta::Annotation>()[0]->name(), "some");
+
+    ASSERT_EQ(functions[4]->name(), "privateExplicitly");
+    ASSERT_EQ(functions[4]->visibility(), meta::Visibility::Private);
+    ASSERT_EQ(functions[4]->getChildren<meta::Annotation>().size(), 2);
+    ASSERT_EQ(functions[4]->getChildren<meta::Annotation>()[0]->name(), "some");
+    ASSERT_EQ(functions[4]->getChildren<meta::Annotation>()[1]->name(), "other");
+}
 
 TEST(Parser, zeroParamFunc) {
     const char *input = "package test; int foo() {return 5;}";

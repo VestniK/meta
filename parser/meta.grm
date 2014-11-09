@@ -1,5 +1,6 @@
 // Named const for useful terminals
 identifier <identifier>;
+annotation <annotation>;
 
 trueVal 'true';
 falseVal 'false';
@@ -53,7 +54,12 @@ Visibility -> 'extern'
 
 Declaration -> Function
 
+Annotation -> <annotation> +> Annotation
+
+// [Annotation...] [Visibility] <identifier> <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') leads to shift-reduce conflict
+// which is resolved by spliting this rule into two.
 Function -> [Visibility] <identifier> <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') *> Function
+         -> Annotation... [Visibility] <identifier> <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') *> Function
 CodeBlock -> '{' (Statement)... '}' +> CodeBlock
 VarDecl -> <identifier> <identifier> ['=' Expr] +> VarDecl
 

@@ -17,7 +17,7 @@
  *
  */
 
-#include <cassert>
+#include "utils/contract.h"
 
 #include "parser/function.h"
 #include "parser/vardecl.h"
@@ -26,11 +26,13 @@ namespace meta {
 
 Function::Function(const StackFrame *reduction, size_t size): Node(reduction, size)
 {
-    static const size_t visibilityPos = 0;
-    static const size_t typePos = 1;
-    static const size_t namePos = 2;
-    static const size_t argsPos = 4;
-    assert(size > argsPos + 1);
+    PRECONDITION(size == 7 || size == 8); // with or without annotations
+
+    const bool hasAnnotations = size == 8;
+    const size_t visibilityPos = (hasAnnotations ? 1 : 0);
+    const size_t typePos = visibilityPos + 1;
+    const size_t namePos = typePos + 1;
+    const size_t argsPos = namePos + 2;
     auto visTokenIt = reduction[visibilityPos].tokens.begin();
     if (visTokenIt != reduction[visibilityPos].tokens.end())
         mVisibility = fromToken(*visTokenIt);

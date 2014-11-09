@@ -17,24 +17,21 @@
  *
  */
 
-#ifndef META_NODES_H
-#define META_NODES_H
+#include "utils/contract.h"
 
 #include "parser/annotation.h"
-#include "parser/assigment.h"
-#include "parser/binaryop.h"
-#include "parser/call.h"
-#include "parser/codeblock.h"
-#include "parser/exprstatement.h"
-#include "parser/function.h"
-#include "parser/if.h"
-#include "parser/import.h"
-#include "parser/literal.h"
-#include "parser/number.h"
-#include "parser/prefixop.h"
-#include "parser/return.h"
-#include "parser/sourcefile.h"
-#include "parser/var.h"
-#include "parser/vardecl.h"
 
-#endif // META_NODES_H
+namespace meta {
+
+Annotation::Annotation(const StackFrame *reduction, size_t size): Node(reduction, size)
+{
+    PRECONDITION(size == 1);
+    PRECONDITION(reduction[0].tokens.begin() != reduction[0].tokens.end());
+    PRECONDITION(reduction[0].tokens.begin()->termNum == annotation);
+
+    Token token = *(reduction[0].tokens.begin());
+    ++token.start; // skip '@' character in the beggining of annotation
+    mName = token;
+}
+
+} // namespace meta
