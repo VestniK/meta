@@ -19,6 +19,7 @@
 
 #include "utils/contract.h"
 
+#include "parser/annotation.h"
 #include "parser/function.h"
 #include "parser/vardecl.h"
 
@@ -29,6 +30,10 @@ Function::Function(const StackFrame *reduction, size_t size): Node(reduction, si
     PRECONDITION(size == 7 || size == 8); // with or without annotations
 
     const bool hasAnnotations = size == 8;
+    if (hasAnnotations) {
+        for (auto annotataion : reduction[0].nodes)
+            walkTopDown<Annotation>(*annotataion, [this](Annotation *node){node->setTarget(this); return false;}, 0);
+    }
     const size_t visibilityPos = (hasAnnotations ? 1 : 0);
     const size_t typePos = visibilityPos + 1;
     const size_t namePos = typePos + 1;
@@ -39,7 +44,7 @@ Function::Function(const StackFrame *reduction, size_t size): Node(reduction, si
     mRetType = reduction[typePos].tokens;
     mName = reduction[namePos].tokens;
     for (auto arg : reduction[argsPos].nodes)
-        walkTopDown<meta::VarDecl>(*arg, [] (meta::VarDecl *node) {node->set(meta::VarDecl::argument); return false;}, 0);
+        walkTopDown<VarDecl>(*arg, [] (VarDecl *node) {node->set(VarDecl::argument); return false;}, 0);
 }
 
 std::vector<VarDecl*> Function::args()
@@ -52,6 +57,23 @@ CodeBlock *Function::body()
     CodeBlock *res = nullptr;
     meta::walkTopDown<CodeBlock>(*this, [&res](CodeBlock *node){res = node; return false;}, 1);
     return res;
+}
+
+bool Function::is(Function::Attribute attr) const
+{
+    return (mAttributes & attr) != 0;
+}
+
+void Function::set(Function::Attribute attr, bool val)
+{
+    mAttributes = val ? (mAttributes | attr) : (mAttributes & ~attr);
+}
+
+Function::Attribute Function::attribute(const std::string &name)
+{
+    if (name == "entryPoint")
+        return entryPoint;
+    return invalid;
 }
 
 } // namespace meta

@@ -34,6 +34,11 @@ meta_NODE
 public:
     Function(const StackFrame *start, size_t size);
 
+    enum Attribute {
+        invalid = 0,
+        entryPoint = (1<<0)
+    };
+
     const std::string &name() const {return mName;}
     const std::string &retType() const {return mRetType;}
     const std::string &package() const {return mPackage;}
@@ -44,11 +49,16 @@ public:
     Visibility visibility() const {return mVisibility;}
     void setVisibility(Visibility val) {mVisibility = val;}
 
+    void set(Attribute attr, bool val = true);
+    bool is(Attribute attr) const;
+    static Attribute attribute(const std::string &name);
+
 private:
     std::string mPackage;
     std::string mName;
     std::string mRetType;
     Visibility mVisibility = Visibility::Default;
+    int mAttributes = 0;
 };
 
 } // namespace meta

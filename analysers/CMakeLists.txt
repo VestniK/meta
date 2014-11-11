@@ -1,4 +1,5 @@
 set(SRC
+  metaprocessor.cpp
   reachabilitychecker.cpp
   resolver.cpp
   semanticerror.cpp

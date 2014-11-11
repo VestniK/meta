@@ -30,6 +30,7 @@
 
 #include "typesystem/typesstore.h"
 
+#include "analysers/metaprocessor.h"
 #include "analysers/reachabilitychecker.h"
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
@@ -63,6 +64,7 @@ int main(int argc, char **argv)
         analysers::resolve(ast, act.dictionary());
         typesystem::TypesStore typestore;
         analysers::checkTypes(ast, typestore);
+        analysers::processMeta(ast);
         // generate
         std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
         gen->generate(ast, argv[srcCount + 1]);

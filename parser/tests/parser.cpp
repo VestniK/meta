@@ -87,12 +87,15 @@ TEST(Parser, funcDeclarationsAndVisibilities)
     ASSERT_EQ(functions[3]->visibility(), meta::Visibility::Protected);
     ASSERT_EQ(functions[3]->getChildren<meta::Annotation>().size(), 1);
     ASSERT_EQ(functions[3]->getChildren<meta::Annotation>()[0]->name(), "some");
+    ASSERT_EQ(functions[3]->getChildren<meta::Annotation>()[0]->target(), functions[3]);
 
     ASSERT_EQ(functions[4]->name(), "privateExplicitly");
     ASSERT_EQ(functions[4]->visibility(), meta::Visibility::Private);
     ASSERT_EQ(functions[4]->getChildren<meta::Annotation>().size(), 2);
     ASSERT_EQ(functions[4]->getChildren<meta::Annotation>()[0]->name(), "some");
+    ASSERT_EQ(functions[4]->getChildren<meta::Annotation>()[0]->target(), functions[4]);
     ASSERT_EQ(functions[4]->getChildren<meta::Annotation>()[1]->name(), "other");
+    ASSERT_EQ(functions[4]->getChildren<meta::Annotation>()[1]->target(), functions[4]);
 }
 
 TEST(Parser, zeroParamFunc) {

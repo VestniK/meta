@@ -17,31 +17,17 @@
  *
  */
 
-#ifndef ANNOTATION_H
-#define ANNOTATION_H
-
-#include <string>
-
-#include "parser/metaparser.h"
+#ifndef METAPROCESSOR_H
+#define METAPROCESSOR_H
 
 namespace meta {
+    class AST;
+}
 
-class Annotation: public Node
-{
-meta_NODE
-public:
-    Annotation (const StackFrame *reduction, size_t size);
+namespace analysers {
 
-    const std::string &name() const {return mName;}
+void processMeta(meta::AST *ast);
 
-    void setTarget(Function *val) {mTarget = val;}
-    Function *target() {return mTarget;}
+} // namespace analysers
 
-private:
-    std::string mName;
-    Function *mTarget;
-};
-
-} // namespace meta
-
-#endif // ANNOTATION_H
+#endif // METAPROCESSOR_H

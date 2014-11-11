@@ -17,31 +17,29 @@
  *
  */
 
-#ifndef ANNOTATION_H
-#define ANNOTATION_H
+#include "utils/contract.h"
 
-#include <string>
-
+#include "parser/annotation.h"
 #include "parser/metaparser.h"
+#include "parser/function.h"
 
-namespace meta {
+#include "analysers/metaprocessor.h"
+#include "analysers/semanticerror.h"
 
-class Annotation: public Node
+namespace analysers {
+
+void processMeta(meta::AST *ast)
 {
-meta_NODE
-public:
-    Annotation (const StackFrame *reduction, size_t size);
+    meta::walkTopDown<meta::Annotation>(*ast, [] (meta::Annotation *node) {
+        PRECONDITION(node->target() != nullptr);
 
-    const std::string &name() const {return mName;}
+        /// @todo process user defined metas here
+        auto attr = meta::Function::attribute(node->name());
+        if (attr == meta::Function::invalid)
+            throw SemanticError(node, "Invalid attribute '%s'", node->name().c_str());
+        node->target()->set(attr);
+        return false;
+    });
+}
 
-    void setTarget(Function *val) {mTarget = val;}
-    Function *target() {return mTarget;}
-
-private:
-    std::string mName;
-    Function *mTarget;
-};
-
-} // namespace meta
-
-#endif // ANNOTATION_H
+} // namespace analysers
