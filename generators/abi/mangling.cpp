@@ -28,6 +28,8 @@ namespace abi {
 
 std::string mangledName(meta::Function *func)
 {
+    if (func->is(meta::Function::entryPoint))
+        return "main";
     std::string res = func->package() + '_' + func->name();
     for (auto &symb : res)
         symb = symb == '.' ? '_' : symb;
