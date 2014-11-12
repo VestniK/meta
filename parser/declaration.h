@@ -17,33 +17,29 @@
  *
  */
 
-#ifndef ANNOTATION_H
-#define ANNOTATION_H
+#ifndef DECLARATION_H
+#define DECLARATION_H
 
+#include <functional>
+#include <map>
 #include <string>
 
 #include "parser/metaparser.h"
 
 namespace meta {
 
-class Declaration;
-
-class Annotation: public Node
+class Declaration: public meta::Node
 {
-meta_NODE
 public:
-    Annotation (const StackFrame *reduction, size_t size);
+    typedef std::map<std::string, std::function<void(Declaration *)> > AttributesMap;
+    virtual const AttributesMap &attributes() const = 0;
 
-    const std::string &name() const {return mName;}
+    virtual Function *asFunction() {return nullptr;}
 
-    void setTarget(Declaration *val) {mTarget = val;}
-    Declaration *target() {return mTarget;}
-
-private:
-    std::string mName;
-    Declaration *mTarget;
+protected:
+    Declaration(const meta::StackFrame *reduction, size_t size);
 };
 
 } // namespace meta
 
-#endif // ANNOTATION_H
+#endif // DECLARATION_H

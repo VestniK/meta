@@ -34,10 +34,10 @@ void processMeta(meta::AST *ast)
         PRECONDITION(node->target() != nullptr);
 
         /// @todo process user defined metas here
-        auto attr = meta::Function::attribute(node->name());
-        if (attr == meta::Function::invalid)
+        auto attrSetter = node->target()->attributes().find(node->name());
+        if (attrSetter == node->target()->attributes().end())
             throw SemanticError(node, "Invalid attribute '%s'", node->name().c_str());
-        node->target()->set(attr);
+        attrSetter->second(node->target());
         return false;
     });
 }

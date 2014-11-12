@@ -25,7 +25,7 @@
 
 namespace meta {
 
-Function::Function(const StackFrame *reduction, size_t size): Node(reduction, size)
+Function::Function(const StackFrame *reduction, size_t size): Declaration(reduction, size)
 {
     PRECONDITION(size == 7 || size == 8); // with or without annotations
 
@@ -69,12 +69,9 @@ void Function::set(Function::Attribute attr, bool val)
     mAttributes = val ? (mAttributes | attr) : (mAttributes & ~attr);
 }
 
-Function::Attribute Function::attribute(const std::string &name)
-{
-    if (name == "entryPoint")
-        return entryPoint;
-    return invalid;
-}
+const Declaration::AttributesMap Function::attrMap{
+    {"entryPoint", [](Declaration *decl){PRECONDITION(decl->asFunction() != nullptr); decl->asFunction()->set(entryPoint);}}
+};
 
 } // namespace meta
 

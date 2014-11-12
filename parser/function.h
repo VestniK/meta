@@ -22,13 +22,14 @@
 
 #include <string>
 
+#include "parser/declaration.h"
 #include "parser/metaparser.h"
 #include "parser/typed.h"
 #include "parser/visibility.h"
 
 namespace meta {
 
-class Function: public Node, public Typed
+class Function: public Declaration, public Typed
 {
 meta_NODE
 public:
@@ -38,6 +39,9 @@ public:
         invalid = 0,
         entryPoint = (1<<0)
     };
+
+    virtual const Declaration::AttributesMap &attributes() const override {return attrMap;}
+    virtual Function *asFunction() override {return this;}
 
     const std::string &name() const {return mName;}
     const std::string &retType() const {return mRetType;}
@@ -51,7 +55,6 @@ public:
 
     void set(Attribute attr, bool val = true);
     bool is(Attribute attr) const;
-    static Attribute attribute(const std::string &name);
 
 private:
     std::string mPackage;
@@ -59,6 +62,8 @@ private:
     std::string mRetType;
     Visibility mVisibility = Visibility::Default;
     int mAttributes = 0;
+
+    static const Declaration::AttributesMap attrMap;
 };
 
 } // namespace meta

@@ -17,33 +17,13 @@
  *
  */
 
-#ifndef ANNOTATION_H
-#define ANNOTATION_H
-
-#include <string>
-
-#include "parser/metaparser.h"
+#include "parser/declaration.h"
 
 namespace meta {
 
-class Declaration;
-
-class Annotation: public Node
+Declaration::Declaration(const StackFrame *reduction, size_t size): Node(reduction, size)
 {
-meta_NODE
-public:
-    Annotation (const StackFrame *reduction, size_t size);
 
-    const std::string &name() const {return mName;}
-
-    void setTarget(Declaration *val) {mTarget = val;}
-    Declaration *target() {return mTarget;}
-
-private:
-    std::string mName;
-    Declaration *mTarget;
-};
+}
 
 } // namespace meta
-
-#endif // ANNOTATION_H
