@@ -58,16 +58,21 @@ Annotation -> <annotation> +> Annotation
 
 // [Annotation...] [Visibility] <identifier> <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') leads to shift-reduce conflict
 // which is resolved by spliting this rule into two.
-Function -> [Visibility] <identifier> <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') *> Function
-         -> Annotation... [Visibility] <identifier> <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') *> Function
+Function -> [Visibility] Type <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') *> Function
+         -> Annotation... [Visibility] Type <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') *> Function
 CodeBlock -> '{' (Statement)... '}' +> CodeBlock
-VarDecl -> <identifier> <identifier> ['=' Expr] +> VarDecl
+VarDecl -> Type <identifier> ['=' Expr] +> VarDecl
+Type -> 'int'
+     -> 'bool'
+     -> 'auto'
+     -> 'void'
+     -> <identifier>
 
 Statement -> CodeBlock
           -> If
           -> VarDecl ';'
           -> Expr ';' +> ExprStatement
-          -> 'return' Expr ';' +> Return
+          -> 'return' [Expr] ';' +> Return
           -> ';' // Empty Statement no node created
 
 If -> 'if' '(' Expr ')' Statement ['else' Statement] +> If
