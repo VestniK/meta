@@ -36,6 +36,7 @@ public:
 
     Type *getByName(const std::string &name) const;
     Type *getPrimitive(Type::TypeId id) const;
+    Type *getVoid() const;
 
 private:
     std::map< std::string, std::unique_ptr<Type> > mTypes;

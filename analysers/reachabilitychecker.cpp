@@ -20,8 +20,11 @@
 #include "parser/codeblock.h"
 #include "parser/exprstatement.h"
 #include "parser/if.h"
+#include "parser/function.h"
 #include "parser/return.h"
 #include "parser/vardecl.h"
+
+#include "typesystem/type.h"
 
 #include "analysers/reachabilitychecker.h"
 #include "analysers/semanticerror.h"
@@ -32,6 +35,7 @@ class ReachabilityChecker : public meta::Visitor
 {
 public:
     virtual bool visit(meta::Function *node) override;
+    virtual void leave(meta::Function *node) override;
     virtual bool visit(meta::CodeBlock *node) override;
     virtual bool visit(meta::VarDecl *node) override;
     virtual bool visit(meta::ExprStatement *node) override;
@@ -50,6 +54,17 @@ bool ReachabilityChecker::visit(meta::Function *)
     mReturn = nullptr;
     return true;
 }
+
+void ReachabilityChecker::leave(meta::Function *node)
+{
+    /// @todo unit tests needed for non-void function without return
+    if (mReturn != nullptr || node->body() == nullptr)
+        return;
+    if (node->type()->typeId() != typesystem::Type::Void)
+        throw SemanticError(node, "Non-void function ends without return");
+    node->body()->add(new meta::Return(nullptr, 0)); /// @todo memleak here!!!
+}
+
 
 void ReachabilityChecker::checkReturn(meta::Node *node)
 {

@@ -29,6 +29,8 @@ class CodeBlock: public Node
 meta_NODE
 public:
     CodeBlock(const StackFrame *start, size_t size);
+
+    void add(Node *statement);
 };
 
 } // namespace meta

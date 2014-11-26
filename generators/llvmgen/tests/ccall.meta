@@ -27,3 +27,12 @@ export int caller(int x)
     setGlobal(x);
     return sqr(x);
 }
+
+export void setModifiedGlobal(int x)
+{
+    if (x < 0) {
+        setGlobal(-x);
+        return;
+    }
+    setGlobal(2*x);
+}

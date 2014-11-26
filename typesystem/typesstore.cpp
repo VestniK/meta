@@ -74,7 +74,7 @@ Type *TypesStore::getByName(const std::string &name) const
     return it->second.get();
 }
 
-Type* TypesStore::getPrimitive(Type::TypeId id) const
+Type *TypesStore::getPrimitive(Type::TypeId id) const
 {
     if ((id & Type::primitive) == 0)
         return nullptr;
@@ -83,6 +83,13 @@ Type* TypesStore::getPrimitive(Type::TypeId id) const
             return pair.second.get();
     }
     return nullptr;
+}
+
+Type *TypesStore::getVoid() const
+{
+    auto it = mTypes.find("void");
+    assert(it != mTypes.end());
+    return it->second.get();
 }
 
 } // namespace typesystem

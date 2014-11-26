@@ -24,6 +24,8 @@
 #include <stack>
 #include <vector>
 
+#include "utils/contract.h"
+
 #include "parser/metanodes.h"
 #include "parser/metaparser.h"
 
@@ -35,6 +37,7 @@ class Evaluator: public meta::Visitor
 public:
     // Value consumers
     virtual void returnValue(meta::Return *node, Value val) = 0;
+    virtual void returnVoid(meta::Return *node) = 0;
     virtual void varInit(meta::VarDecl *node, Value val) = 0;
     virtual void ifCond(meta::If *node, Value val) = 0;
     // Value providers
@@ -54,10 +57,14 @@ public:
     virtual bool visit(meta::Return *) override {mStack.push(std::vector<Value>()); return true;}
     virtual void leave(meta::Return *node) override
     {
-        assert(mStack.top().size() == 1);
-        returnValue(node, mStack.top()[0]);
+        PRECONDITION(mStack.top().empty() || mStack.top().size() == 1);
+        POSTCONDITION(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
+
+        if (mStack.top().empty())
+            returnVoid(node);
+        else
+            returnValue(node, mStack.top()[0]);
         mStack.pop();
-        assert(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
     }
     virtual bool visit(meta::If *node) override
     {

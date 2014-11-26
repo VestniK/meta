@@ -60,10 +60,10 @@ int main(int argc, char **argv)
         }
         auto ast = parser.ast();
         // analyse
-        analysers::checkReachability(ast);
         analysers::resolve(ast, act.dictionary());
         typesystem::TypesStore typestore;
         analysers::checkTypes(ast, typestore);
+        analysers::checkReachability(ast);
         analysers::processMeta(ast);
         // generate
         std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());

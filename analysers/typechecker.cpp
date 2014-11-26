@@ -124,6 +124,11 @@ public:
             throw analysers::SemanticError(node, "Attempt to return value of type '%s' from function returning '%s'", val->name().c_str(), mCurrFunc->type()->name().c_str());
     }
 
+    virtual void returnVoid(meta::Return *node) override
+    {
+        returnValue(node, mTypes.getVoid());
+    }
+
     virtual const typesystem::Type *assign(meta::Assigment *node, const typesystem::Type *val) override
     {
         if (node->declaration()->type() != val) // TODO: implicit type conversations here

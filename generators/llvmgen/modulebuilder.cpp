@@ -44,6 +44,12 @@ void ModuleBuilder::returnValue(meta::Return *node, llvm::Value *val)
     mCurrBlockTerminated = true;
 }
 
+void ModuleBuilder::returnVoid(meta::Return *node)
+{
+    builder.CreateRetVoid();
+    mCurrBlockTerminated = true;
+}
+
 void ModuleBuilder::ifCond(meta::If *node, llvm::Value *val)
 {
     if (!node->thenBlock() && !node->elseBlock()) // "if (cond) ;" || "if (cond) ; else ;" no additional generation needed

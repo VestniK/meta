@@ -25,4 +25,10 @@ CodeBlock::CodeBlock(const StackFrame *start, size_t size): Node(start, size)
 {
 }
 
+void CodeBlock::add(Node *statement)
+{
+    /// @todo allow to add statements only, not arbitrary node
+    children.push_back(statement);
+}
+
 } // namespace meta

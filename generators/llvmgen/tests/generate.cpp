@@ -49,6 +49,7 @@ int test_imports_impl_fooExport(int x);
 
 // C call tests:
 int test_ccall_caller(int x);
+void test_ccall_setModifiedGlobal(int x);
 
 }
 
@@ -190,7 +191,7 @@ int caller(int x)
     return test_ccall_sqr(x);
 }
 
-}
+} // namespace ccall
 
 } // namespace local
 
@@ -263,5 +264,7 @@ TEST(BuilderTests, ccall)
     for (int x = -50; x < 50; ++x) {
         ASSERT_EQ(test_ccall_caller(x), local::ccall::caller(x)) << "x: " << x;
         ASSERT_EQ(global, x) << "x: " << x;
+        test_ccall_setModifiedGlobal(x);
+        ASSERT_EQ(global, x < 0 ? -x : 2*x) << "x: " << x;
     }
 }
