@@ -20,7 +20,10 @@ package test.ccall;
 
 extern int sqr(int x);
 
+extern void setGlobal(int x);
+
 export int caller(int x)
 {
+    setGlobal(x);
     return sqr(x);
 }

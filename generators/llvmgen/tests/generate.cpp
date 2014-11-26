@@ -60,6 +60,12 @@ int test_ccall_sqr(int x)
     return x*x;
 }
 
+int global = 0;
+void test_ccall_setGlobal(int x)
+{
+    global = x;
+}
+
 }
 
 // Functions with the same body as above funcs
@@ -179,6 +185,8 @@ namespace ccall {
 
 int caller(int x)
 {
+    // test.ccall.sqr calls test_ccall_setGlobal here but C++ impl will not do it to check
+    // if side effect of this function is caused by meta-lang function.
     return test_ccall_sqr(x);
 }
 
@@ -252,6 +260,8 @@ TEST(BuilderTests, imports)
 
 TEST(BuilderTests, ccall)
 {
-    for (int x = -50; x < 50; ++x)
+    for (int x = -50; x < 50; ++x) {
         ASSERT_EQ(test_ccall_caller(x), local::ccall::caller(x)) << "x: " << x;
+        ASSERT_EQ(global, x) << "x: " << x;
+    }
 }
