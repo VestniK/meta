@@ -22,6 +22,8 @@
 
 #include <string>
 
+#include <boost/optional.hpp>
+
 #include "parser/declaration.h"
 #include "parser/metaparser.h"
 #include "parser/typed.h"
@@ -47,6 +49,9 @@ public:
     const std::string &retType() const {return mRetType;}
     const std::string &package() const {return mPackage;}
     void setPackage(const std::string &pkg) {mPackage = pkg;}
+    void setMangledName(const std::string &val) {mMangledName = val;}
+    void setMangledName(std::nullptr_t) {mMangledName = boost::none;}
+    const std::string *mangledName() const {return mMangledName.get_ptr();}
     std::vector<VarDecl*> args();
     CodeBlock *body();
 
@@ -60,6 +65,7 @@ private:
     std::string mPackage;
     std::string mName;
     std::string mRetType;
+    boost::optional<std::string> mMangledName;
     Visibility mVisibility = Visibility::Default;
     int mAttributes = 0;
 

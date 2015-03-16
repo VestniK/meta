@@ -30,6 +30,9 @@ std::string mangledName(meta::Function *func)
 {
     if (func->is(meta::Function::entrypoint))
         return "main";
+    if (func->mangledName() != nullptr)
+        return *func->mangledName();
+    // Perform mangling based on regular rules
     std::string res = func->package() + '_' + func->name();
     for (auto &symb : res)
         symb = symb == '.' ? '_' : symb;
