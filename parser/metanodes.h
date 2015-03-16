@@ -34,6 +34,7 @@
 #include "parser/prefixop.h"
 #include "parser/return.h"
 #include "parser/sourcefile.h"
+#include "parser/strliteral.h"
 #include "parser/var.h"
 #include "parser/vardecl.h"
 

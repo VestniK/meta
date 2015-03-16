@@ -1,6 +1,7 @@
 <identifier> -> letter(letter|digit)*
 <annotation> -> '@'<identifier>
 <num> -> digit+
+<str> -> '"'strchar*'"'
 <eof> -> 0 // end of input
 
 digit -> {'0'..'9'}
@@ -11,6 +12,11 @@ letter -> {'a'..'z' | 'A'..'Z' | '_'}
 {commentblock} -> '/' '*' na* '*'+ (nans na* '*'+)* '/'
 
 any -> { 1..255 }
+strchar -> '\' '\'
+        -> '\' '"'
+        -> strany
+strany -> { any - '"' - \n }
+
 neol -> { any - \r - \n }
 na -> { any - '*' }
 nans -> { na - '/' }

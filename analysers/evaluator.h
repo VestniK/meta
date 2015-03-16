@@ -43,6 +43,7 @@ public:
     // Value providers
     virtual Value number(meta::Number *node) = 0;
     virtual Value literal(meta::Literal *node) = 0;
+    virtual Value strLiteral(meta::StrLiteral *node) = 0;
     virtual Value var(meta::Var *node) = 0;
     // Operations on values
     virtual Value call(meta::Call *node, const std::vector<Value> &args) = 0;

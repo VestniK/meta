@@ -109,6 +109,12 @@ llvm::Value *ModuleBuilder::literal(meta::Literal *node)
     return nullptr;
 }
 
+llvm::Value *ModuleBuilder::strLiteral(meta::StrLiteral *node)
+{
+    // TODO: better string needed
+    return llvm::ConstantDataArray::getString(env.context, llvm::StringRef(node->value().data(), node->value().size()));
+}
+
 llvm::Value *ModuleBuilder::var(meta::Var *node)
 {
     assert(node->declaration());

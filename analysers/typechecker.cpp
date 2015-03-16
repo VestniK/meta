@@ -67,6 +67,11 @@ public:
         }
         return node->type();
     }
+    virtual const typesystem::Type *strLiteral(meta::StrLiteral *node) override
+    {
+        node->setType(mTypes.getPrimitive(typesystem::Type::String));
+        return node->type();
+    }
     virtual const typesystem::Type *var(meta::Var *node) override
     {
         PRECONDITION(node->declaration() != nullptr);

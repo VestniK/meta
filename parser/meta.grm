@@ -1,6 +1,7 @@
 // Named const for useful terminals
 identifier <identifier>;
 annotation <annotation>;
+strLiteral <str>;
 
 trueVal 'true';
 falseVal 'false';
@@ -66,6 +67,7 @@ Type -> 'int'
      -> 'bool'
      -> 'auto'
      -> 'void'
+     -> 'string'
      -> <identifier>
 
 Statement -> CodeBlock
@@ -96,6 +98,7 @@ UnaryExpr -> '+' UnaryExpr +> PrefixOp
           -> '-' UnaryExpr +> PrefixOp
           -> '!' UnaryExpr +> PrefixOp
           -> <num> +> Number
+          -> <str> +> StrLiteral
           -> ValueLiteral
           -> Var  +> Var
           -> '(' Expr ')'

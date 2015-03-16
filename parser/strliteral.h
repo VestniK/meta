@@ -17,41 +17,28 @@
  *
  */
 
-#ifndef TYPE_H
-#define TYPE_H
+#ifndef STRING_H
+#define STRING_H
 
-#include <memory>
 #include <string>
-#include <vector>
 
-namespace typesystem {
+#include "parser/metaparser.h"
+#include "parser/typed.h"
 
-class Type {
+namespace meta {
+
+class StrLiteral: public Node, public Typed
+{
+meta_NODE
 public:
-    enum TypeClass {
-        numeric = (1 << 5),
-        boolean = (1 << 6),
-        primitive = (1 << 7)
-    };
+    StrLiteral(const StackFrame *reduction, size_t size);
 
-    enum TypeId {
-        // incomplete types
-        Auto = -1,
+    const std::string &value() const {return mVal;}
 
-        // Built in types
-        Void = 0,
-        Int = (1 | numeric | primitive),
-        Bool = (boolean | primitive),
-        String = primitive
-    };
-
-    virtual std::string name() const = 0;
-    virtual TypeId typeId() const = 0;
-    virtual bool is(TypeClass type) const;
-
-    virtual ~Type() {}
+private:
+    std::string mVal;
 };
 
-} // namespace typesystem
+} // namespace meta
 
-#endif
+#endif // STRING_H

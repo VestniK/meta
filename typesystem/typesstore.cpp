@@ -36,6 +36,7 @@ public:
             case Void: return "void"; break;
             case Int: return "int"; break;
             case Bool: return "bool"; break;
+            case String: return "string"; break;
         }
         assert(false);
         return "";
@@ -54,7 +55,7 @@ namespace typesystem {
 TypesStore::TypesStore()
 {
     Type::TypeId primitives[] = {
-        Type::Auto, Type::Void, Type::Int, Type::Bool
+        Type::Auto, Type::Void, Type::Int, Type::Bool, Type::String
     };
     for (auto primitive : primitives) {
         auto type = new PrimitiveType(primitive);

@@ -20,6 +20,7 @@ set(SRC
   prefixop.cpp
   return.cpp
   sourcefile.cpp
+  strliteral.cpp
   var.cpp
   vardecl.cpp
   visibility.cpp

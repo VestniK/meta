@@ -76,6 +76,7 @@ llvm::Type *Environment::getType(const typesystem::Type *type)
     switch (type->typeId()) {
         case typesystem::Type::Int: return llvm::Type::getInt32Ty(context);
         case typesystem::Type::Bool: return llvm::Type::getInt1Ty(context);
+        case typesystem::Type::String: return llvm::Type::getInt8PtrTy(context); // TODO: proper type needed
 
         case typesystem::Type::Auto: assert(false);
         case typesystem::Type::Void: return llvm::Type::getVoidTy(context);

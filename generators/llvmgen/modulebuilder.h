@@ -31,6 +31,7 @@ public:
     // Value providers
     virtual llvm::Value *number(meta::Number *node) override;
     virtual llvm::Value *literal(meta::Literal *node) override;
+    virtual llvm::Value *strLiteral(meta::StrLiteral *node) override;
     virtual llvm::Value *var(meta::Var *node) override;
     // Operations on values
     virtual llvm::Value *call(meta::Call *node, const std::vector<llvm::Value*> &args) override;
