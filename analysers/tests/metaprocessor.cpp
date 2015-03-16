@@ -30,7 +30,7 @@ TEST(MetaProcessor, attribute)
     const char *input = R"META(
         package test;
 
-        @entryPoint
+        @entrypoint
         int foo() {return 0;}
 
         int bar() {return 1;}
@@ -46,8 +46,8 @@ TEST(MetaProcessor, attribute)
     auto functions = ast->getChildren<meta::Function>(-1);
     ASSERT_EQ(functions.size(), 2);
     ASSERT_EQ(functions[0]->name(), "foo");
-    ASSERT_TRUE(functions[0]->is(meta::Function::entryPoint));
+    ASSERT_TRUE(functions[0]->is(meta::Function::entrypoint));
 
     ASSERT_EQ(functions[1]->name(), "bar");
-    ASSERT_FALSE(functions[1]->is(meta::Function::entryPoint));
+    ASSERT_FALSE(functions[1]->is(meta::Function::entrypoint));
 }

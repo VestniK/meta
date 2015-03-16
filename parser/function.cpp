@@ -70,7 +70,7 @@ void Function::set(Function::Attribute attr, bool val)
 }
 
 const Declaration::AttributesMap Function::attrMap{
-    {"entryPoint", [](Declaration *decl){PRECONDITION(decl->asFunction() != nullptr); decl->asFunction()->set(entryPoint);}}
+    {"entrypoint", [](Declaration *decl){PRECONDITION(decl->asFunction() != nullptr); decl->asFunction()->set(entrypoint);}}
 };
 
 } // namespace meta

@@ -37,7 +37,7 @@ public:
 
     enum Attribute {
         invalid = 0,
-        entryPoint = (1<<0)
+        entrypoint = (1<<0)
     };
 
     virtual const Declaration::AttributesMap &attributes() const override {return attrMap;}
