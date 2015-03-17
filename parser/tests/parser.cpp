@@ -34,6 +34,7 @@
 #include "parser/import.h"
 #include "parser/function.h"
 #include "parser/metaparser.h"
+#include "parser/strliteral.h"
 #include "parser/return.h"
 #include "parser/vardecl.h"
 
@@ -579,6 +580,39 @@ TEST(Parser, multipleFiles) {
     ASSERT_EQ(foo->sourcePath(), "src1");
     ASSERT_NE(bar, nullptr);
     ASSERT_EQ(bar->sourcePath(), "src2");
+}
+
+namespace {
+
+template<size_t N>
+inline std::vector<char> str2buf(const char (&str)[N])
+{
+    return std::vector<char>(str, str + N - 1); // ignore auto assigned zero terminator
+}
+
+}
+
+TEST(Parser, stringLiteral) {
+    const char *input = R"META(
+        package test;
+        string foo() {
+            return "Hello World";
+        }
+        string escaped() {
+            return "\t \n \r \a \b \f \\ \" \0";
+        }
+    )META";
+
+    meta::Parser parser;
+    meta::Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+
+    auto strs = parser.ast()->getChildren<meta::StrLiteral>(-1);
+    ASSERT_EQ(strs.size(), 2);
+    ASSERT_EQ(strs[0]->value(), str2buf("Hello World"));
+    ASSERT_EQ(strs[1]->value(), str2buf("\t \n \r \a \b \f \\ \" \0"));
 }
 
 namespace {

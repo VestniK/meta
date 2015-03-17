@@ -20,7 +20,7 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include <string>
+#include <vector>
 
 #include "parser/metaparser.h"
 #include "parser/typed.h"
@@ -33,10 +33,10 @@ meta_NODE
 public:
     StrLiteral(const StackFrame *reduction, size_t size);
 
-    const std::string &value() const {return mVal;}
+    const std::vector<char> &value() const {return mVal;}
 
 private:
-    std::string mVal;
+    std::vector<char> mVal;
 };
 
 } // namespace meta

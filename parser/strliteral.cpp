@@ -36,20 +36,21 @@ StrLiteral::StrLiteral(const StackFrame *reduction, size_t size): Node(reduction
         }
         if (escape) {
             switch (*cur) {
-                case '\\': mVal += '\\'; break;
-                case '"': mVal += '"'; break;
-                case 'n': mVal += '\n'; break;
-                case 'r': mVal += '\r'; break;
-                case 't': mVal += '\t'; break;
-                case 'a': mVal += '\a'; break;
-                case 'b': mVal += '\b'; break;
-                case 'f': mVal += '\f'; break;
-                case '0': mVal += '\0'; break;
-                default: mVal += '\\'; mVal += *cur;
+                case '\\': mVal.push_back('\\'); break;
+                case '"': mVal.push_back('"'); break;
+                case 'n': mVal.push_back('\n'); break;
+                case 'r': mVal.push_back('\r'); break;
+                case 't': mVal.push_back('\t'); break;
+                case 'a': mVal.push_back('\a'); break;
+                case 'b': mVal.push_back('\b'); break;
+                case 'f': mVal.push_back('\f'); break;
+                case '0': mVal.push_back('\0'); break;
+                default: mVal.push_back('\\'); mVal.push_back(*cur);
             }
+            escape = false;
             continue;
         }
-        mVal += *cur;
+        mVal.push_back(*cur);
     }
 }
 
