@@ -38,64 +38,83 @@
 
 #include "generators/llvmgen/generator.h"
 
-int main(int argc, char **argv)
+namespace {
+
+enum class ErrorVerbosity
+{
+    silent,
+    brief,
+    lineMarked,
+    expectedTerms,
+    parserStack
+};
+
+const ErrorVerbosity verbosity = ErrorVerbosity::expectedTerms;
+
+}
+
+int main(int argc, char **argv) try
 {
     if (argc < 3) {
         std::cerr << "Ussage: " << argv[0] << " SRC_FILE... OUTPUT" << std::endl;
         return EXIT_FAILURE;
     }
-    const enum ErrorVerbosity {silent, brief, lineMarked, expectedTerms, parserStack} verbosity = expectedTerms;
-    try {
-        // parse
-        const int srcCount = argc - 2; // ommit argv[0] == 'self path' and argv[argc - 1] == 'output file'
-        std::vector<char> input[srcCount];
-        meta::Parser parser;
-        meta::Actions act;
-        parser.setParseActions(&act);
-        parser.setNodeActions(&act);
-        for (int i = 0; i < srcCount; ++i) {
-            readWholeFile(argv[i + 1], input[i]);
-            parser.setSourcePath(argv[i + 1]);
-            parser.parse(input[i].data(), input[i].size());
-        }
-        auto ast = parser.ast();
-        // analyse
-        analysers::resolve(ast, act.dictionary());
-        typesystem::TypesStore typestore;
-        analysers::checkTypes(ast, typestore);
-        analysers::checkReachability(ast);
-        analysers::processMeta(ast);
-        // generate
-        std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
-        gen->generate(ast, argv[srcCount + 1]);
-    } catch(const meta::SyntaxError &err) {
-        if (verbosity > silent)
-            std::cerr << err.sourcePath() << ':' << err.token().line << ':' << err.token().column << ": " << err.what();
-        if (verbosity == brief)
-            std::cerr << std::endl;
-        if (verbosity > brief) {
-            std::cerr << ':' << std::endl;
-            std::cerr << err.line() << std::endl;
-        }
-        if (verbosity > lineMarked)
-            std::cerr << "Expected one of the following terms:" << std::endl << err.expected();
-        if (verbosity > expectedTerms)
-            std::cerr << "Parser stack dump:" << std::endl << err.parserStack();
-        return EXIT_FAILURE;
-    } catch(const analysers::SemanticError &err) {
-        if (verbosity > silent)
-            std::cerr << err.sourcePath() << ':' << err.tokens().begin()->line << ':' << err.tokens().begin()->column << ": " << err.what() << (verbosity == brief ? "" : ":") << std::endl;
-        if (verbosity > brief) {
-            std::cerr << err.tokens().lineStr() << "..." << std::endl;
-            for (int i = 1; i < err.tokens().colnum(); ++i)
-                std::cerr << ' ';
-            std::cerr << '^' << std::endl;
-        }
-        return EXIT_FAILURE;
-    } catch(const std::exception &err) {
-        std::cerr << "Internal compiler error: " << err.what() << std::endl;
-        return EXIT_FAILURE;
+    // parse
+    const int srcCount = argc - 2; // ommit argv[0] == 'self path' and argv[argc - 1] == 'output file'
+    std::vector<char> input[srcCount];
+    meta::Parser parser;
+    meta::Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    for (int i = 0; i < srcCount; ++i) {
+        readWholeFile(argv[i + 1], input[i]);
+        parser.setSourcePath(argv[i + 1]);
+        parser.parse(input[i].data(), input[i].size());
     }
-
+    auto ast = parser.ast();
+    // analyse
+    analysers::resolve(ast, act.dictionary());
+    typesystem::TypesStore typestore;
+    analysers::checkTypes(ast, typestore);
+    analysers::checkReachability(ast);
+    analysers::processMeta(ast);
+    // generate
+    std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
+    gen->generate(ast, argv[srcCount + 1]);
     return EXIT_SUCCESS;
+} catch(const meta::SyntaxError &err) {
+    if (verbosity > ErrorVerbosity::silent) {
+        std::cerr <<
+            err.sourcePath() << ':' << err.token().line << ':' <<
+            err.token().column << ": " << err.what()
+        ;
+    }
+    if (verbosity == ErrorVerbosity::brief)
+        std::cerr << std::endl;
+    if (verbosity > ErrorVerbosity::brief) {
+        std::cerr << ':' << std::endl;
+        std::cerr << err.line() << std::endl;
+    }
+    if (verbosity > ErrorVerbosity::lineMarked)
+        std::cerr << "Expected one of the following terms:" << std::endl << err.expected();
+    if (verbosity > ErrorVerbosity::expectedTerms)
+        std::cerr << "Parser stack dump:" << std::endl << err.parserStack();
+    return EXIT_FAILURE;
+} catch(const analysers::SemanticError &err) {
+    if (verbosity > ErrorVerbosity::silent)
+        std::cerr <<
+            err.sourcePath() << ':' << err.tokens().begin()->line <<
+            ':' << err.tokens().begin()->column << ": " << err.what() <<
+            (verbosity == ErrorVerbosity::brief ? "" : ":") << std::endl
+        ;
+    if (verbosity > ErrorVerbosity::brief) {
+        std::cerr << err.tokens().lineStr() << "..." << std::endl;
+        for (int i = 1; i < err.tokens().colnum(); ++i)
+            std::cerr << ' ';
+        std::cerr << '^' << std::endl;
+    }
+    return EXIT_FAILURE;
+} catch(const std::exception &err) {
+    std::cerr << "Internal compiler error: " << err.what() << std::endl;
+    return EXIT_FAILURE;
 }
