@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstdio>
 #include <stdexcept>
+#include <system_error>
 #include <vector>
 
 #include <llvm/IR/LLVMContext.h>
@@ -190,12 +191,12 @@ llvm::Value *ModuleBuilder::prefixOp(meta::PrefixOp *node, llvm::Value *val)
 
 void ModuleBuilder::save(const std::string &path)
 {
-    std::string errBuf;
-    llvm::raw_fd_ostream out(path.c_str(), errBuf, llvm::sys::fs::F_None);
+    std::error_code errCode;
+    llvm::raw_fd_ostream out(path.c_str(), errCode, llvm::sys::fs::F_None);
     llvm::WriteBitcodeToFile(env.module.get(), out);
     out.close();
     if (out.has_error())
-        throw std::runtime_error(errBuf);
+        throw std::system_error(errCode);
 }
 
 } // namespace llvmgen
