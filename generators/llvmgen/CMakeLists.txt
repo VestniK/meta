@@ -5,7 +5,6 @@ add_definitions(-DLLVMGEN_BUILD) # used for private headers check
 include_directories(${LLVM_INCLUDE_DIRS})
 link_directories(${LLVM_LIBRARY_DIRS})
 
-get_system_libs(LLVM_DEPS)
 set(LLVM_DEPS ${LLVM_DEPS} curses dl)
 set(LLVM_REQUIRED_LIBS LLVMBitWriter LLVMCore LLVMSupport)
 

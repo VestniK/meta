@@ -12,7 +12,7 @@ set(meta_SRC
 )
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test.bc
-  COMMAND meta ${meta_SRC} ${CMAKE_CURRENT_BINARY_DIR}/test.bc
+  COMMAND meta ${meta_SRC} -o ${CMAKE_CURRENT_BINARY_DIR}/test.bc
   MAIN_DEPENDENCY ${meta_SRC}
   DEPENDS meta
 )

@@ -23,6 +23,8 @@
 #include <iostream>
 #include <vector>
 
+#include <boost/program_options.hpp>
+
 #include "fs/io.h"
 
 #include "parser/actions.h"
@@ -38,8 +40,6 @@
 
 #include "generators/llvmgen/generator.h"
 
-namespace {
-
 enum class ErrorVerbosity
 {
     silent,
@@ -49,27 +49,85 @@ enum class ErrorVerbosity
     parserStack
 };
 
-const ErrorVerbosity verbosity = ErrorVerbosity::expectedTerms;
+struct Options {
+    ErrorVerbosity verbosity = ErrorVerbosity::expectedTerms;
+    std::string output;
+    std::vector<std::string> sources;
+};
 
+namespace po = boost::program_options;
+
+std::istream& operator>> (std::istream &in, ErrorVerbosity &verbosity)
+{
+    std::string str;
+    in >> str;
+    if (str == "silent")
+        verbosity = ErrorVerbosity::silent;
+    else if (str == "brief")
+        verbosity = ErrorVerbosity::brief;
+    else if (str == "lineMarked")
+        verbosity = ErrorVerbosity::lineMarked;
+    else if (str == "expectedTerms")
+        verbosity = ErrorVerbosity::expectedTerms;
+    else if (str == "parserStack")
+        verbosity = ErrorVerbosity::parserStack;
+    else
+        throw po::invalid_option_value(str);
+    return in;
 }
 
-int main(int argc, char **argv) try
+
+bool run(const Options &opts);
+
+int main(int argc, char **argv)
 {
-    if (argc < 3) {
-        std::cerr << "Ussage: " << argv[0] << " SRC_FILE... OUTPUT" << std::endl;
+    Options opts;
+    po::options_description desc("Command line options");
+    desc.add_options()
+        ("help,h", "Show help")
+        ("version,v", "Show version")
+        ("output,o", po::value<std::string>(&opts.output), "Specify output file path")
+        ("verbosity", po::value<ErrorVerbosity>(&opts.verbosity), "Error description verbosity: silent, brief, lineMarked, expectedTerms(default), parserStack")
+        ("src", po::value<std::vector<std::string>>(&opts.sources), "Sources to compile")
+    ;
+    po::positional_options_description pos;
+    pos.add("src", -1);
+    try {
+        auto parseRes = po::command_line_parser(argc, argv).options(desc).positional(pos).run();
+        po::variables_map vm;
+        po::store(parseRes, vm);
+        po::notify(vm);
+        if (vm.count("help") != 0) {
+            std::cout << "Ussage: " << argv[0] << " [options] -o OUTPUT SRC_FILE..." << std::endl;
+            std::cout << desc << std::endl;
+            return EXIT_SUCCESS;
+        } else if (vm.count("version") != 0) {
+            std::cout << "0.0.0" << std::endl; // TODO: extract version from git tags
+            return EXIT_SUCCESS;
+        }
+    } catch(std::exception &err) {
+        std::cerr << "Error: " << err.what() << std::endl;
+        std::cerr << "Ussage: " << argv[0] << " [options] -o OUTPUT SRC_FILE..." << std::endl;
+        std::cerr << desc << std::endl;
         return EXIT_FAILURE;
     }
+    return run(opts) ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+
+bool run(const Options &opts) try
+{
     // parse
-    const int srcCount = argc - 2; // ommit argv[0] == 'self path' and argv[argc - 1] == 'output file'
-    std::vector<char> input[srcCount];
+    std::vector<std::vector<char>> input;
+    input.reserve(opts.sources.size());
     meta::Parser parser;
     meta::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    for (int i = 0; i < srcCount; ++i) {
-        readWholeFile(argv[i + 1], input[i]);
-        parser.setSourcePath(argv[i + 1]);
-        parser.parse(input[i].data(), input[i].size());
+    for (const auto &src: opts.sources) {
+        input.push_back(std::vector<char>());
+        readWholeFile(src, input.back());
+        parser.setSourcePath(src);
+        parser.parse(input.back().data(), input.back().size());
     }
     auto ast = parser.ast();
     // analyse
@@ -80,41 +138,41 @@ int main(int argc, char **argv) try
     analysers::processMeta(ast);
     // generate
     std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
-    gen->generate(ast, argv[srcCount + 1]);
-    return EXIT_SUCCESS;
+    gen->generate(ast, opts.output);
+    return true;
 } catch(const meta::SyntaxError &err) {
-    if (verbosity > ErrorVerbosity::silent) {
+    if (opts.verbosity > ErrorVerbosity::silent) {
         std::cerr <<
             err.sourcePath() << ':' << err.token().line << ':' <<
             err.token().column << ": " << err.what()
         ;
     }
-    if (verbosity == ErrorVerbosity::brief)
+    if (opts.verbosity == ErrorVerbosity::brief)
         std::cerr << std::endl;
-    if (verbosity > ErrorVerbosity::brief) {
+    if (opts.verbosity > ErrorVerbosity::brief) {
         std::cerr << ':' << std::endl;
         std::cerr << err.line() << std::endl;
     }
-    if (verbosity > ErrorVerbosity::lineMarked)
+    if (opts.verbosity > ErrorVerbosity::lineMarked)
         std::cerr << "Expected one of the following terms:" << std::endl << err.expected();
-    if (verbosity > ErrorVerbosity::expectedTerms)
+    if (opts.verbosity > ErrorVerbosity::expectedTerms)
         std::cerr << "Parser stack dump:" << std::endl << err.parserStack();
-    return EXIT_FAILURE;
+    return false;
 } catch(const analysers::SemanticError &err) {
-    if (verbosity > ErrorVerbosity::silent)
+    if (opts.verbosity > ErrorVerbosity::silent)
         std::cerr <<
             err.sourcePath() << ':' << err.tokens().begin()->line <<
             ':' << err.tokens().begin()->column << ": " << err.what() <<
-            (verbosity == ErrorVerbosity::brief ? "" : ":") << std::endl
+            (opts.verbosity == ErrorVerbosity::brief ? "" : ":") << std::endl
         ;
-    if (verbosity > ErrorVerbosity::brief) {
+    if (opts.verbosity > ErrorVerbosity::brief) {
         std::cerr << err.tokens().lineStr() << "..." << std::endl;
         for (int i = 1; i < err.tokens().colnum(); ++i)
             std::cerr << ' ';
         std::cerr << '^' << std::endl;
     }
-    return EXIT_FAILURE;
+    return false;
 } catch(const std::exception &err) {
     std::cerr << "Internal compiler error: " << err.what() << std::endl;
-    return EXIT_FAILURE;
+    return false;
 }

@@ -1,6 +1,8 @@
 project(meta)
 cmake_minimum_required(VERSION 2.8)
 
+find_package(Boost COMPONENTS program_options REQUIRED)
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -16,5 +18,5 @@ add_subdirectory(analysers)
 add_subdirectory(generators)
 
 add_executable(meta main.cpp)
-target_link_libraries(meta parser fs analysers llvmgenerator)
+target_link_libraries(meta parser fs analysers llvmgenerator ${Boost_LIBRARIES})
 install(TARGETS meta RUNTIME DESTINATION bin)
