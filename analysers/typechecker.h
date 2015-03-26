@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef TYPE_CHECKER_H
-#define TYPE_CHECKER_H
+#pragma once
 
 namespace meta {
 class AST;
@@ -32,5 +30,3 @@ namespace analysers {
 void checkTypes(meta::AST *ast, typesystem::TypesStore &types);
 
 } // namespace analysers
-
-#endif //TYPE_CHECKER_H

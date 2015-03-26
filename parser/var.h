@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef VAR_H
-#define VAR_H
+#pragma once
 
 #include <string>
 
@@ -42,5 +40,3 @@ private:
 };
 
 }
-
-#endif // VAR_H

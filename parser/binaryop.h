@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef BINARY_OP_H
-#define BINARY_OP_H
+#pragma once
 
 #include "parser/metaparser.h"
 #include "parser/typed.h"
@@ -46,5 +44,3 @@ private:
 };
 
 } // namespace meta
-
-#endif // BINARY_OP_H

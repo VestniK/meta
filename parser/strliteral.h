@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef STRING_H
-#define STRING_H
+#pragma once
 
 #include <vector>
 
@@ -40,5 +38,3 @@ private:
 };
 
 } // namespace meta
-
-#endif // STRING_H

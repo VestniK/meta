@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef TYPESSTORE_H
-#define TYPESSTORE_H
+#pragma once
 
 #include <map>
 #include <memory>
@@ -43,5 +41,3 @@ private:
 };
 
 } // namespace typesystem
-
-#endif // TYPESSTORE_H

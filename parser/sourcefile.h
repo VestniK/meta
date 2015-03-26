@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef META_SOURCEFILE_H
-#define META_SOURCEFILE_H
+#pragma once
 
 #include "parser/metaparser.h"
 
@@ -38,5 +36,3 @@ private:
 };
 
 } // namespace meta
-
-#endif // META_SOURCEFILE_H

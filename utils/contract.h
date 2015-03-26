@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef CONTRACT_H
-#define CONTRACT_H
+#pragma once
 
 #if defined(NDEBUG)
 
@@ -61,5 +59,3 @@ private:
 #define POSTCONDITION(cond) PostCondRunner CONCAT(postcond, __LINE__) ([&](){return (cond);}, __PRETTY_FUNCTION__, #cond)
 
 #endif // NDEBUG
-
-#endif // CONTRACT_H

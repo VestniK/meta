@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef ANALYSERS_REACHABILITYCHECKER_H
-#define ANALYSERS_REACHABILITYCHECKER_H
+#pragma once
 
 #include "parser/metaparser.h"
 
@@ -28,5 +26,3 @@ namespace analysers
 void checkReachability(meta::AST *ast);
 
 }
-
-#endif // ANALYSERS_REACHABILITYCHECKER_H

@@ -16,10 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef PRIVATE_HEADER_CHECK_H
-#define PRIVATE_HEADER_CHECK_H
-#    ifndef LLVMGEN_BUILD
-#        error This header is private header of the LLVM generator and should not be used outside of the llvmgenerator library sources!
-#    endif
-#endif // PRIVATE_HEADER_CHECK_H
+#pragma once
+#ifndef LLVMGEN_BUILD
+#    error This header is private header of the LLVM generator and should not be used outside of the llvmgenerator library sources!
+#endif

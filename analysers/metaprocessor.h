@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef METAPROCESSOR_H
-#define METAPROCESSOR_H
+#pragma once
 
 namespace meta {
     class AST;
@@ -29,5 +27,3 @@ namespace analysers {
 void processMeta(meta::AST *ast);
 
 } // namespace analysers
-
-#endif // METAPROCESSOR_H

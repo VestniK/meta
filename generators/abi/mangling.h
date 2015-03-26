@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef MANGLING_H
-#define MANGLING_H
+#pragma once
 
 #include <string>
 
@@ -33,5 +31,3 @@ std::string mangledName(meta::Function *func);
 
 } // namespace abi
 } // namespace generators
-
-#endif // MANGLING_H

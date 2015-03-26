@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef LITERAL_H
-#define LITERAL_H
+#pragma once
 
 #include "parser/metaparser.h"
 #include "parser/typed.h"
@@ -42,5 +40,3 @@ private:
 };
 
 } // namespace meta
-
-#endif // LITERAL_H

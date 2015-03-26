@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef RESOLVER_H
-#define RESOLVER_H
+#pragma once
 
 #include "parser/dictionary.h"
 
@@ -31,5 +29,3 @@ namespace analysers {
 void resolve(meta::AST *ast, meta::Dictionary &dict);
 
 } // namespace analysers
-
-#endif // RESOLVER_H

@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef SEMANTICERROR_H
-#define SEMANTICERROR_H
+#pragma once
 
 #include <exception>
 #include <string>
@@ -51,5 +49,3 @@ private:
 };
 
 } // namespace analysers
-
-#endif // SEMANTICERROR_H

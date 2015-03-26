@@ -16,13 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef FS_IO_H
-#define FS_IO_H
+#pragma once
 
 #include <string>
 #include <vector>
 
 void readWholeFile(const std::string &path, std::vector<char> &dst);
-
-#endif // FS_IO_H

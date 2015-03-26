@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef ENVIRONMENT_H
-#define ENVIRONMENT_H
+#pragma once
 
 #include <memory>
 
@@ -63,6 +61,3 @@ struct Environment
 
 } // namespace llvmgen
 } // namespace generators
-
-#endif // ENVIRONMENT_H
-

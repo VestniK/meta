@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef TYPE_H
-#define TYPE_H
+#pragma once
 
 #include <memory>
 #include <string>
@@ -53,5 +51,3 @@ public:
 };
 
 } // namespace typesystem
-
-#endif

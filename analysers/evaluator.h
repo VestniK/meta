@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef EVALUATOR_H
-#define EVALUATOR_H
+#pragma once
 
 #include <cassert>
 #include <stack>
@@ -136,5 +134,3 @@ private:
 };
 
 } // namespace analysers
-
-#endif // EVALUATOR_H

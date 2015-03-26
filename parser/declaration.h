@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef DECLARATION_H
-#define DECLARATION_H
+#pragma once
 
 #include <functional>
 #include <map>
@@ -41,5 +39,3 @@ protected:
 };
 
 } // namespace meta
-
-#endif // DECLARATION_H

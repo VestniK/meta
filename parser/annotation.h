@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef ANNOTATION_H
-#define ANNOTATION_H
+#pragma once
 
 #include <string>
 
@@ -45,5 +43,3 @@ private:
 };
 
 } // namespace meta
-
-#endif // ANNOTATION_H

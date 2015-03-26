@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef TYPED_H
-#define TYPED_H
+#pragma once
 
 namespace typesystem {
 class Type;
@@ -39,5 +37,3 @@ private:
 };
 
 } // namespace meta
-
-#endif

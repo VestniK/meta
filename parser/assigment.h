@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef ASSIGMENT_H
-#define ASSIGMENT_H
+#pragma once
 
 #include "parser/metaparser.h"
 
@@ -40,5 +38,3 @@ private:
 };
 
 }
-
-#endif // ASSIGMENT_H

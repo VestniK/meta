@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef GENERATORS_GENERATOR_H
-#define GENERATORS_GENERATOR_H
+#pragma once
 
 #include <memory>
 #include <string>
@@ -41,5 +39,3 @@ protected:
 };
 
 } // namespace generators
-
-#endif // GENERATORS_GENERATOR_H

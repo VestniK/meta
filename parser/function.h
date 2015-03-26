@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef FUNCTION_H
-#define FUNCTION_H
+#pragma once
 
 #include <string>
 
@@ -73,6 +71,3 @@ private:
 };
 
 } // namespace meta
-
-#endif // FUNCTION_H
-

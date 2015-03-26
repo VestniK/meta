@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef ACTIONS_H
-#define ACTIONS_H
+#pragma once
 
 #include <string>
 
@@ -45,5 +43,3 @@ private:
 };
 
 } // namespace meta
-
-#endif // ACTIONS_H

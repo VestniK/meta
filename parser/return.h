@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef RETURN_H
-#define RETURN_H
+#pragma once
 
 #include "parser/metaparser.h"
 
@@ -32,5 +30,3 @@ public:
 };
 
 }
-
-#endif // RETURN_H

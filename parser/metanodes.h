@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef META_NODES_H
-#define META_NODES_H
+#pragma once
 
 #include "parser/annotation.h"
 #include "parser/assigment.h"
@@ -37,5 +35,3 @@
 #include "parser/strliteral.h"
 #include "parser/var.h"
 #include "parser/vardecl.h"
-
-#endif // META_NODES_H

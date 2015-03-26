@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef CODEBLOCK_H
-#define CODEBLOCK_H
+#pragma once
 
 #include "parser/metaparser.h"
 
@@ -34,5 +32,3 @@ public:
 };
 
 } // namespace meta
-
-#endif // CODEBLOCK_H

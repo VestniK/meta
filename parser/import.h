@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef META_IMPORT_H
-#define META_IMPORT_H
+#pragma once
 
 #include <string>
 
@@ -43,5 +41,3 @@ private:
 };
 
 } // namespace meta
-
-#endif // META_IMPORT_H

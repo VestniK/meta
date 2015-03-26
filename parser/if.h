@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef IF_H
-#define IF_H
+#pragma once
 
 #include "parser/metaparser.h"
 
@@ -40,5 +38,3 @@ private:
 };
 
 } // namespace meta
-
-#endif // IF_H

@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef PREFIXOP_H
-#define PREFIXOP_H
+#pragma once
 
 #include "parser/metaparser.h"
 #include "parser/typed.h"
@@ -44,5 +42,3 @@ private:
 };
 
 } // namespace meta
-
-#endif // PREFIXOP_H

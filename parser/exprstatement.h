@@ -16,9 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#ifndef EXPRSTATEMENT_H
-#define EXPRSTATEMENT_H
+#pragma once
 
 #include "parser/metaparser.h"
 
@@ -32,5 +30,3 @@ public:
 };
 
 } // namespace meta
-
-#endif // EXPRSTATEMENT_H
