@@ -17,6 +17,7 @@
  *
  */
 
+#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 
@@ -34,7 +35,12 @@ namespace llvmgen {
 
 Environment::Environment(const std::string& moduleName):
     context(llvm::getGlobalContext()),
-    module(new llvm::Module(moduleName, context))
+    module(new llvm::Module(moduleName, context)),
+    string(llvm::StructType::get(
+        llvm::Type::getInt32PtrTy(context), // refcount ptr
+        llvm::Type::getInt8PtrTy(context), // content ptr
+        llvm::Type::getInt32Ty(context), // size
+    nullptr))
 {
 }
 
@@ -76,7 +82,7 @@ llvm::Type *Environment::getType(const typesystem::Type *type)
     switch (type->typeId()) {
         case typesystem::Type::Int: return llvm::Type::getInt32Ty(context);
         case typesystem::Type::Bool: return llvm::Type::getInt1Ty(context);
-        case typesystem::Type::String: return llvm::Type::getInt8PtrTy(context); // TODO: proper type needed
+        case typesystem::Type::String: return string;
 
         case typesystem::Type::Auto: assert(false);
         case typesystem::Type::Void: return llvm::Type::getVoidTy(context);

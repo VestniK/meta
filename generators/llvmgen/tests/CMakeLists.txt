@@ -14,7 +14,7 @@ set(meta_SRC
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test.bc
   COMMAND meta ${meta_SRC} -o ${CMAKE_CURRENT_BINARY_DIR}/test.bc
   MAIN_DEPENDENCY ${meta_SRC}
-  DEPENDS meta
+  DEPENDS meta ${meta_SRC}
 )
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test.o
   COMMAND ${LLC} -filetype=obj -O=2 ${CMAKE_CURRENT_BINARY_DIR}/test.bc -o ${CMAKE_CURRENT_BINARY_DIR}/test.o

@@ -29,6 +29,7 @@ namespace llvm {
 class LLVMContext;
 class Module;
 class Type;
+class StructType;
 
 }
 
@@ -57,6 +58,7 @@ struct Environment
 
     llvm::LLVMContext &context;
     std::unique_ptr<llvm::Module> module;
+    llvm::StructType *string;
 };
 
 } // namespace llvmgen

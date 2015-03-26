@@ -112,8 +112,11 @@ llvm::Value *ModuleBuilder::literal(meta::Literal *node)
 
 llvm::Value *ModuleBuilder::strLiteral(meta::StrLiteral *node)
 {
-    // TODO: better string needed
-    return llvm::ConstantDataArray::getString(env.context, llvm::StringRef(node->value().data(), node->value().size()));
+    return llvm::ConstantStruct::get(env.string,
+        llvm::ConstantPointerNull::get(llvm::Type::getInt32PtrTy(env.context)), // no refcounter
+        llvm::ConstantDataArray::getString(env.context, llvm::StringRef(node->value().data(), node->value().size()), false), // data
+        llvm::ConstantInt::get(llvm::Type::getInt32Ty(env.context), node->value().size(), false), // size
+    nullptr);
 }
 
 llvm::Value *ModuleBuilder::var(meta::Var *node)
