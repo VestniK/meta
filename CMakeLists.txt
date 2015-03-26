@@ -9,7 +9,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 enable_testing()
 
 include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
-add_definitions(-Wall -Werror -std=c++11)
+add_definitions(-Wall -Werror -std=c++14)
 
 add_subdirectory(fs)
 add_subdirectory(parser)
