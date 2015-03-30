@@ -25,8 +25,8 @@
 
 namespace meta {
 
-Call::Call(const StackFrame* reduction, size_t size):
-    Node(reduction, size),
+Call::Call(const StackFrame *reduction, size_t size):
+    Expression(reduction ,size),
     mFunction(nullptr)
 {
     assert(size == 4);

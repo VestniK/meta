@@ -20,11 +20,11 @@
 
 #include <string>
 
-#include "parser/metaparser.h"
+#include "parser/expression.h"
 
 namespace meta {
 
-class Var: public Node
+class Var: public Expression
 {
 meta_NODE
 public:

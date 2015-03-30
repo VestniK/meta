@@ -18,12 +18,11 @@
  */
 #pragma once
 
-#include "parser/metaparser.h"
-#include "parser/typed.h"
+#include "parser/expression.h"
 
 namespace meta {
 
-class Number: public Node, public Typed
+class Number: public Expression, public Typed
 {
 meta_NODE
 public:

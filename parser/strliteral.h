@@ -20,12 +20,11 @@
 
 #include <vector>
 
-#include "parser/metaparser.h"
-#include "parser/typed.h"
+#include "parser/expression.h"
 
 namespace meta {
 
-class StrLiteral: public Node, public Typed
+class StrLiteral: public Expression, public Typed
 {
 meta_NODE
 public:

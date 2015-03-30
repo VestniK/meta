@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2015  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,24 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#pragma once
 
-#include <cassert>
-
-#include "typesystem/typesstore.h"
-
-#include "parser/literal.h"
+#include "parser/metaparser.h"
+#include "parser/typed.h"
 
 namespace meta {
 
-Literal::Literal(const StackFrame *reduction, size_t size): Expression(reduction, size)
-{
-    assert(size == 1);
-    assert(reduction[0].symbol > 0); // symbol is terminal
-    switch (reduction[0].symbol) {
-        case meta::trueVal: mVal = trueVal; break;
-        case meta::falseVal: mVal = falseVal; break;
-        default: assert(false);
-    }
-}
+class Expression: public Node {
+public:
+protected:
+    Expression(const StackFrame *frame, size_t size): Node(frame, size) {}
+};
 
 } // namespace meta

@@ -23,7 +23,7 @@
 
 namespace meta {
 
-Var::Var(const StackFrame* start, size_t size): Node(start, size)
+Var::Var(const StackFrame *start, size_t size): Expression(start, size)
 {
     assert(size == 1);
     mName = start[0].tokens;

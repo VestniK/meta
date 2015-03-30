@@ -23,7 +23,7 @@
 
 namespace meta {
 
-Assigment::Assigment(const StackFrame* start, size_t size): Node(start, size)
+Assigment::Assigment(const StackFrame* start, size_t size): Expression(start, size)
 {
     assert(size == 3);
     mVarName = start[0].tokens;

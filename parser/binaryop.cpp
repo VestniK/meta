@@ -23,7 +23,7 @@
 
 namespace meta {
 
-BinaryOp::BinaryOp(const StackFrame *reduction, size_t size): Node(reduction, size)
+BinaryOp::BinaryOp(const StackFrame *reduction, size_t size): Expression(reduction ,size)
 {
     assert(size == 3);
     assert(reduction[1].symbol > 0);
