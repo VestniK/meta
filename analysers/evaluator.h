@@ -52,6 +52,7 @@ public:
 
     // Visitor implementation
     virtual void leave(Number *node) override {mStack.top().push_back(number(node));}
+    virtual void leave(StrLiteral *node) override {mStack.top().push_back(strLiteral(node));}
     virtual void leave(Literal *node) override {mStack.top().push_back(literal(node));}
     virtual void leave(Var *node) override {mStack.top().push_back(var(node));}
     virtual bool visit(Return *) override {mStack.push(std::vector<Value>()); return true;}

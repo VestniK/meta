@@ -149,6 +149,26 @@ INSTANTIATE_TEST_CASE_P(typeCheckAndDeduce, TypeCheker, ::testing::Values(
         "package test; auto foo() {auto val = false; if (val) {int x = 5; return x > 2;} else {int y = 7; val = val && y < 5;} return val && true;}",
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("val", typesystem::Type::Bool), NameType("x", typesystem::Type::Int), NameType("y", typesystem::Type::Int)})
+    ),
+    TestData(
+        R"META(package test; auto foo() {auto var = "Hello"; return var;})META",
+        NameTypeList({NameType("foo", typesystem::Type::String)}),
+        NameTypeList({NameType("var", typesystem::Type::String)})
+    ),
+    TestData(
+        R"META(package test; string foo() {auto var = "Hello"; return var;})META",
+        NameTypeList({NameType("foo", typesystem::Type::String)}),
+        NameTypeList({NameType("var", typesystem::Type::String)})
+    ),
+    TestData(
+        R"META(package test; auto foo() {string var = "Hello"; return var;})META",
+        NameTypeList({NameType("foo", typesystem::Type::String)}),
+        NameTypeList({NameType("var", typesystem::Type::String)})
+    ),
+    TestData(
+        R"META(package test; string foo() {string var = "Hello"; return var;})META",
+        NameTypeList({NameType("foo", typesystem::Type::String)}),
+        NameTypeList({NameType("var", typesystem::Type::String)})
     )
 ));
 
