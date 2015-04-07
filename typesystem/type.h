@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 
+namespace meta {
 namespace typesystem {
 
 class Type {
@@ -51,3 +52,4 @@ public:
 };
 
 } // namespace typesystem
+} // namespace meta

@@ -26,12 +26,14 @@
 #include "parser/binaryop.h"
 #include "parser/metaparser.h"
 
+using namespace meta;
+
 namespace {
 
 struct TestData
 {
     const char *expr;
-    std::vector<meta::BinaryOp::Operation> opSequence;
+    std::vector<BinaryOp::Operation> opSequence;
 };
 
 class Priority: public ::testing::TestWithParam<TestData>
@@ -47,51 +49,51 @@ TEST_P(Priority, priority)
     const char *tmpl = "package test; int foo() {return %s;}";
     char input[sizeof(tmpl) + strlen(param.expr)];
     sprintf(input, tmpl, param.expr);
-    meta::Parser parser;
-    meta::Actions act;
+    Parser parser;
+    Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
     auto ast = parser.ast();
-    std::vector<meta::BinaryOp::Operation> opSequence;
-    meta::walkBottomUp<meta::BinaryOp>(*ast, [&](meta::BinaryOp *node) {opSequence.push_back(node->operation());});
+    std::vector<BinaryOp::Operation> opSequence;
+    walkBottomUp<BinaryOp>(*ast, [&](BinaryOp *node) {opSequence.push_back(node->operation());});
     ASSERT_EQ(opSequence, param.opSequence);
 }
 
 INSTANTIATE_TEST_CASE_P(Operations, Priority, ::testing::Values(
-    TestData({"1+2-3+4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::add, meta::BinaryOp::sub, meta::BinaryOp::add})}),
-    TestData({"1-2+3-4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::sub, meta::BinaryOp::add, meta::BinaryOp::sub})}),
+    TestData({"1+2-3+4", std::vector<BinaryOp::Operation>({BinaryOp::add, BinaryOp::sub, BinaryOp::add})}),
+    TestData({"1-2+3-4", std::vector<BinaryOp::Operation>({BinaryOp::sub, BinaryOp::add, BinaryOp::sub})}),
 
-    TestData({"1+2*3+4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::add, meta::BinaryOp::add})}),
-    TestData({"1*2+3*4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::mul, meta::BinaryOp::add})}),
+    TestData({"1+2*3+4", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::add, BinaryOp::add})}),
+    TestData({"1*2+3*4", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::mul, BinaryOp::add})}),
 
-    TestData({"1+2/3+4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::div, meta::BinaryOp::add, meta::BinaryOp::add})}),
-    TestData({"1/2+3/4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::div, meta::BinaryOp::div, meta::BinaryOp::add})}),
+    TestData({"1+2/3+4", std::vector<BinaryOp::Operation>({BinaryOp::div, BinaryOp::add, BinaryOp::add})}),
+    TestData({"1/2+3/4", std::vector<BinaryOp::Operation>({BinaryOp::div, BinaryOp::div, BinaryOp::add})}),
 
-    TestData({"1-2/3-4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::div, meta::BinaryOp::sub, meta::BinaryOp::sub})}),
-    TestData({"1/2-3/4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::div, meta::BinaryOp::div, meta::BinaryOp::sub})}),
+    TestData({"1-2/3-4", std::vector<BinaryOp::Operation>({BinaryOp::div, BinaryOp::sub, BinaryOp::sub})}),
+    TestData({"1/2-3/4", std::vector<BinaryOp::Operation>({BinaryOp::div, BinaryOp::div, BinaryOp::sub})}),
 
-    TestData({"1-2*3-4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::sub, meta::BinaryOp::sub})}),
-    TestData({"1*2-3*4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::mul, meta::BinaryOp::sub})}),
+    TestData({"1-2*3-4", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::sub, BinaryOp::sub})}),
+    TestData({"1*2-3*4", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::mul, BinaryOp::sub})}),
 
-    TestData({"1*2/3*4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::div, meta::BinaryOp::mul})}),
-    TestData({"1/2*3/4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::div, meta::BinaryOp::mul, meta::BinaryOp::div})}),
+    TestData({"1*2/3*4", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::div, BinaryOp::mul})}),
+    TestData({"1/2*3/4", std::vector<BinaryOp::Operation>({BinaryOp::div, BinaryOp::mul, BinaryOp::div})}),
 
-    TestData({"1+2*3>3-4/5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::add, meta::BinaryOp::div, meta::BinaryOp::sub, meta::BinaryOp::greater})}),
-    TestData({"1+2*3>=3-4/5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::add, meta::BinaryOp::div, meta::BinaryOp::sub, meta::BinaryOp::greatereq})}),
-    TestData({"1+2*3<3-4/5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::add, meta::BinaryOp::div, meta::BinaryOp::sub, meta::BinaryOp::less})}),
-    TestData({"1+2*3<=3-4/5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::add, meta::BinaryOp::div, meta::BinaryOp::sub, meta::BinaryOp::lesseq})}),
-    TestData({"1+2*3==3-4/5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::add, meta::BinaryOp::div, meta::BinaryOp::sub, meta::BinaryOp::equal})}),
-    TestData({"1+2*3!=3-4/5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::mul, meta::BinaryOp::add, meta::BinaryOp::div, meta::BinaryOp::sub, meta::BinaryOp::noteq})}),
+    TestData({"1+2*3>3-4/5", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::add, BinaryOp::div, BinaryOp::sub, BinaryOp::greater})}),
+    TestData({"1+2*3>=3-4/5", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::add, BinaryOp::div, BinaryOp::sub, BinaryOp::greatereq})}),
+    TestData({"1+2*3<3-4/5", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::add, BinaryOp::div, BinaryOp::sub, BinaryOp::less})}),
+    TestData({"1+2*3<=3-4/5", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::add, BinaryOp::div, BinaryOp::sub, BinaryOp::lesseq})}),
+    TestData({"1+2*3==3-4/5", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::add, BinaryOp::div, BinaryOp::sub, BinaryOp::equal})}),
+    TestData({"1+2*3!=3-4/5", std::vector<BinaryOp::Operation>({BinaryOp::mul, BinaryOp::add, BinaryOp::div, BinaryOp::sub, BinaryOp::noteq})}),
 
-    TestData({"1<2 == 3<=5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::less, meta::BinaryOp::lesseq, meta::BinaryOp::equal})}),
-    TestData({"1>2 == 3>=5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::greater, meta::BinaryOp::greatereq, meta::BinaryOp::equal})}),
-    TestData({"1<2 != 3<=5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::less, meta::BinaryOp::lesseq, meta::BinaryOp::noteq})}),
-    TestData({"1>2 != 3>=5", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::greater, meta::BinaryOp::greatereq, meta::BinaryOp::noteq})}),
+    TestData({"1<2 == 3<=5", std::vector<BinaryOp::Operation>({BinaryOp::less, BinaryOp::lesseq, BinaryOp::equal})}),
+    TestData({"1>2 == 3>=5", std::vector<BinaryOp::Operation>({BinaryOp::greater, BinaryOp::greatereq, BinaryOp::equal})}),
+    TestData({"1<2 != 3<=5", std::vector<BinaryOp::Operation>({BinaryOp::less, BinaryOp::lesseq, BinaryOp::noteq})}),
+    TestData({"1>2 != 3>=5", std::vector<BinaryOp::Operation>({BinaryOp::greater, BinaryOp::greatereq, BinaryOp::noteq})}),
 
-    TestData({"1 == 2 != 3 == 4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::equal, meta::BinaryOp::noteq, meta::BinaryOp::equal})}),
-    TestData({"1 != 2 == 3 != 4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::noteq, meta::BinaryOp::equal, meta::BinaryOp::noteq})}),
+    TestData({"1 == 2 != 3 == 4", std::vector<BinaryOp::Operation>({BinaryOp::equal, BinaryOp::noteq, BinaryOp::equal})}),
+    TestData({"1 != 2 == 3 != 4", std::vector<BinaryOp::Operation>({BinaryOp::noteq, BinaryOp::equal, BinaryOp::noteq})}),
 
-    TestData({"1 < 2 && 3 != 4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::less, meta::BinaryOp::noteq, meta::BinaryOp::boolAnd})}),
-    TestData({"1+3 != 2 || 3 <= 4", std::vector<meta::BinaryOp::Operation>({meta::BinaryOp::add, meta::BinaryOp::noteq, meta::BinaryOp::lesseq, meta::BinaryOp::boolOr})})
+    TestData({"1 < 2 && 3 != 4", std::vector<BinaryOp::Operation>({BinaryOp::less, BinaryOp::noteq, BinaryOp::boolAnd})}),
+    TestData({"1+3 != 2 || 3 <= 4", std::vector<BinaryOp::Operation>({BinaryOp::add, BinaryOp::noteq, BinaryOp::lesseq, BinaryOp::boolOr})})
 ));

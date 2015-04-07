@@ -28,20 +28,20 @@ BinaryOp::BinaryOp(const StackFrame *reduction, size_t size): Expression(reducti
     assert(size == 3);
     assert(reduction[1].symbol > 0);
     switch (reduction[1].symbol) {
-        case meta::addOp: mOp = add; break;
-        case meta::subOp: mOp = sub; break;
-        case meta::mulOp: mOp = mul; break;
-        case meta::divOp: mOp = div; break;
+        case addOp: mOp = add; break;
+        case subOp: mOp = sub; break;
+        case mulOp: mOp = mul; break;
+        case divOp: mOp = div; break;
 
-        case meta::eqOp: mOp = equal; break;
-        case meta::neqOp: mOp = noteq; break;
-        case meta::lessOp: mOp = less; break;
-        case meta::lesseqOp: mOp = lesseq; break;
-        case meta::greaterOp: mOp = greater; break;
-        case meta::greatereqOp: mOp = greatereq; break;
+        case eqOp: mOp = equal; break;
+        case neqOp: mOp = noteq; break;
+        case lessOp: mOp = less; break;
+        case lesseqOp: mOp = lesseq; break;
+        case greaterOp: mOp = greater; break;
+        case greatereqOp: mOp = greatereq; break;
 
-        case meta::andOp: mOp = boolAnd; break;
-        case meta::orOp: mOp = boolOr; break;
+        case andOp: mOp = boolAnd; break;
+        case orOp: mOp = boolOr; break;
 
         default: assert(false);
     }

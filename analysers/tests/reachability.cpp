@@ -25,6 +25,9 @@
 #include "parser/actions.h"
 #include "parser/metaparser.h"
 
+using namespace meta;
+using namespace meta::analysers;
+
 namespace {
 
 class Reachability: public testing::TestWithParam<const char *>
@@ -36,16 +39,16 @@ public:
 
 TEST_P(Reachability, resolveErrors) {
     const char *input = GetParam();
-    meta::Parser parser;
-    meta::Actions act;
+    Parser parser;
+    Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
     auto ast = parser.ast();
     try {
-        analysers::checkReachability(ast);
+        checkReachability(ast);
         ASSERT_TRUE(false) << "Input code contains unrachable statements however check didn't find them";
-    } catch (analysers::SemanticError &err) {
+    } catch (SemanticError &err) {
         ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << std::string(err.tokens());
         ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << std::string(err.tokens());
     }

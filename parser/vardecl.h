@@ -25,7 +25,7 @@
 
 namespace meta {
 
-class VarDecl: public meta::Node, public Typed
+class VarDecl: public Node, public Typed
 {
 meta_NODE
 public:

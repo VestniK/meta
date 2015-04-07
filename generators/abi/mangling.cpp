@@ -23,12 +23,13 @@
 
 #include "generators/abi/mangling.h"
 
+namespace meta {
 namespace generators {
 namespace abi {
 
-std::string mangledName(meta::Function *func)
+std::string mangledName(Function *func)
 {
-    if (func->is(meta::Function::entrypoint))
+    if (func->is(Function::entrypoint))
         return "main";
     if (func->mangledName() != nullptr)
         return *func->mangledName();
@@ -41,3 +42,4 @@ std::string mangledName(meta::Function *func)
 
 } // namespace abi
 } // namespace generators
+} // namespace meta

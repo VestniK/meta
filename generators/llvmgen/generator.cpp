@@ -3,13 +3,14 @@
 #include "generators/llvmgen/generator.h"
 #include "generators/llvmgen/modulebuilder.h"
 
+namespace meta {
 namespace generators {
 namespace llvmgen {
 
-class LlvmGen: public generators::Generator
+class LlvmGen: public Generator
 {
 public:
-    virtual void generate(meta::AST *ast, const std::string &output) override
+    virtual void generate(AST *ast, const std::string &output) override
     {
         auto pos = output.rfind('/');
         if (pos == std::string::npos)
@@ -21,10 +22,11 @@ public:
     }
 };
 
-generators::Generator *createLlvmGenerator()
+Generator *createLlvmGenerator()
 {
     return new LlvmGen;
 }
 
 } // namespace llvmgen
 } // namespace generator
+} // namespace meta

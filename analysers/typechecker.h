@@ -19,14 +19,17 @@
 #pragma once
 
 namespace meta {
+
 class AST;
-}
+
 namespace typesystem {
 class TypesStore;
 }
 
 namespace analysers {
 
-void checkTypes(meta::AST *ast, typesystem::TypesStore &types);
+void checkTypes(AST *ast, typesystem::TypesStore &types);
 
 } // namespace analysers
+} // namespace meta
+

@@ -14,15 +14,16 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 #pragma once
 
 #include "parser/metaparser.h"
 
-namespace analysers
-{
+namespace meta {
+namespace analysers {
 
-void checkReachability(meta::AST *ast);
+void checkReachability(AST *ast);
 
-}
+} // namespace analysers
+} // namespace meta
+

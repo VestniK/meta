@@ -25,6 +25,9 @@
 
 #include "analysers/metaprocessor.h"
 
+using namespace meta;
+using namespace meta::analysers;
+
 TEST(MetaProcessor, attribute)
 {
     const char *input = R"META(
@@ -35,19 +38,19 @@ TEST(MetaProcessor, attribute)
 
         int bar() {return 1;}
     )META";
-    meta::Parser parser;
-    meta::Actions act;
+    Parser parser;
+    Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     parser.setSourcePath("test.meta");
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
     auto ast = parser.ast();
-    ASSERT_NO_THROW(analysers::processMeta(ast));
-    auto functions = ast->getChildren<meta::Function>(-1);
+    ASSERT_NO_THROW(processMeta(ast));
+    auto functions = ast->getChildren<Function>(-1);
     ASSERT_EQ(functions.size(), 2);
     ASSERT_EQ(functions[0]->name(), "foo");
-    ASSERT_TRUE(functions[0]->is(meta::Function::entrypoint));
+    ASSERT_TRUE(functions[0]->is(Function::entrypoint));
 
     ASSERT_EQ(functions[1]->name(), "bar");
-    ASSERT_FALSE(functions[1]->is(meta::Function::entrypoint));
+    ASSERT_FALSE(functions[1]->is(Function::entrypoint));
 }

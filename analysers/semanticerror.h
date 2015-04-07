@@ -14,7 +14,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 #pragma once
 
@@ -24,28 +23,27 @@
 #include "parser/metalexer.h"
 
 namespace meta {
-
 class Node;
-
-} // namespace meta
 
 namespace analysers {
 
 class SemanticError: public std::exception
 {
 public:
-    SemanticError(meta::Node *node, const char *format, ...) __attribute__((format(printf, 3, 4)));
+    SemanticError(Node *node, const char *format, ...) __attribute__((format(printf, 3, 4)));
     ~SemanticError();
 
     virtual const char *what() const noexcept override;
-    const meta::TokenSequence &tokens() const {return mTokens;}
+    const TokenSequence &tokens() const {return mTokens;}
     const std::string &sourcePath() const {return mSrc;}
 
 private:
     std::string mMsg;
     std::string mErrContext;
-    meta::TokenSequence mTokens;
+    TokenSequence mTokens;
     std::string mSrc;
 };
 
 } // namespace analysers
+} // namespace meta
+

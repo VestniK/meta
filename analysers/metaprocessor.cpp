@@ -14,9 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
-
 #include "utils/contract.h"
 
 #include "parser/annotation.h"
@@ -26,11 +24,12 @@
 #include "analysers/metaprocessor.h"
 #include "analysers/semanticerror.h"
 
+namespace meta {
 namespace analysers {
 
-void processMeta(meta::AST *ast)
+void processMeta(AST *ast)
 {
-    meta::walkTopDown<meta::Annotation>(*ast, [] (meta::Annotation *node) {
+    walkTopDown<Annotation>(*ast, [] (Annotation *node) {
         PRECONDITION(node->target() != nullptr);
 
         /// @todo process user defined metas here
@@ -43,3 +42,5 @@ void processMeta(meta::AST *ast)
 }
 
 } // namespace analysers
+} // namespace meta 
+

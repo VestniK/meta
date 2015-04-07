@@ -21,13 +21,14 @@
 #include <string>
 
 namespace meta {
+
 class Function;
-} // namespace meta
 
 namespace generators {
 namespace abi {
 
-std::string mangledName(meta::Function *func);
+std::string mangledName(Function *func);
 
 } // namespace abi
 } // namespace generators
+} // namespace meta

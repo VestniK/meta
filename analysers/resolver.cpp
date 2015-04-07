@@ -14,9 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
-
 #include <cassert>
 #include <map>
 #include <set>
@@ -35,6 +33,7 @@
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
 
+namespace meta {
 namespace analysers {
 
 namespace
@@ -43,7 +42,7 @@ namespace
 inline
 bool isChildPackage(const std::string &subpkg, const std::string &parentpkg)
 {
-    /// @todo rewrite using meta::TokenSequence
+    /// @todo rewrite using TokenSequence
     if (parentpkg.length() > subpkg.length())
         return false;
     size_t pos = 0;
@@ -56,14 +55,14 @@ bool isChildPackage(const std::string &subpkg, const std::string &parentpkg)
 
 }
 
-class ResolveVisitor: public meta::Visitor
+class ResolveVisitor: public Visitor
 {
 public:
-    ResolveVisitor(meta::AST *ast, meta::Dictionary &dict): mGlobalDict(dict)
+    ResolveVisitor(AST *ast, Dictionary &dict): mGlobalDict(dict)
     {
     }
 
-    virtual bool visit(meta::SourceFile *node) override
+    virtual bool visit(SourceFile *node) override
     {
         mCurrDecls.clear();
         mCurrDecls = mGlobalDict[node->package()];
@@ -71,15 +70,15 @@ public:
         return true;
     }
 
-    virtual void leave(meta::Import *node) override
+    virtual void leave(Import *node) override
     {
         if (node->targetPackage() == mCurrSrcPackage)
             return;
         for (auto it = mGlobalDict[node->targetPackage()].lower_bound(node->target()); it != mGlobalDict[node->targetPackage()].upper_bound(node->target()); ++it) {
-            meta::Function *func = it->second;
-            if (func->visibility() == meta::Visibility::Private)
+            Function *func = it->second;
+            if (func->visibility() == Visibility::Private)
                 throw SemanticError(node, "Can't import private declaration '%s.%s'", func->package().c_str(), func->name().c_str());
-            if (func->visibility() == meta::Visibility::Protected && !isChildPackage(mCurrSrcPackage, node->targetPackage()))
+            if (func->visibility() == Visibility::Protected && !isChildPackage(mCurrSrcPackage, node->targetPackage()))
                 throw SemanticError(
                     node, "Can't import protected declaration '%s.%s' from package '%s' which is not a subpackage of '%s'",
                     func->package().c_str(), func->name().c_str(), mCurrSrcPackage.c_str(), node->targetPackage().c_str()
@@ -89,7 +88,7 @@ public:
         }
     }
 
-    virtual bool visit(meta::Call *node) override
+    virtual bool visit(Call *node) override
     {
         assert(mCurrDecls.count(node->functionName()) == 1); /// @todo support for function overloads instead of assert here!!!
         auto it = mCurrDecls.lower_bound(node->functionName());
@@ -97,17 +96,17 @@ public:
             throw SemanticError(node, "Unresolved function call '%s'", node->functionName().c_str());
         node->setFunction(it->second); /// @todo: handle overloads
         auto expectedArgs = node->function()->args();
-        auto passedArgs = node->getChildren<meta::Node>(1);
+        auto passedArgs = node->getChildren<Node>(1);
         if (expectedArgs.size() != passedArgs.size())
             throw SemanticError(node, "Call to function '%s' with incorrect number of arguments", node->functionName().c_str());
         return true;
     }
 
-    virtual bool visit(meta::Function *node) override
+    virtual bool visit(Function *node) override
     {
-        if (node->visibility() != meta::Visibility::Extern && node->body() == nullptr)
+        if (node->visibility() != Visibility::Extern && node->body() == nullptr)
             throw SemanticError(node, "Implementation missing for the function '%s'", node->name().c_str());
-        if (node->visibility() == meta::Visibility::Extern && node->body() != nullptr)
+        if (node->visibility() == Visibility::Extern && node->body() != nullptr)
             throw SemanticError(node, "Extern function '%s' must not have implementation", node->name().c_str());
 
         bool hasDefaultValues = false;
@@ -121,9 +120,9 @@ public:
         return true;
     }
 
-    virtual void leave(meta::Function *node) override
+    virtual void leave(Function *node) override
     {
-        if (node->visibility() == meta::Visibility::Extern)
+        if (node->visibility() == Visibility::Extern)
             return; // Skip check for unused arguments on extern functions since they have no implementation to use them
         for (const auto &var : mVars) {
             if (var.second.accessCount == 0)
@@ -131,7 +130,7 @@ public:
         }
     }
 
-    virtual bool visit(meta::VarDecl *node) override
+    virtual bool visit(VarDecl *node) override
     {
         auto prev = mVars.find(node->name());
         if (prev != mVars.end())
@@ -143,7 +142,7 @@ public:
         return true;
     }
 
-    virtual bool visit(meta::Var *node) override
+    virtual bool visit(Var *node) override
     {
         auto decl = mVars.find(node->name());
         if (decl == mVars.end())
@@ -155,12 +154,12 @@ public:
         return true;
     }
 
-    virtual bool visit(meta::Assigment *node) override
+    virtual bool visit(Assigment *node) override
     {
         auto decl = mVars.find(node->varName());
         if (decl == mVars.end())
             throw SemanticError(node, "Reference to undefined variable '%s'", node->varName().c_str());
-        if (decl->second.decl->is(meta::VarDecl::argument))
+        if (decl->second.decl->is(VarDecl::argument))
             throw SemanticError(node, "Attempt to modify function argument '%s'", node->varName().c_str());
         node->setDeclaration(decl->second.decl);
         ++decl->second.modifyCount;
@@ -170,13 +169,13 @@ public:
 private:
     struct VarSrc
     {
-        VarSrc(meta::VarDecl *decl = nullptr):
+        VarSrc(VarDecl *decl = nullptr):
             decl(decl),
-            modifyCount(decl && (decl->inited() || decl->is(meta::VarDecl::argument)) ? 1 : 0),
+            modifyCount(decl && (decl->inited() || decl->is(VarDecl::argument)) ? 1 : 0),
             accessCount(0)
         {}
 
-        meta::VarDecl *decl;
+        VarDecl *decl;
         unsigned modifyCount;
         unsigned accessCount;
     };
@@ -184,7 +183,7 @@ private:
     class FuncComparator
     {
     public:
-        bool operator() (meta::Function *left, meta::Function *right) const
+        bool operator() (Function *left, Function *right) const
         {
             if (left->package().compare(right->package()) < 0)
                 return true;
@@ -194,16 +193,18 @@ private:
         }
     };
 
-    meta::Dictionary &mGlobalDict;
-    meta::DeclarationsDict mCurrDecls;
+    Dictionary &mGlobalDict;
+    DeclarationsDict mCurrDecls;
     std::string mCurrSrcPackage;
     std::map<std::string, VarSrc> mVars;
 };
 
-void resolve(meta::AST *ast, meta::Dictionary &dict)
+void resolve(AST *ast, Dictionary &dict)
 {
     ResolveVisitor resolver(ast, dict);
     ast->walk(&resolver);
 }
 
 } // namespace analysers
+} // namespace meta
+

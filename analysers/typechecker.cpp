@@ -29,6 +29,7 @@
 #include "analysers/semanticerror.h"
 #include "analysers/typechecker.h"
 
+namespace meta {
 namespace analysers {
 
 class TypeChecker: public Evaluator<const typesystem::Type*>
@@ -36,7 +37,7 @@ class TypeChecker: public Evaluator<const typesystem::Type*>
 public:
     explicit TypeChecker(typesystem::TypesStore &types): mTypes(types) {}
 
-    virtual bool visit(meta::Function *node)
+    virtual bool visit(Function *node)
     {
         if (node->type() != nullptr)
             return false;
@@ -46,7 +47,7 @@ public:
         mCurrFunc = node;
         return true;
     }
-    virtual void leave(meta::Function *node) override
+    virtual void leave(Function *node) override
     {
         POSTCONDITION(node->type() != nullptr);
         POSTCONDITION(node->type()->typeId() != typesystem::Type::Auto);
@@ -54,25 +55,25 @@ public:
         mCurrFunc = nullptr;
     }
 
-    virtual const typesystem::Type *number(meta::Number *node) override
+    virtual const typesystem::Type *number(Number *node) override
     {
         node->setType(mTypes.getPrimitive(typesystem::Type::Int));
         return node->type();
     }
-    virtual const typesystem::Type *literal(meta::Literal *node) override
+    virtual const typesystem::Type *literal(Literal *node) override
     {
         switch (node->value()) {
-            case meta::Literal::trueVal:
-            case meta::Literal::falseVal: node->setType(mTypes.getPrimitive(typesystem::Type::Bool)); break;
+            case Literal::trueVal:
+            case Literal::falseVal: node->setType(mTypes.getPrimitive(typesystem::Type::Bool)); break;
         }
         return node->type();
     }
-    virtual const typesystem::Type *strLiteral(meta::StrLiteral *node) override
+    virtual const typesystem::Type *strLiteral(StrLiteral *node) override
     {
         node->setType(mTypes.getPrimitive(typesystem::Type::String));
         return node->type();
     }
-    virtual const typesystem::Type *var(meta::Var *node) override
+    virtual const typesystem::Type *var(Var *node) override
     {
         PRECONDITION(node->declaration() != nullptr);
         PRECONDITION(node->declaration()->type() != nullptr);
@@ -81,7 +82,7 @@ public:
         return node->declaration()->type();
     }
 
-    virtual void leave(meta::VarDecl *node) override
+    virtual void leave(VarDecl *node) override
     {
         POSTCONDITION(node->type() != nullptr);
         POSTCONDITION(node->type()->typeId() != typesystem::Type::Auto);
@@ -94,7 +95,7 @@ public:
         if (node->type()->typeId() == typesystem::Type::Auto)
             throw analysers::SemanticError(node, "Can't deduce variable '%s' type.", node->name().c_str());
     }
-    virtual void varInit(meta::VarDecl *node, const typesystem::Type *val) override
+    virtual void varInit(VarDecl *node, const typesystem::Type *val) override
     {
         if (node->type()->typeId() == typesystem::Type::Auto) {
             node->setType(val);
@@ -107,7 +108,7 @@ public:
             );
     }
 
-    virtual void ifCond(meta::If *node, const typesystem::Type *val) override
+    virtual void ifCond(If *node, const typesystem::Type *val) override
     {
         if (!val->is(typesystem::Type::boolean))
             throw SemanticError(node->condition(), "If statement can't work with condition of type '%s'", val->name().c_str());
@@ -117,7 +118,7 @@ public:
             node->elseBlock()->walk(this);
     }
 
-    virtual void returnValue(meta::Return *node, const typesystem::Type *val) override
+    virtual void returnValue(Return *node, const typesystem::Type *val) override
     {
         if (mCurrFunc->type()->typeId() == typesystem::Type::Auto) {
             if (val->typeId() == typesystem::Type::Auto)
@@ -129,12 +130,12 @@ public:
             throw analysers::SemanticError(node, "Attempt to return value of type '%s' from function returning '%s'", val->name().c_str(), mCurrFunc->type()->name().c_str());
     }
 
-    virtual void returnVoid(meta::Return *node) override
+    virtual void returnVoid(Return *node) override
     {
         returnValue(node, mTypes.getVoid());
     }
 
-    virtual const typesystem::Type *assign(meta::Assigment *node, const typesystem::Type *val) override
+    virtual const typesystem::Type *assign(Assigment *node, const typesystem::Type *val) override
     {
         if (node->declaration()->type() != val) // TODO: implicit type conversations here
             throw analysers::SemanticError(
@@ -144,15 +145,15 @@ public:
         return node->declaration()->type();
     }
 
-    virtual const typesystem::Type *prefixOp(meta::PrefixOp *node, const typesystem::Type *val) override
+    virtual const typesystem::Type *prefixOp(PrefixOp *node, const typesystem::Type *val) override
     {
         switch (node->operation()) {
-            case meta::PrefixOp::positive:
-            case meta::PrefixOp::negative:
+            case PrefixOp::positive:
+            case PrefixOp::negative:
                 if (!val->is(typesystem::Type::numeric))
                     throw analysers::SemanticError(node, "Can't perform arythmetic operation on value of type '%s'", val->name().c_str());
                 break;
-            case meta::PrefixOp::boolnot:
+            case PrefixOp::boolnot:
                 if (!val->is(typesystem::Type::boolean))
                     throw analysers::SemanticError(node, "Can't perform boolean not operation on value of type '%s'", val->name().c_str());
                 break;
@@ -161,37 +162,37 @@ public:
         return val;
     }
 
-    virtual const typesystem::Type *binaryOp(meta::BinaryOp *node, const typesystem::Type *left, const typesystem::Type *right) override
+    virtual const typesystem::Type *binaryOp(BinaryOp *node, const typesystem::Type *left, const typesystem::Type *right) override
     {
         POSTCONDITION(node->type() != nullptr);
 
         switch (node->operation()) {
-            case meta::BinaryOp::add:
-            case meta::BinaryOp::div:
-            case meta::BinaryOp::sub:
-            case meta::BinaryOp::mul:
+            case BinaryOp::add:
+            case BinaryOp::div:
+            case BinaryOp::sub:
+            case BinaryOp::mul:
                 if (!left->is(typesystem::Type::numeric) || !right->is(typesystem::Type::numeric))
                     throw analysers::SemanticError(node, "Can't perform arythmetic operation on values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
                 node->setType(left); // TODO: should return widest type of left or right. Now there is only one numeric type so it's ok to return first arg type
                 break;
 
-            case meta::BinaryOp::equal:
-            case meta::BinaryOp::noteq:
+            case BinaryOp::equal:
+            case BinaryOp::noteq:
                 if (left != right)
                     throw analysers::SemanticError(node, "Can't compare values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
                 node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
                 break;
-            case meta::BinaryOp::greater:
-            case meta::BinaryOp::greatereq:
-            case meta::BinaryOp::less:
-            case meta::BinaryOp::lesseq:
+            case BinaryOp::greater:
+            case BinaryOp::greatereq:
+            case BinaryOp::less:
+            case BinaryOp::lesseq:
                 if (!left->is(typesystem::Type::numeric) || !right->is(typesystem::Type::numeric))
                     throw analysers::SemanticError(node, "Can't compare values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
                 node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
                 break;
 
-            case meta::BinaryOp::boolAnd:
-            case meta::BinaryOp::boolOr:
+            case BinaryOp::boolAnd:
+            case BinaryOp::boolOr:
                 if (!left->is(typesystem::Type::boolean) || !right->is(typesystem::Type::boolean))
                     throw analysers::SemanticError(node, "Can't perform boolean operations on values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
                 node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
@@ -200,7 +201,7 @@ public:
         return node->type();
     }
 
-    virtual const typesystem::Type *call(meta::Call *node, const std::vector<const typesystem::Type *> &args)
+    virtual const typesystem::Type *call(Call *node, const std::vector<const typesystem::Type *> &args)
     {
         PRECONDITION(node->function()->args().size() == args.size());
         PRECONDITION(args.size() == node->argsCount());
@@ -222,13 +223,14 @@ public:
 
 private:
     typesystem::TypesStore &mTypes;
-    meta::Function *mCurrFunc = nullptr;
+    Function *mCurrFunc = nullptr;
 };
 
-void checkTypes(meta::AST *ast, typesystem::TypesStore &types)
+void checkTypes(AST *ast, typesystem::TypesStore &types)
 {
     TypeChecker visitor(types);
     ast->walk(&visitor);
 }
 
 } // namespace analysers
+} // namspace meta

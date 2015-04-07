@@ -24,6 +24,7 @@
 
 #include "typesystem/type.h"
 
+namespace meta {
 namespace typesystem {
 
 class TypesStore
@@ -41,3 +42,4 @@ private:
 };
 
 } // namespace typesystem
+} // namespace meta

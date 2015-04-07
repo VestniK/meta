@@ -29,7 +29,7 @@ Import::Import(const StackFrame *reduction, size_t size): Node(reduction, size)
     Token target;
     TokenSequence package;
     for (auto token : reduction[1].tokens) {
-        if (token.termNum != meta::identifier)
+        if (token.termNum != identifier)
             continue;
         package.setLast(target);
         target = token;

@@ -31,6 +31,9 @@
 
 #include "typesystem/typesstore.h"
 
+using namespace meta;
+using namespace meta::analysers;
+
 namespace {
 
 struct NameType
@@ -60,31 +63,31 @@ public:
 
 TEST_P(TypeCheker, typeCheck) {
     auto param = GetParam();
-    meta::Parser parser;
-    meta::Actions act;
+    Parser parser;
+    Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(param.src, strlen(param.src)));
     auto ast = parser.ast();
-    ASSERT_NO_THROW(analysers::resolve(ast, act.dictionary()));
+    ASSERT_NO_THROW(resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;
-    ASSERT_NO_THROW(analysers::checkTypes(ast, typestore));
-    auto functions = ast->getChildren<meta::Function>();
+    ASSERT_NO_THROW(checkTypes(ast, typestore));
+    auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), param.functions.size());
     for (size_t pos = 0; pos < functions.size(); ++pos) {
         ASSERT_EQ(functions[pos]->name(), param.functions[pos].name);
         ASSERT_EQ(functions[pos]->type()->typeId(), param.functions[pos].type);
     }
 
-    auto vars = ast->getChildren<meta::VarDecl>(-1);
+    auto vars = ast->getChildren<VarDecl>(-1);
     ASSERT_EQ(vars.size(), param.vars.size());
     for (size_t pos = 0; pos < vars.size(); ++pos) {
         ASSERT_EQ(vars[pos]->name(), param.vars[pos].name);
         ASSERT_EQ(vars[pos]->type()->typeId(), param.vars[pos].type);
     }
 
-    std::vector<meta::Typed*> exprs;
-    meta::walkTopDown<meta::Node>(*ast, [&exprs](meta::Node *node){auto typed = dynamic_cast<meta::Typed*>(node); if (typed) exprs.push_back(typed); return true;});
+    std::vector<Typed*> exprs;
+    walkTopDown<Node>(*ast, [&exprs](Node *node){auto typed = dynamic_cast<Typed*>(node); if (typed) exprs.push_back(typed); return true;});
     for (auto typed : exprs) {
         ASSERT_NE(typed->type(), nullptr) << "Type not set for node of type " << typeid(*typed).name();
         ASSERT_NE(typed->type()->typeId(), typesystem::Type::Auto) << "Type is incomplete for node of type " << typeid(*typed).name();
@@ -160,18 +163,18 @@ public:
 
 TEST_P(TypeChekerErrors, typeErrors) {
     const char *input = GetParam();
-    meta::Parser parser;
-    meta::Actions act;
+    Parser parser;
+    Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
     auto ast = parser.ast();
-    ASSERT_NO_THROW(analysers::resolve(ast, act.dictionary()));
+    ASSERT_NO_THROW(resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;
     try {
-        analysers::checkTypes(ast, typestore);
+        checkTypes(ast, typestore);
         ASSERT_TRUE(false) << "Input code contains type integrity or deduce error which was not found";
-    } catch (analysers::SemanticError &err) {
+    } catch (SemanticError &err) {
         ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << std::string(err.tokens());
         ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << std::string(err.tokens());
     }

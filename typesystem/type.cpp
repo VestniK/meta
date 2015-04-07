@@ -22,6 +22,7 @@
 
 #include "typesystem/type.h"
 
+namespace meta {
 namespace typesystem {
 
 bool Type::is(Type::TypeClass type) const
@@ -30,3 +31,4 @@ bool Type::is(Type::TypeClass type) const
 }
 
 } // namespace typesystem
+} // namespace meta

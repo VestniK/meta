@@ -14,9 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
-
 #include "parser/codeblock.h"
 #include "parser/exprstatement.h"
 #include "parser/if.h"
@@ -29,44 +27,45 @@
 #include "analysers/reachabilitychecker.h"
 #include "analysers/semanticerror.h"
 
+namespace meta {
 namespace analysers {
 
-class ReachabilityChecker : public meta::Visitor
+class ReachabilityChecker : public Visitor
 {
 public:
-    virtual bool visit(meta::Function *node) override;
-    virtual void leave(meta::Function *node) override;
-    virtual bool visit(meta::CodeBlock *node) override;
-    virtual bool visit(meta::VarDecl *node) override;
-    virtual bool visit(meta::ExprStatement *node) override;
-    virtual bool visit(meta::Return *node) override;
-    virtual bool visit(meta::If *node) override;
+    virtual bool visit(Function *node) override;
+    virtual void leave(Function *node) override;
+    virtual bool visit(CodeBlock *node) override;
+    virtual bool visit(VarDecl *node) override;
+    virtual bool visit(ExprStatement *node) override;
+    virtual bool visit(Return *node) override;
+    virtual bool visit(If *node) override;
 
 private:
-    void checkReturn(meta::Node *node);
+    void checkReturn(Node *node);
 
 private:
-    meta::Return *mReturn = nullptr;
+    Return *mReturn = nullptr;
 };
 
-bool ReachabilityChecker::visit(meta::Function *)
+bool ReachabilityChecker::visit(Function *)
 {
     mReturn = nullptr;
     return true;
 }
 
-void ReachabilityChecker::leave(meta::Function *node)
+void ReachabilityChecker::leave(Function *node)
 {
     /// @todo unit tests needed for non-void function without return
     if (mReturn != nullptr || node->body() == nullptr)
         return;
     if (node->type()->typeId() != typesystem::Type::Void)
         throw SemanticError(node, "Non-void function ends without return");
-    node->body()->add(new meta::Return(nullptr, 0)); /// @todo memleak here!!!
+    node->body()->add(new Return(nullptr, 0)); /// @todo memleak here!!!
 }
 
 
-void ReachabilityChecker::checkReturn(meta::Node *node)
+void ReachabilityChecker::checkReturn(Node *node)
 {
     if (mReturn != nullptr)
         throw SemanticError(
@@ -75,34 +74,34 @@ void ReachabilityChecker::checkReturn(meta::Node *node)
         );
 }
 
-bool ReachabilityChecker::visit(meta::CodeBlock *node)
+bool ReachabilityChecker::visit(CodeBlock *node)
 {
     checkReturn(node);
     return true;
 }
 
-bool ReachabilityChecker::visit(meta::VarDecl *node)
+bool ReachabilityChecker::visit(VarDecl *node)
 {
-    if (node->is(meta::VarDecl::argument))
+    if (node->is(VarDecl::argument))
         return false;
     checkReturn(node);
     return false;
 }
 
-bool ReachabilityChecker::visit(meta::ExprStatement *node)
+bool ReachabilityChecker::visit(ExprStatement *node)
 {
     checkReturn(node);
     return false;
 }
 
-bool ReachabilityChecker::visit(meta::Return *node)
+bool ReachabilityChecker::visit(Return *node)
 {
     checkReturn(node);
     mReturn = node;
     return false;
 }
 
-bool ReachabilityChecker::visit(meta::If *node)
+bool ReachabilityChecker::visit(If *node)
 {
     checkReturn(node);
     if (node->thenBlock()) {
@@ -116,10 +115,12 @@ bool ReachabilityChecker::visit(meta::If *node)
     return false;
 }
 
-void checkReachability(meta::AST *ast)
+void checkReachability(AST *ast)
 {
     ReachabilityChecker checker;
     ast->walk(&checker);
 }
 
 } // namespace analysers
+} // namespace meta
+

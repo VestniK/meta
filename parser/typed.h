@@ -18,11 +18,12 @@
  */
 #pragma once
 
-namespace typesystem {
-class Type;
-}
 
 namespace meta {
+
+namespace typesystem {
+class Type;
+} // namespace typesystem
 
 class Typed
 {

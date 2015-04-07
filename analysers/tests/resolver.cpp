@@ -27,6 +27,9 @@
 #include "parser/actions.h"
 #include "parser/metaparser.h"
 
+using namespace meta;
+using namespace meta::analysers;
+
 namespace {
 
 class Resolver: public testing::TestWithParam<const char *>
@@ -49,8 +52,8 @@ TEST_P(Resolver, resolveErrors) {
         private int foo4(int x) {return x*x - 2*x;}
     )META";
     const char *input = GetParam();
-    meta::Parser parser;
-    meta::Actions act;
+    Parser parser;
+    Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     parser.setSourcePath("lib.meta");
@@ -59,9 +62,9 @@ TEST_P(Resolver, resolveErrors) {
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
     auto ast = parser.ast();
     try {
-        analysers::resolve(ast, act.dictionary());
+        resolve(ast, act.dictionary());
         ASSERT_TRUE(false) << "Input code contains symbol resolvation errors which were not found";
-    } catch (analysers::SemanticError &err) {
+    } catch (SemanticError &err) {
         ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << std::string(err.tokens());
         ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << std::string(err.tokens());
     }

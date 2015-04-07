@@ -23,6 +23,8 @@
 
 #include "parser/metalexer.h"
 
+using namespace meta;
+
 TEST(Lexer, separated) {
     const char *input = "testIdentifier1;testIdentifier2,test.qname";
     meta::Lexer lexer;

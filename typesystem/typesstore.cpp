@@ -22,9 +22,12 @@
 #include "typesystem/type.h"
 #include "typesystem/typesstore.h"
 
+namespace meta {
+namespace typesystem {
+
 namespace {
 
-class PrimitiveType: public typesystem::Type
+class PrimitiveType: public Type
 {
 public:
     explicit PrimitiveType(Type::TypeId id): id(id) {}
@@ -49,8 +52,6 @@ private:
 };
 
 } // anonymous namespace
-
-namespace typesystem {
 
 TypesStore::TypesStore()
 {
@@ -94,3 +95,4 @@ Type *TypesStore::getVoid() const
 }
 
 } // namespace typesystem
+} // namespace meta

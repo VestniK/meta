@@ -24,24 +24,24 @@
 
 namespace meta {
 
-void Actions::package(const meta::StackFrame *reduction, size_t size)
+void Actions::package(const StackFrame *reduction, size_t size)
 {
     assert(size == 3);
     mPackage = reduction[1].tokens;
 }
 
-void Actions::changeVisibility(const meta::StackFrame *reduction, size_t size)
+void Actions::changeVisibility(const StackFrame *reduction, size_t size)
 {
     assert(size == 2);
     assert(reduction[0].tokens.begin() != reduction[0].tokens.end());
     auto token = *(reduction[0].tokens.begin());
-    mDefaultVisibility = meta::fromToken(token);
+    mDefaultVisibility = fromToken(token);
 }
 
-void Actions::onFunction(meta::Function *node)
+void Actions::onFunction(Function *node)
 {
     node->setPackage(mPackage);
-    if (node->visibility() == meta::Visibility::Default)
+    if (node->visibility() == Visibility::Default)
         node->setVisibility(mDefaultVisibility);
     mDictionary[mPackage].insert({node->name(), node});
 }

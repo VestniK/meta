@@ -27,34 +27,35 @@
 #include "parser/metanodes.h"
 #include "parser/metaparser.h"
 
+namespace meta {
 namespace analysers {
 
 template<typename Value>
-class Evaluator: public meta::Visitor
+class Evaluator: public Visitor
 {
 public:
     // Value consumers
-    virtual void returnValue(meta::Return *node, Value val) = 0;
-    virtual void returnVoid(meta::Return *node) = 0;
-    virtual void varInit(meta::VarDecl *node, Value val) = 0;
-    virtual void ifCond(meta::If *node, Value val) = 0;
+    virtual void returnValue(Return *node, Value val) = 0;
+    virtual void returnVoid(Return *node) = 0;
+    virtual void varInit(VarDecl *node, Value val) = 0;
+    virtual void ifCond(If *node, Value val) = 0;
     // Value providers
-    virtual Value number(meta::Number *node) = 0;
-    virtual Value literal(meta::Literal *node) = 0;
-    virtual Value strLiteral(meta::StrLiteral *node) = 0;
-    virtual Value var(meta::Var *node) = 0;
+    virtual Value number(Number *node) = 0;
+    virtual Value literal(Literal *node) = 0;
+    virtual Value strLiteral(StrLiteral *node) = 0;
+    virtual Value var(Var *node) = 0;
     // Operations on values
-    virtual Value call(meta::Call *node, const std::vector<Value> &args) = 0;
-    virtual Value assign(meta::Assigment *node, Value val) = 0;
-    virtual Value binaryOp(meta::BinaryOp *node, Value left, Value right) = 0;
-    virtual Value prefixOp(meta::PrefixOp *node, Value val) = 0;
+    virtual Value call(Call *node, const std::vector<Value> &args) = 0;
+    virtual Value assign(Assigment *node, Value val) = 0;
+    virtual Value binaryOp(BinaryOp *node, Value left, Value right) = 0;
+    virtual Value prefixOp(PrefixOp *node, Value val) = 0;
 
     // Visitor implementation
-    virtual void leave(meta::Number *node) override {mStack.top().push_back(number(node));}
-    virtual void leave(meta::Literal *node) override {mStack.top().push_back(literal(node));}
-    virtual void leave(meta::Var *node) override {mStack.top().push_back(var(node));}
-    virtual bool visit(meta::Return *) override {mStack.push(std::vector<Value>()); return true;}
-    virtual void leave(meta::Return *node) override
+    virtual void leave(Number *node) override {mStack.top().push_back(number(node));}
+    virtual void leave(Literal *node) override {mStack.top().push_back(literal(node));}
+    virtual void leave(Var *node) override {mStack.top().push_back(var(node));}
+    virtual bool visit(Return *) override {mStack.push(std::vector<Value>()); return true;}
+    virtual void leave(Return *node) override
     {
         PRECONDITION(mStack.top().empty() || mStack.top().size() == 1);
         POSTCONDITION(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
@@ -65,7 +66,7 @@ public:
             returnValue(node, mStack.top()[0]);
         mStack.pop();
     }
-    virtual bool visit(meta::If *node) override
+    virtual bool visit(If *node) override
     {
         mStack.push(std::vector<Value>());
         node->condition()->walk(this);
@@ -76,13 +77,13 @@ public:
         assert(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
         return false; // do not evaluate both then and else branches they must be evaluated in subclass ifCond implementation
     }
-    virtual bool visit(meta::VarDecl *node) override
+    virtual bool visit(VarDecl *node) override
     {
         if (node->inited())
             mStack.push(std::vector<Value>());
         return true;
     }
-    virtual void leave(meta::VarDecl *node) override
+    virtual void leave(VarDecl *node) override
     {
         if (!node->inited())
             return;
@@ -91,46 +92,48 @@ public:
         mStack.pop();
         assert(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
     }
-    virtual bool visit(meta::Call *) override {mStack.push(std::vector<Value>()); return true;}
-    virtual void leave(meta::Call *node) override
+    virtual bool visit(Call *) override {mStack.push(std::vector<Value>()); return true;}
+    virtual void leave(Call *node) override
     {
         auto res = call(node, mStack.top());
         mStack.pop();
         mStack.top().push_back(res);
     }
-    virtual bool visit(meta::Assigment *) override {mStack.push(std::vector<Value>()); return true;}
-    virtual void leave(meta::Assigment *node) override
+    virtual bool visit(Assigment *) override {mStack.push(std::vector<Value>()); return true;}
+    virtual void leave(Assigment *node) override
     {
         assert(mStack.top().size() == 1);
         auto res = assign(node, mStack.top()[0]);
         mStack.pop();
         mStack.top().push_back(res);
     }
-    virtual bool visit(meta::PrefixOp *) override {mStack.push(std::vector<Value>()); return true;}
-    virtual void leave(meta::PrefixOp *node) override
+    virtual bool visit(PrefixOp *) override {mStack.push(std::vector<Value>()); return true;}
+    virtual void leave(PrefixOp *node) override
     {
         assert(mStack.top().size() == 1);
         auto res = prefixOp(node, mStack.top()[0]);
         mStack.pop();
         mStack.top().push_back(res);
     }
-    virtual bool visit(meta::BinaryOp *) override {mStack.push(std::vector<Value>()); return true;}
-    virtual void leave(meta::BinaryOp *node) override
+    virtual bool visit(BinaryOp *) override {mStack.push(std::vector<Value>()); return true;}
+    virtual void leave(BinaryOp *node) override
     {
         assert(mStack.top().size() == 2);
         auto res = binaryOp(node, mStack.top()[0], mStack.top()[1]);
         mStack.pop();
         mStack.top().push_back(res);
     }
-    virtual bool visit(meta::ExprStatement *) override {mStack.push(std::vector<Value>()); return true;}
-    virtual void leave(meta::ExprStatement *) override
+    virtual bool visit(ExprStatement *) override {mStack.push(std::vector<Value>()); return true;}
+    virtual void leave(ExprStatement *) override
     {
         mStack.pop();
         assert(mStack.empty()); /// @todo unit tests needed to check that all statements cunsume whole evaluation stack
     }
 
 private:
-    std::stack< std::vector<Value> > mStack;
+    std::stack<std::vector<Value>> mStack;
 };
 
 } // namespace analysers
+} // namespace meta
+

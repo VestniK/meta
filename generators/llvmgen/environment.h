@@ -35,13 +35,11 @@ namespace meta {
 
 class Function;
 
-}
-
 namespace typesystem {
 
 class Type;
 
-}
+} // namespace typesystem
 
 namespace generators {
 namespace llvmgen {
@@ -51,7 +49,7 @@ struct Environment
     Environment(const std::string &moduleName);
     ~Environment();
 
-    llvm::Function *addFunction(meta::Function *func);
+    llvm::Function *addFunction(Function *func);
     llvm::Type *getType(const typesystem::Type *type);
 
     llvm::LLVMContext &context;
@@ -61,3 +59,4 @@ struct Environment
 
 } // namespace llvmgen
 } // namespace generators
+} // namespace meta

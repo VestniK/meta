@@ -23,7 +23,6 @@
 
 namespace meta {
 class AST;
-}
 
 namespace generators {
 
@@ -32,10 +31,11 @@ class Generator
 public:
     virtual ~Generator() {}
 
-    virtual void generate(meta::AST *ast, const std::string &output) = 0;
+    virtual void generate(AST *ast, const std::string &output) = 0;
 
 protected:
     Generator() {}
 };
 
 } // namespace generators
+} // namespace meta

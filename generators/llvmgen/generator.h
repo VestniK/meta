@@ -23,10 +23,12 @@
 
 #include "generators/generator.h"
 
+namespace meta {
 namespace generators {
 namespace llvmgen {
 
-generators::Generator *createLlvmGenerator();
+Generator *createLlvmGenerator();
 
 } // namespace llvmgen
 } // namespace generators
+} // namespace meta

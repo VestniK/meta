@@ -14,16 +14,16 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 #pragma once
 
 namespace meta {
-    class AST;
-}
+class AST;
 
 namespace analysers {
 
-void processMeta(meta::AST *ast);
+void processMeta(AST *ast);
 
 } // namespace analysers
+} // namwspace meta
+

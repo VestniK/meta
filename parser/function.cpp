@@ -55,7 +55,7 @@ std::vector<VarDecl*> Function::args()
 CodeBlock *Function::body()
 {
     CodeBlock *res = nullptr;
-    meta::walkTopDown<CodeBlock>(*this, [&res](CodeBlock *node){res = node; return false;}, 1);
+    walkTopDown<CodeBlock>(*this, [&res](CodeBlock *node){res = node; return false;}, 1);
     return res;
 }
 

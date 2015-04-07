@@ -26,7 +26,7 @@ namespace meta {
 StrLiteral::StrLiteral(const StackFrame *reduction, size_t size): Expression(reduction, size)
 {
     PRECONDITION(size == 1);
-    PRECONDITION(reduction[0].symbol == meta::strLiteral);
+    PRECONDITION(reduction[0].symbol == strLiteral);
     auto token = *reduction[0].tokens.begin();
     bool escape = false;
     for (const char *cur = token.start + 1; cur < token.end - 1; ++cur) {

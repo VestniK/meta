@@ -26,21 +26,23 @@
 #include "parser/number.h"
 #include "parser/prefixop.h"
 
+using namespace meta;
+
 struct Operation
 {
-    meta::BinaryOp::Operation operation;
+    BinaryOp::Operation operation;
     int left, right;
 };
 
-class LoggingCalc: public meta::Visitor
+class LoggingCalc: public Visitor
 {
 public:
-    virtual void leave(meta::Number *num)
+    virtual void leave(Number *num)
     {
         mCalcStack.push_back(num->value());
     }
 
-    virtual void leave(meta::BinaryOp *op)
+    virtual void leave(BinaryOp *op)
     {
         assert(mCalcStack.size() >= 2);
         mCalcSequence.push_back(Operation());
@@ -50,20 +52,20 @@ public:
         mCalcStack.pop_back();
         current.left = mCalcStack.back();
         switch (current.operation) {
-            case meta::BinaryOp::add: mCalcStack.back() = current.left + current.right; break;
-            case meta::BinaryOp::sub: mCalcStack.back() = current.left - current.right; break;
-            case meta::BinaryOp::mul: mCalcStack.back() = current.left*current.right; break;
-            case meta::BinaryOp::div: mCalcStack.back() = current.left/current.right; break;
+            case BinaryOp::add: mCalcStack.back() = current.left + current.right; break;
+            case BinaryOp::sub: mCalcStack.back() = current.left - current.right; break;
+            case BinaryOp::mul: mCalcStack.back() = current.left*current.right; break;
+            case BinaryOp::div: mCalcStack.back() = current.left/current.right; break;
             default: assert(false);
         }
     }
 
-    virtual void leave(meta::PrefixOp *op)
+    virtual void leave(PrefixOp *op)
     {
         assert(mCalcStack.size() >= 1);
         switch(op->operation()) {
-            case meta::PrefixOp::negative: mCalcStack.back() = - mCalcStack.back(); break;
-            case meta::PrefixOp::positive: mCalcStack.back() = + mCalcStack.back(); break;
+            case PrefixOp::negative: mCalcStack.back() = - mCalcStack.back(); break;
+            case PrefixOp::positive: mCalcStack.back() = + mCalcStack.back(); break;
             default: assert(false);
         }
     }
@@ -83,22 +85,22 @@ private:
 TEST(Arythmetic, parenthesis)
 {
     const char *input = "package test; int foo() {return 2*(11+5)/8;}";
-    meta::Parser parser;
+    Parser parser;
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     LoggingCalc calc;
     ast->walk(&calc);
     ASSERT_EQ(calc.calcSequence().size(), 3);
 
-    ASSERT_EQ(calc.calcSequence()[0].operation, meta::BinaryOp::add);
+    ASSERT_EQ(calc.calcSequence()[0].operation, BinaryOp::add);
     ASSERT_EQ(calc.calcSequence()[0].left, 11);
     ASSERT_EQ(calc.calcSequence()[0].right, 5);
 
-    ASSERT_EQ(calc.calcSequence()[1].operation, meta::BinaryOp::mul);
+    ASSERT_EQ(calc.calcSequence()[1].operation, BinaryOp::mul);
     ASSERT_EQ(calc.calcSequence()[1].left, 2);
     ASSERT_EQ(calc.calcSequence()[1].right, 16);
 
-    ASSERT_EQ(calc.calcSequence()[2].operation, meta::BinaryOp::div);
+    ASSERT_EQ(calc.calcSequence()[2].operation, BinaryOp::div);
     ASSERT_EQ(calc.calcSequence()[2].left, 32);
     ASSERT_EQ(calc.calcSequence()[2].right, 8);
 
@@ -127,7 +129,7 @@ TEST_P(Arythmetic, calcTest)
     input += data.expression;
     input += ";}";
 
-    meta::Parser parser;
+    Parser parser;
     ASSERT_NO_THROW(parser.parse(input.c_str()));
     auto ast = parser.ast();
     LoggingCalc calc;

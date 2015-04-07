@@ -26,7 +26,7 @@
 
 namespace meta {
 
-class Declaration: public meta::Node
+class Declaration: public Node
 {
 public:
     typedef std::map<std::string, std::function<void(Declaration *)> > AttributesMap;
@@ -35,7 +35,7 @@ public:
     virtual Function *asFunction() {return nullptr;}
 
 protected:
-    Declaration(const meta::StackFrame *reduction, size_t size);
+    Declaration(const StackFrame *reduction, size_t size);
 };
 
 } // namespace meta

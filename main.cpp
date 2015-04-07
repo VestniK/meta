@@ -14,9 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
-
 #include <cassert>
 #include <cstdlib>
 #include <exception>
@@ -39,6 +37,8 @@
 #include "analysers/typechecker.h"
 
 #include "generators/llvmgen/generator.h"
+
+using namespace meta;
 
 enum class ErrorVerbosity
 {
@@ -77,7 +77,7 @@ std::istream& operator>> (std::istream &in, ErrorVerbosity &verbosity)
 }
 
 
-bool run(const Options &opts);
+bool run(const Options &opts) noexcept;
 
 int main(int argc, char **argv)
 {
@@ -114,13 +114,13 @@ int main(int argc, char **argv)
     return run(opts) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-bool run(const Options &opts) try
+bool run(const Options &opts) noexcept try
 {
     // parse
     std::vector<std::vector<char>> input;
     input.reserve(opts.sources.size());
-    meta::Parser parser;
-    meta::Actions act;
+    Parser parser;
+    Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     for (const auto &src: opts.sources) {
@@ -140,7 +140,7 @@ bool run(const Options &opts) try
     std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
     gen->generate(ast, opts.output);
     return true;
-} catch(const meta::SyntaxError &err) {
+} catch(const SyntaxError &err) {
     if (opts.verbosity > ErrorVerbosity::silent) {
         std::cerr <<
             err.sourcePath() << ':' << err.token().line << ':' <<
@@ -176,3 +176,4 @@ bool run(const Options &opts) try
     std::cerr << "Internal compiler error: " << err.what() << std::endl;
     return false;
 }
+

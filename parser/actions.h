@@ -26,19 +26,19 @@
 
 namespace meta {
 
-class Actions : public meta::ParseActions, public meta::NodeActions
+class Actions : public ParseActions, public NodeActions
 {
 public:
-    virtual void package(const meta::StackFrame *reduction, size_t size) override;
-    virtual void changeVisibility(const meta::StackFrame *reduction, size_t size) override;
-    virtual void onFunction(meta::Function *node) override;
-    virtual void onSourceFile(meta::SourceFile *node) override;
+    virtual void package(const StackFrame *reduction, size_t size) override;
+    virtual void changeVisibility(const StackFrame *reduction, size_t size) override;
+    virtual void onFunction(Function *node) override;
+    virtual void onSourceFile(SourceFile *node) override;
 
     Dictionary &dictionary() {return mDictionary;}
 
 private:
     std::string mPackage;
-    meta::Visibility mDefaultVisibility = meta::Visibility::Private;
+    Visibility mDefaultVisibility = Visibility::Private;
     Dictionary mDictionary;
 };
 

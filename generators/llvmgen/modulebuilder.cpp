@@ -13,17 +13,18 @@
 #include "generators/llvmgen/modulebuilder.h"
 #include "generators/abi/mangling.h"
 
+namespace meta {
 namespace generators {
 namespace llvmgen {
 
-bool ModuleBuilder::visit(meta::Function *node)
+bool ModuleBuilder::visit(Function *node)
 {
     mCurrBlockTerminated = false;
     mVarMap.clear();
     llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node));
     if (!func)
         func = env.addFunction(node);
-    if (node->visibility() == meta::Visibility::Extern)
+    if (node->visibility() == Visibility::Extern)
         return false;
 
     llvm::Function::arg_iterator it = func->arg_begin();
@@ -39,19 +40,19 @@ bool ModuleBuilder::visit(meta::Function *node)
     return true;
 }
 
-void ModuleBuilder::returnValue(meta::Return *node, llvm::Value *val)
+void ModuleBuilder::returnValue(Return *node, llvm::Value *val)
 {
     builder.CreateRet(val);
     mCurrBlockTerminated = true;
 }
 
-void ModuleBuilder::returnVoid(meta::Return *node)
+void ModuleBuilder::returnVoid(Return *node)
 {
     builder.CreateRetVoid();
     mCurrBlockTerminated = true;
 }
 
-void ModuleBuilder::ifCond(meta::If *node, llvm::Value *val)
+void ModuleBuilder::ifCond(If *node, llvm::Value *val)
 {
     if (!node->thenBlock() && !node->elseBlock()) // "if (cond) ;" || "if (cond) ; else ;" no additional generation needed
         return;
@@ -82,7 +83,7 @@ void ModuleBuilder::ifCond(meta::If *node, llvm::Value *val)
     builder.SetInsertPoint(mergeBB);
 }
 
-llvm::Value *ModuleBuilder::call(meta::Call *node, const std::vector<llvm::Value*> &args)
+llvm::Value *ModuleBuilder::call(Call *node, const std::vector<llvm::Value*> &args)
 {
     llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node->function()));
     if (!func) {
@@ -93,24 +94,24 @@ llvm::Value *ModuleBuilder::call(meta::Call *node, const std::vector<llvm::Value
     return builder.CreateCall(func, args);
 }
 
-llvm::Value *ModuleBuilder::number(meta::Number *node)
+llvm::Value *ModuleBuilder::number(Number *node)
 {
     llvm::Type *type = env.getType(node->type());
     return llvm::ConstantInt::get(type, node->value(), true);
 }
 
-llvm::Value *ModuleBuilder::literal(meta::Literal *node)
+llvm::Value *ModuleBuilder::literal(Literal *node)
 {
     llvm::Type *type = env.getType(node->type());
     switch (node->value()) {
-        case meta::Literal::trueVal: return llvm::ConstantInt::getTrue(type);
-        case meta::Literal::falseVal:return llvm::ConstantInt::getFalse(type);
+        case Literal::trueVal: return llvm::ConstantInt::getTrue(type);
+        case Literal::falseVal:return llvm::ConstantInt::getFalse(type);
     }
     assert(false);
     return nullptr;
 }
 
-llvm::Value *ModuleBuilder::strLiteral(meta::StrLiteral *node)
+llvm::Value *ModuleBuilder::strLiteral(StrLiteral *node)
 {
     return llvm::ConstantStruct::get(env.string,
         llvm::ConstantPointerNull::get(llvm::Type::getInt32PtrTy(env.context)), // no refcounter
@@ -119,13 +120,13 @@ llvm::Value *ModuleBuilder::strLiteral(meta::StrLiteral *node)
     nullptr);
 }
 
-llvm::Value *ModuleBuilder::var(meta::Var *node)
+llvm::Value *ModuleBuilder::var(Var *node)
 {
     assert(node->declaration());
     auto it = mVarMap.find(node->declaration());
     assert(it != mVarMap.end()); // Use befor initialization should be checked by analizers
 
-    return node->declaration()->is(meta::VarDecl::argument) ? it->second : builder.CreateLoad(it->second);
+    return node->declaration()->is(VarDecl::argument) ? it->second : builder.CreateLoad(it->second);
 }
 
 namespace {
@@ -136,7 +137,7 @@ inline llvm::AllocaInst *addLocalVar(llvm::Function *func, llvm::Type *type, con
 }
 }
 
-void ModuleBuilder::varInit(meta::VarDecl *node, llvm::Value *val)
+void ModuleBuilder::varInit(VarDecl *node, llvm::Value *val)
 {
     auto type = env.getType(node->type());
     assert(type != nullptr); // types integrity should be checked by analyzers
@@ -144,9 +145,9 @@ void ModuleBuilder::varInit(meta::VarDecl *node, llvm::Value *val)
     builder.CreateStore(val, allocaVal);
 }
 
-llvm::Value *ModuleBuilder::assign(meta::Assigment *node, llvm::Value *val)
+llvm::Value *ModuleBuilder::assign(Assigment *node, llvm::Value *val)
 {
-    assert(!node->declaration()->is(meta::VarDecl::argument));
+    assert(!node->declaration()->is(VarDecl::argument));
     auto it = mVarMap.find(node->declaration());
     if (it == mVarMap.end()) {
         auto type = env.getType(node->declaration()->type());
@@ -158,35 +159,35 @@ llvm::Value *ModuleBuilder::assign(meta::Assigment *node, llvm::Value *val)
     return val;
 }
 
-llvm::Value *ModuleBuilder::binaryOp(meta::BinaryOp *node, llvm::Value *left, llvm::Value *right)
+llvm::Value *ModuleBuilder::binaryOp(BinaryOp *node, llvm::Value *left, llvm::Value *right)
 {
     switch (node->operation()) {
-        case meta::BinaryOp::add: return builder.CreateAdd(left, right);
-        case meta::BinaryOp::sub: return builder.CreateSub(left, right);
-        case meta::BinaryOp::mul: return builder.CreateMul(left, right);
-        case meta::BinaryOp::div: return builder.CreateSDiv(left, right);
+        case BinaryOp::add: return builder.CreateAdd(left, right);
+        case BinaryOp::sub: return builder.CreateSub(left, right);
+        case BinaryOp::mul: return builder.CreateMul(left, right);
+        case BinaryOp::div: return builder.CreateSDiv(left, right);
 
-        case meta::BinaryOp::equal: return builder.CreateICmpEQ(left, right);
-        case meta::BinaryOp::noteq: return builder.CreateICmpNE(left, right);
+        case BinaryOp::equal: return builder.CreateICmpEQ(left, right);
+        case BinaryOp::noteq: return builder.CreateICmpNE(left, right);
 
-        case meta::BinaryOp::less: return builder.CreateICmpSLT(left, right);
-        case meta::BinaryOp::lesseq: return builder.CreateICmpSLE(left, right);
-        case meta::BinaryOp::greater: return builder.CreateICmpSGT(left, right);
-        case meta::BinaryOp::greatereq: return builder.CreateICmpSGE(left, right);
+        case BinaryOp::less: return builder.CreateICmpSLT(left, right);
+        case BinaryOp::lesseq: return builder.CreateICmpSLE(left, right);
+        case BinaryOp::greater: return builder.CreateICmpSGT(left, right);
+        case BinaryOp::greatereq: return builder.CreateICmpSGE(left, right);
 
-        case meta::BinaryOp::boolAnd: return builder.CreateAnd(left, right);
-        case meta::BinaryOp::boolOr: return builder.CreateOr(left,right);
+        case BinaryOp::boolAnd: return builder.CreateAnd(left, right);
+        case BinaryOp::boolOr: return builder.CreateOr(left,right);
     }
     assert(false);
     return nullptr;
 }
 
-llvm::Value *ModuleBuilder::prefixOp(meta::PrefixOp *node, llvm::Value *val)
+llvm::Value *ModuleBuilder::prefixOp(PrefixOp *node, llvm::Value *val)
 {
     switch (node->operation()) {
-        case meta::PrefixOp::negative: return builder.CreateNeg(val);
-        case meta::PrefixOp::positive: return val;
-        case meta::PrefixOp::boolnot: return builder.CreateNot(val);
+        case PrefixOp::negative: return builder.CreateNeg(val);
+        case PrefixOp::positive: return val;
+        case PrefixOp::boolnot: return builder.CreateNot(val);
     }
     assert(false);
     return nullptr;
@@ -204,3 +205,4 @@ void ModuleBuilder::save(const std::string &path)
 
 } // namespace llvmgen
 } // namespace generators
+} // namespace meta

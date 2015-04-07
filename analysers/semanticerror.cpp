@@ -24,9 +24,10 @@
 
 #include "analysers/semanticerror.h"
 
+namespace meta {
 namespace analysers {
 
-SemanticError::SemanticError(meta::Node *node, const char *format, ...):
+SemanticError::SemanticError(Node *node, const char *format, ...):
     mTokens(node->tokens()), mSrc(node->sourcePath())
 {
     va_list args;
@@ -49,3 +50,5 @@ const char *SemanticError::what() const noexcept
 }
 
 } // namespace analysers
+} // namespace meta
+

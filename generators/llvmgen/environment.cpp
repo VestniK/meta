@@ -30,6 +30,7 @@
 #include "generators/abi/mangling.h"
 #include "generators/llvmgen/environment.h"
 
+namespace meta {
 namespace generators {
 namespace llvmgen {
 
@@ -48,7 +49,7 @@ Environment::~Environment()
 {
 }
 
-llvm::Function *Environment::addFunction(meta::Function *func)
+llvm::Function *Environment::addFunction(Function *func)
 {
     const auto args = func->args();
     std::vector<llvm::Type *> argTypes;
@@ -61,11 +62,11 @@ llvm::Function *Environment::addFunction(meta::Function *func)
     auto rettype = getType(func->type());
     assert(rettype != nullptr);
     llvm::FunctionType *funcType = llvm::FunctionType::get(rettype, argTypes, false);
-    const llvm::GlobalValue::LinkageTypes linkType = func->visibility() == meta::Visibility::Export || func->visibility() == meta::Visibility::Extern ?
+    const llvm::GlobalValue::LinkageTypes linkType = func->visibility() == Visibility::Export || func->visibility() == Visibility::Extern ?
         llvm::GlobalValue::ExternalLinkage :
         llvm::GlobalValue::PrivateLinkage
     ;
-    llvm::Function *prototype = llvm::Function::Create(funcType, linkType, generators::abi::mangledName(func), module.get());
+    llvm::Function *prototype = llvm::Function::Create(funcType, linkType, abi::mangledName(func), module.get());
     llvm::Function::arg_iterator it = prototype->arg_begin();
     for (const auto arg : args) {
         it->setName(arg->name());
@@ -92,4 +93,4 @@ llvm::Type *Environment::getType(const typesystem::Type *type)
 
 } // namespace llvmgen
 } // namespace generators
-
+} // namespace meta

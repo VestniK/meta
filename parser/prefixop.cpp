@@ -28,9 +28,9 @@ PrefixOp::PrefixOp(const StackFrame *reduction, size_t size): Expression(reducti
     assert(size == 2);
     assert(reduction[0].symbol > 0); // symbol is terminal
     switch (reduction[0].symbol) {
-        case meta::subOp: mOperation = negative; break;
-        case meta::addOp: mOperation = positive; break;
-        case meta::notOp: mOperation = boolnot; break;
+        case subOp: mOperation = negative; break;
+        case addOp: mOperation = positive; break;
+        case notOp: mOperation = boolnot; break;
         default: assert(false);
     }
 }
