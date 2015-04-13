@@ -22,9 +22,8 @@
 
 namespace meta {
 
-class PrefixOp: public Expression, public Typed
+class PrefixOp: public Expression<PrefixOp>, public Typed
 {
-meta_NODE
 public:
     PrefixOp(const StackFrame *start, size_t size);
 

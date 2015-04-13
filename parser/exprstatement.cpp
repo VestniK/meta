@@ -21,7 +21,7 @@
 
 namespace meta {
 
-ExprStatement::ExprStatement(const StackFrame *start, size_t size): Node(start, size)
+ExprStatement::ExprStatement(const StackFrame *start, size_t size): VisitableNode<ExprStatement>(start, size)
 {
 
 }

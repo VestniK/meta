@@ -24,9 +24,8 @@
 
 namespace meta {
 
-class Call: public Expression
+class Call: public Expression<Call>
 {
-meta_NODE
 public:
     Call(const StackFrame *reduction, size_t size);
 

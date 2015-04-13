@@ -22,9 +22,8 @@
 
 namespace meta {
 
-class Literal: public Expression, public Typed
+class Literal: public Expression<Literal>, public Typed
 {
-meta_NODE
 public:
     Literal(const StackFrame *reduction, size_t size);
 

@@ -24,9 +24,8 @@
 
 namespace meta {
 
-class Var: public Expression
+class Var: public Expression<Var>
 {
-meta_NODE
 public:
     Var(const StackFrame *start, size_t size);
 

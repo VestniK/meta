@@ -22,9 +22,8 @@
 
 namespace meta {
 
-class SourceFile: public Node
+class SourceFile: public VisitableNode<SourceFile>
 {
-meta_NODE
 public:
     SourceFile(const StackFrame *reduction, size_t size);
 

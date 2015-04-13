@@ -22,9 +22,8 @@
 
 namespace meta {
 
-class Number: public Expression, public Typed
+class Number: public Expression<Number>, public Typed
 {
-meta_NODE
 public:
     Number(const StackFrame *start, size_t size);
 

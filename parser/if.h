@@ -22,9 +22,8 @@
 
 namespace meta {
 
-class If: public Node
+class If: public VisitableNode<If>
 {
-meta_NODE
 public:
     If(const StackFrame *reduction, size_t size);
 

@@ -22,9 +22,8 @@
 
 namespace meta {
 
-class CodeBlock: public Node
+class CodeBlock: public VisitableNode<CodeBlock>
 {
-meta_NODE
 public:
     CodeBlock(const StackFrame *start, size_t size);
 

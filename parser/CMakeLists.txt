@@ -10,7 +10,6 @@ set(SRC
   binaryop.cpp
   call.cpp
   codeblock.cpp
-  declaration.cpp
   exprstatement.cpp
   function.cpp
   if.cpp

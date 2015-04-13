@@ -22,9 +22,8 @@
 
 namespace meta {
 
-class Assigment: public Expression
+class Assigment: public Expression<Assigment>
 {
-meta_NODE
 public:
     Assigment(const StackFrame* start, size_t size);
 

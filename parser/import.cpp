@@ -16,14 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include "utils/contract.h"
 
-#include <cassert>
-
-#include "import.h"
+#include "parser/import.h"
 
 namespace meta {
 
-Import::Import(const StackFrame *reduction, size_t size): Node(reduction, size)
+Import::Import(const StackFrame *reduction, size_t size): VisitableNode<Import>(reduction, size)
 {
     assert(size == 3 || size == 5);
     Token target;

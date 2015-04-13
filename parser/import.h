@@ -24,9 +24,8 @@
 
 namespace meta {
 
-class Import: public Node
+class Import: public VisitableNode<Import>
 {
-meta_NODE
 public:
     Import(const StackFrame *reduction, size_t size);
 

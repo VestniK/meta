@@ -22,9 +22,8 @@
 
 namespace meta {
 
-class BinaryOp: public Expression, public Typed
+class BinaryOp: public Expression<BinaryOp>, public Typed
 {
-meta_NODE
 public:
     BinaryOp(const StackFrame *reduction, size_t size);
 
