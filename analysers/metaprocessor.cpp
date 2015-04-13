@@ -29,7 +29,7 @@ namespace analysers {
 
 void processMeta(AST *ast)
 {
-    walkTopDown<Annotation>(*ast, [] (Annotation *node) {
+    walk<Annotation, TopDown>(*ast, [] (Annotation *node) {
         PRECONDITION(node->target() != nullptr);
 
         /// @todo process user defined metas here

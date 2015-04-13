@@ -571,7 +571,7 @@ TEST(MetaParser, multipleFiles) {
     auto ast = parser.ast();
     Function *foo = nullptr;
     Function *bar = nullptr;
-    walkTopDown<Function>(*ast, [&foo, &bar](Function *node) {
+    walk<Function, TopDown>(*ast, [&foo, &bar](Function *node) {
         if (node->name() == "foo")
             foo = node;
         else if (node->name() == "bar")

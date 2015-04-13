@@ -56,7 +56,7 @@ TEST_P(Priority, priority)
     ASSERT_NO_THROW(parser.parse(input, strlen(input)));
     auto ast = parser.ast();
     std::vector<BinaryOp::Operation> opSequence;
-    walkBottomUp<BinaryOp>(*ast, [&](BinaryOp *node) {opSequence.push_back(node->operation());});
+    walk<BinaryOp, BottomUp>(*ast, [&](BinaryOp *node) {opSequence.push_back(node->operation());});
     ASSERT_EQ(opSequence, param.opSequence);
 }
 

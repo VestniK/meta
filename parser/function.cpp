@@ -32,7 +32,7 @@ Function::Function(const StackFrame *reduction, size_t size): VisitableNode<Func
     const bool hasAnnotations = size == 8;
     if (hasAnnotations) {
         for (auto annotataion : reduction[0].nodes)
-            walkTopDown<Annotation>(*annotataion, [this](Annotation *node){node->setTarget(this); return false;}, 0);
+            meta::walk<Annotation, TopDown>(*annotataion, [this](Annotation *node){node->setTarget(this); return false;}, 0);
     }
     const size_t visibilityPos = (hasAnnotations ? 1 : 0);
     const size_t typePos = visibilityPos + 1;
@@ -44,7 +44,7 @@ Function::Function(const StackFrame *reduction, size_t size): VisitableNode<Func
     mRetType = reduction[typePos].tokens;
     mName = reduction[namePos].tokens;
     for (auto arg : reduction[argsPos].nodes)
-        walkTopDown<VarDecl>(*arg, [] (VarDecl *node) {node->set(VarDecl::argument); return false;}, 0);
+        meta::walk<VarDecl, TopDown>(*arg, [] (VarDecl *node) {node->set(VarDecl::argument); return false;}, 0);
 }
 
 std::vector<VarDecl*> Function::args()
@@ -55,7 +55,7 @@ std::vector<VarDecl*> Function::args()
 CodeBlock *Function::body()
 {
     CodeBlock *res = nullptr;
-    walkTopDown<CodeBlock>(*this, [&res](CodeBlock *node){res = node; return false;}, 1);
+    meta::walk<CodeBlock, TopDown>(*this, [&res](CodeBlock *node){res = node; return false;}, 1);
     return res;
 }
 
