@@ -21,7 +21,7 @@
 
 namespace meta {
 
-CodeBlock::CodeBlock(const StackFrame *start, size_t size): VisitableNode<CodeBlock>(start, size)
+CodeBlock::CodeBlock(const StackFrame *start, size_t size): Visitable<Node, CodeBlock>(start, size)
 {
 }
 

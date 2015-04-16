@@ -22,7 +22,7 @@
 
 namespace meta {
 
-class Return: public VisitableNode<Return>
+class Return: public Visitable<Node, Return>
 {
 public:
     Return(const StackFrame *reduction, size_t size);

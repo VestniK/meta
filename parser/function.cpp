@@ -25,7 +25,7 @@
 
 namespace meta {
 
-Function::Function(const StackFrame *reduction, size_t size): VisitableNode<Function>(reduction, size)
+Function::Function(const StackFrame *reduction, size_t size): Visitable<Declaration, Function>(reduction, size)
 {
     PRECONDITION(size == 7 || size == 8); // with or without annotations
 

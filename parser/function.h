@@ -29,7 +29,7 @@
 
 namespace meta {
 
-class Function: public VisitableNode<Function>, public Typed, public Declaration
+class Function: public Visitable<Declaration, Function>, public Typed
 {
 public:
     Function(const StackFrame *start, size_t size);

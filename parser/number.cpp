@@ -24,7 +24,7 @@
 
 namespace meta {
 
-Number::Number(const StackFrame* start, size_t size): Expression<Number>(start, size)
+Number::Number(const StackFrame* start, size_t size): Visitable<Expression, Number>(start, size)
 {
     assert(size == 1);
     mValue = atoi(std::string(start[0].tokens).c_str());

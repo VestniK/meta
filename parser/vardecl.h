@@ -25,7 +25,7 @@
 
 namespace meta {
 
-class VarDecl: public VisitableNode<VarDecl>, public Typed
+class VarDecl: public Visitable<Node, VarDecl>, public Typed
 {
 public:
     VarDecl(const StackFrame* start, size_t size);

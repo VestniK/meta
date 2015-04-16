@@ -23,7 +23,7 @@
 
 namespace meta {
 
-If::If(const StackFrame *reduction, size_t size): VisitableNode<If>(reduction, size)
+If::If(const StackFrame *reduction, size_t size): Visitable<Node, If>(reduction, size)
 {
     assert(size == 6);
     const size_t thenStatementPos = 4;

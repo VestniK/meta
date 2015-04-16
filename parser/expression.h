@@ -23,11 +23,10 @@
 
 namespace meta {
 
-template<typename Impl>
-class Expression: public VisitableNode<Impl> {
+class Expression: public Node {
 public:
 protected:
-    Expression(const StackFrame *reduction, size_t size): VisitableNode<Impl>(reduction, size) {}
+    Expression(const StackFrame *reduction, size_t size): Node(reduction, size) {}
 };
 
 } // namespace meta

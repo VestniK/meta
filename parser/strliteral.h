@@ -24,7 +24,7 @@
 
 namespace meta {
 
-class StrLiteral: public Expression<StrLiteral>, public Typed
+class StrLiteral: public Visitable<Expression, StrLiteral>, public Typed
 {
 public:
     StrLiteral(const StackFrame *reduction, size_t size);

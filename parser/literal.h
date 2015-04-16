@@ -22,7 +22,7 @@
 
 namespace meta {
 
-class Literal: public Expression<Literal>, public Typed
+class Literal: public Visitable<Expression, Literal>, public Typed
 {
 public:
     Literal(const StackFrame *reduction, size_t size);

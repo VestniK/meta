@@ -24,7 +24,7 @@
 
 namespace meta {
 
-class Var: public Expression<Var>
+class Var: public Visitable<Expression, Var>
 {
 public:
     Var(const StackFrame *start, size_t size);

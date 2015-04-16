@@ -22,7 +22,7 @@
 
 namespace meta {
 
-class ExprStatement: public VisitableNode<ExprStatement>
+class ExprStatement: public Visitable<Node, ExprStatement>
 {
 public:
     ExprStatement(const StackFrame *start, size_t size);

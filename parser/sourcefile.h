@@ -22,7 +22,7 @@
 
 namespace meta {
 
-class SourceFile: public VisitableNode<SourceFile>
+class SourceFile: public Visitable<Node, SourceFile>
 {
 public:
     SourceFile(const StackFrame *reduction, size_t size);

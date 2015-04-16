@@ -23,7 +23,7 @@
 
 namespace meta {
 
-Assigment::Assigment(const StackFrame* start, size_t size): Expression<Assigment>(start, size)
+Assigment::Assigment(const StackFrame* start, size_t size): Visitable<Expression, Assigment>(start, size)
 {
     assert(size == 3);
     mVarName = start[0].tokens;

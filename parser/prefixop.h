@@ -22,7 +22,7 @@
 
 namespace meta {
 
-class PrefixOp: public Expression<PrefixOp>, public Typed
+class PrefixOp: public Visitable<Expression, PrefixOp>, public Typed
 {
 public:
     PrefixOp(const StackFrame *start, size_t size);

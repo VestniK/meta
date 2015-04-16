@@ -22,7 +22,7 @@
 
 namespace meta {
 
-Import::Import(const StackFrame *reduction, size_t size): VisitableNode<Import>(reduction, size)
+Import::Import(const StackFrame *reduction, size_t size): Visitable<Node, Import>(reduction, size)
 {
     assert(size == 3 || size == 5);
     Token target;

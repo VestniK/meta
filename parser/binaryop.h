@@ -22,7 +22,7 @@
 
 namespace meta {
 
-class BinaryOp: public Expression<BinaryOp>, public Typed
+class BinaryOp: public Visitable<Expression, BinaryOp>, public Typed
 {
 public:
     BinaryOp(const StackFrame *reduction, size_t size);

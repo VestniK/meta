@@ -21,7 +21,7 @@
 
 namespace meta {
 
-Return::Return(const StackFrame* reduction, size_t size): VisitableNode<Return>(reduction, size)
+Return::Return(const StackFrame* reduction, size_t size): Visitable<Node, Return>(reduction, size)
 {
 }
 

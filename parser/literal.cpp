@@ -25,7 +25,7 @@
 
 namespace meta {
 
-Literal::Literal(const StackFrame *reduction, size_t size): Expression<Literal>(reduction, size)
+Literal::Literal(const StackFrame *reduction, size_t size): Visitable<Expression, Literal>(reduction, size)
 {
     assert(size == 1);
     assert(reduction[0].symbol > 0); // symbol is terminal

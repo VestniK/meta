@@ -22,7 +22,7 @@
 
 namespace meta {
 
-class Number: public Expression<Number>, public Typed
+class Number: public Visitable<Expression, Number>, public Typed
 {
 public:
     Number(const StackFrame *start, size_t size);

@@ -26,7 +26,7 @@ namespace meta {
 
 class Declaration;
 
-class Annotation: public VisitableNode<Annotation>
+class Annotation: public Visitable<Node, Annotation>
 {
 public:
     Annotation (const StackFrame *reduction, size_t size);

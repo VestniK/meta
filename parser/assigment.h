@@ -22,7 +22,7 @@
 
 namespace meta {
 
-class Assigment: public Expression<Assigment>
+class Assigment: public Visitable<Expression, Assigment>
 {
 public:
     Assigment(const StackFrame* start, size_t size);

@@ -24,7 +24,7 @@
 
 namespace meta {
 
-class Call: public Expression<Call>
+class Call: public Visitable<Expression, Call>
 {
 public:
     Call(const StackFrame *reduction, size_t size);
