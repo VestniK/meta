@@ -16,14 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include <cassert>
 
 #include "utils/contract.h"
 
-#include "parser/annotation.h"
-#include "parser/function.h"
-#include "parser/vardecl.h"
+#include "parser/metanodes.h"
 
 namespace meta {
+
+namespace {
+
+struct {
+    void operator() (Node *, Declaration *) {assert(false && "must be called on meta::Annotations only");}
+    void operator() (Annotation *annotation, Declaration *decl) {annotation->setTarget(decl);}
+} setDeclaration;
+
+struct {
+    void operator() (Node *, VarDecl::Flags, bool = true) {assert(false && "must be called on meta::VarDecl only");}
+    void operator() (VarDecl *var, VarDecl::Flags flag, bool val = true) {var->set(flag, val);}
+} markVarDecl;
+
+}
 
 Function::Function(const StackFrame *reduction, size_t size): Visitable<Declaration, Function>(reduction, size)
 {
@@ -32,7 +45,7 @@ Function::Function(const StackFrame *reduction, size_t size): Visitable<Declarat
     const bool hasAnnotations = size == 8;
     if (hasAnnotations) {
         for (auto annotataion : reduction[0].nodes)
-            meta::walk<Annotation, TopDown>(*annotataion, [this](Annotation *node){node->setTarget(this); return false;}, 0);
+            annotataion->dispatch<void>(setDeclaration, this);
     }
     const size_t visibilityPos = (hasAnnotations ? 1 : 0);
     const size_t typePos = visibilityPos + 1;
@@ -44,7 +57,7 @@ Function::Function(const StackFrame *reduction, size_t size): Visitable<Declarat
     mRetType = reduction[typePos].tokens;
     mName = reduction[namePos].tokens;
     for (auto arg : reduction[argsPos].nodes)
-        meta::walk<VarDecl, TopDown>(*arg, [] (VarDecl *node) {node->set(VarDecl::argument); return false;}, 0);
+        arg->dispatch<void>(markVarDecl, VarDecl::argument);
 }
 
 std::vector<VarDecl*> Function::args()
