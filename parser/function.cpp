@@ -16,27 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include <algorithm>
 #include <cassert>
+#include <iterator>
+#include <type_traits>
 
 #include "utils/contract.h"
 
 #include "parser/metanodes.h"
 
 namespace meta {
-
-namespace {
-
-struct {
-    void operator() (Node *, Declaration *) {assert(false && "must be called on meta::Annotations only");}
-    void operator() (Annotation *annotation, Declaration *decl) {annotation->setTarget(decl);}
-} setDeclaration;
-
-struct {
-    void operator() (Node *, VarDecl::Flags, bool = true) {assert(false && "must be called on meta::VarDecl only");}
-    void operator() (VarDecl *var, VarDecl::Flags flag, bool val = true) {var->set(flag, val);}
-} markVarDecl;
-
-}
 
 Function::Function(const StackFrame *reduction, size_t size): Visitable<Declaration, Function>(reduction, size)
 {
@@ -45,7 +34,7 @@ Function::Function(const StackFrame *reduction, size_t size): Visitable<Declarat
     const bool hasAnnotations = size == 8;
     if (hasAnnotations) {
         for (auto annotataion : reduction[0].nodes)
-            annotataion->dispatch<void>(setDeclaration, this);
+            invoke<Annotation>(&Annotation::setTarget, annotataion, this);
     }
     const size_t visibilityPos = (hasAnnotations ? 1 : 0);
     const size_t typePos = visibilityPos + 1;
@@ -57,7 +46,7 @@ Function::Function(const StackFrame *reduction, size_t size): Visitable<Declarat
     mRetType = reduction[typePos].tokens;
     mName = reduction[namePos].tokens;
     for (auto arg : reduction[argsPos].nodes)
-        arg->dispatch<void>(markVarDecl, VarDecl::argument);
+        invoke<VarDecl>(&VarDecl::set, arg, VarDecl::argument, true);
 }
 
 std::vector<VarDecl*> Function::args()
@@ -67,9 +56,10 @@ std::vector<VarDecl*> Function::args()
 
 CodeBlock *Function::body()
 {
-    CodeBlock *res = nullptr;
-    meta::walk<CodeBlock, TopDown>(*this, [&res](CodeBlock *node){res = node; return false;}, 1);
-    return res;
+    auto res = std::find_if(children.rbegin(), children.rend(), [](Node *node) {
+        return node->getVisitableType() == std::type_index(typeid(CodeBlock));
+    });
+    return res == children.rend() ? nullptr : static_cast<CodeBlock*>(*res);
 }
 
 bool Function::is(Function::Attribute attr) const
@@ -82,8 +72,8 @@ void Function::set(Function::Attribute attr, bool val)
     mAttributes = val ? (mAttributes | attr) : (mAttributes & ~attr);
 }
 
-const Declaration::AttributesMap Function::attrMap{
-    {"entrypoint", [](Declaration *decl){PRECONDITION(decl->asFunction() != nullptr); decl->asFunction()->set(entrypoint);}}
+const Declaration::AttributesMap Function::attrMap = {
+    {"entrypoint", [](Declaration *decl) {invoke<Function>(&Function::set, decl, entrypoint, true);}}
 };
 
 } // namespace meta

@@ -40,7 +40,6 @@ public:
     };
 
     virtual const Declaration::AttributesMap &attributes() const override {return attrMap;}
-    virtual Function *asFunction() override {return this;}
 
     const std::string &name() const {return mName;}
     const std::string &retType() const {return mRetType;}

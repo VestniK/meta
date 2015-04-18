@@ -14,7 +14,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 #pragma once
 
@@ -31,8 +30,6 @@ class Declaration: public Node
 public:
     typedef std::map<std::string, std::function<void(Declaration *)>> AttributesMap;
     virtual const AttributesMap &attributes() const = 0;
-
-    virtual Function *asFunction() {return nullptr;}
 
 protected:
     Declaration(const StackFrame *reduction, size_t size): Node(reduction, size) {}
