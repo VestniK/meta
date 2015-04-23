@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#include <cassert>
+#include "utils/contract.h"
 
 #include "parser/prefixop.h"
 
@@ -25,14 +24,21 @@ namespace meta {
 
 PrefixOp::PrefixOp(const StackFrame *reduction, size_t size): Visitable<Expression, PrefixOp>(reduction, size)
 {
-    assert(size == 2);
-    assert(reduction[0].symbol > 0); // symbol is terminal
+    PRECONDITION(size == 2);
+    PRECONDITION(reduction[0].symbol > 0); // symbol is terminal
+    PRECONDITION(reduction[1].nodes.size() == 1);
     switch (reduction[0].symbol) {
         case subOp: mOperation = negative; break;
         case addOp: mOperation = positive; break;
         case notOp: mOperation = boolnot; break;
         default: assert(false);
     }
+}
+
+Node *PrefixOp::operand()
+{
+    PRECONDITION(children.size() == 1);
+    return children[0];
 }
 
 } // namespace meta

@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#include <cassert>
+#include "utils/contract.h"
 
 #include "parser/binaryop.h"
 
@@ -25,8 +24,10 @@ namespace meta {
 
 BinaryOp::BinaryOp(const StackFrame *reduction, size_t size): Visitable<Expression, BinaryOp>(reduction ,size)
 {
-    assert(size == 3);
-    assert(reduction[1].symbol > 0);
+    PRECONDITION(size == 3);
+    PRECONDITION(reduction[0].nodes.size() == 1);
+    PRECONDITION(reduction[1].symbol > 0);
+    PRECONDITION(reduction[2].nodes.size() == 1);
     switch (reduction[1].symbol) {
         case addOp: mOp = add; break;
         case subOp: mOp = sub; break;
@@ -45,6 +46,18 @@ BinaryOp::BinaryOp(const StackFrame *reduction, size_t size): Visitable<Expressi
 
         default: assert(false);
     }
+}
+
+Node *BinaryOp::left()
+{
+    PRECONDITION(children.size() == 2);
+    return children[0];
+}
+
+Node *BinaryOp::right()
+{
+    PRECONDITION(children.size() == 2);
+    return children[1];
 }
 
 } // namespace meta

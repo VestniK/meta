@@ -35,6 +35,8 @@ public:
     };
     Operation operation() const {return mOperation;}
 
+    Node *operand();
+
 private:
     Operation mOperation;
 };

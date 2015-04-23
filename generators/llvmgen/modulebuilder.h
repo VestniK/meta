@@ -36,35 +36,40 @@ namespace meta {
 namespace generators {
 namespace llvmgen {
 
-class ModuleBuilder: public analysers::Evaluator<llvm::Value*>
+struct ExpressionBuilder {
+    llvm::Value *operator() (Node *) {throw std::invalid_argument("Can't evaluate llvm::Value for non expression node");}
+    llvm::Value *operator() (Expression *) {throw std::runtime_error("Unknown expression type");}
+
+    // Values
+    llvm::Value *operator() (Number *node);
+    llvm::Value *operator() (Literal *node);
+    llvm::Value *operator() (StrLiteral *node);
+    llvm::Value *operator() (Var *node);
+
+    // Operations
+    llvm::Value *operator() (Call *node);
+    llvm::Value *operator() (Assigment *node);
+    llvm::Value *operator() (BinaryOp *node);
+    llvm::Value *operator() (PrefixOp *node);
+
+    Environment &env;
+    const std::map<VarDecl *, llvm::Value *> &varMap;
+    llvm::IRBuilder<> &builder;
+};
+
+class ModuleBuilder: public Visitor
 {
 public:
     ModuleBuilder(Environment &env): env(env), builder(env.context) {}
 
-    // Value consumers
-    virtual void returnValue(Return *node, llvm::Value *val) override;
-    virtual void returnVoid (Return *node) override;
-    virtual void varInit(VarDecl *node, llvm::Value *val) override;
-    virtual void ifCond (If *node, llvm::Value *val) override;
-    // Value providers
-    virtual llvm::Value *number(Number *node) override;
-    virtual llvm::Value *literal(Literal *node) override;
-    virtual llvm::Value *strLiteral(StrLiteral *node) override;
-    virtual llvm::Value *var(Var *node) override;
-    // Operations on values
-    virtual llvm::Value *call(Call *node, const std::vector<llvm::Value*> &args) override;
-    virtual llvm::Value *assign(Assigment *node, llvm::Value *val) override;
-    virtual llvm::Value *binaryOp(BinaryOp *node, llvm::Value *left, llvm::Value *right) override;
-    virtual llvm::Value *prefixOp(PrefixOp *node, llvm::Value *val);
+    bool visit(Function *node) override;
+    bool visit(VarDecl *node) override;
+    bool visit(Return *node) override;
+    bool visit(If *node) override;
+    bool visit(ExprStatement *node) override;
+    bool visit(CodeBlock *node) override;
 
     void save(const std::string &path);
-
-    // Additional traverse functions
-    virtual bool visit(Function *node) override;
-    // Do not generate code of func argumet default value calculation in the beggining of function since
-    // it will be generated on call with default value
-    virtual bool visit(VarDecl *node) override {return !node->is(VarDecl::argument) && analysers::Evaluator<llvm::Value*>::visit(node);}
-    virtual void leave(VarDecl *node) override {if (!node->is(VarDecl::argument)) analysers::Evaluator<llvm::Value*>::leave(node);}
 
 private:
     Environment &env;

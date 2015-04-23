@@ -27,6 +27,9 @@ class BinaryOp: public Visitable<Expression, BinaryOp>, public Typed
 public:
     BinaryOp(const StackFrame *reduction, size_t size);
 
+    Node *left();
+    Node *right();
+
     enum Operation {
         // Arythmetic
         add, sub, mul, div,

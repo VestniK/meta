@@ -204,7 +204,7 @@ public:
     virtual const typesystem::Type *call(Call *node, const std::vector<const typesystem::Type *> &args)
     {
         PRECONDITION(node->function()->args().size() == args.size());
-        PRECONDITION(args.size() == node->argsCount());
+        PRECONDITION(args.size() == node->args().size());
 
         if (node->function()->type() == nullptr) {
             TypeChecker subchecker(mTypes);
@@ -214,7 +214,7 @@ public:
         for (size_t i = 0; i < args.size(); ++i) {
             if (argdecls[i]->type() != args[i])
                 throw analysers::SemanticError(
-                    node->arg(i), "Can't call function '%s' with argument %u of type '%s'. Expected type is '%s'",
+                    node->args()[i], "Can't call function '%s' with argument %u of type '%s'. Expected type is '%s'",
                     node->function()->name().c_str(), (unsigned)i, args[i]->name().c_str(), argdecls[i]->type()->name().c_str()
                 );
         }

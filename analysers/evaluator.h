@@ -26,6 +26,7 @@
 
 #include "parser/metanodes.h"
 #include "parser/metaparser.h"
+#include "parser/expression.h"
 
 namespace meta {
 namespace analysers {

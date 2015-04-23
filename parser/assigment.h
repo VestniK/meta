@@ -30,6 +30,7 @@ public:
     const std::string &varName() const {return mVarName;}
     VarDecl *declaration() {return mDeclaration;}
     void setDeclaration(VarDecl *decl) {mDeclaration = decl;}
+    Node *value();
 
 private:
     std::string mVarName;

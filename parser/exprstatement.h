@@ -25,7 +25,9 @@ namespace meta {
 class ExprStatement: public Visitable<Node, ExprStatement>
 {
 public:
-    ExprStatement(const StackFrame *start, size_t size);
+    ExprStatement(const meta::StackFrame *reduction, size_t size);
+
+    Node *expression();
 };
 
 } // namespace meta

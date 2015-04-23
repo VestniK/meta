@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#include <cassert>
+#include "utils/contract.h"
 
 #include "parser/assigment.h"
 
@@ -25,8 +24,15 @@ namespace meta {
 
 Assigment::Assigment(const StackFrame* start, size_t size): Visitable<Expression, Assigment>(start, size)
 {
-    assert(size == 3);
+    PRECONDITION(size == 3);
+    PRECONDITION(start[0].nodes.empty() && start[1].nodes.empty() && start[2].nodes.size() == 1);
     mVarName = start[0].tokens;
+}
+
+Node *Assigment::value()
+{
+    PRECONDITION(children.size() == 1);
+    return children.front();
 }
 
 }

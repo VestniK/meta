@@ -17,6 +17,103 @@ namespace meta {
 namespace generators {
 namespace llvmgen {
 
+llvm::Value *ExpressionBuilder::operator() (Call *node)
+{
+    llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node->function()));
+    if (!func) {
+        assert(node->function() != nullptr);
+        func = env.addFunction(node->function());
+    }
+    std::vector<llvm::Value*> args;
+    for (auto argNode: node->args())
+        args.push_back(dispatch(*this, argNode));
+    assert(func->arg_size() == args.size());
+    return builder.CreateCall(func, args);
+}
+
+llvm::Value *ExpressionBuilder::operator() (Number *node)
+{
+    llvm::Type *type = env.getType(node->type());
+    return llvm::ConstantInt::get(type, node->value(), true);
+}
+
+llvm::Value *ExpressionBuilder::operator() (Literal *node)
+{
+    llvm::Type *type = env.getType(node->type());
+    switch (node->value()) {
+        case Literal::trueVal: return llvm::ConstantInt::getTrue(type);
+        case Literal::falseVal:return llvm::ConstantInt::getFalse(type);
+    }
+    assert(false);
+    return nullptr;
+}
+
+llvm::Value *ExpressionBuilder::operator() (StrLiteral *node)
+{
+    return llvm::ConstantStruct::get(env.string,
+        llvm::ConstantPointerNull::get(llvm::Type::getInt32PtrTy(env.context)), // no refcounter
+        llvm::ConstantDataArray::getString(env.context, llvm::StringRef(node->value().data(), node->value().size()), false), // data
+        llvm::ConstantInt::get(llvm::Type::getInt32Ty(env.context), node->value().size(), false), // size
+    nullptr);
+}
+
+llvm::Value *ExpressionBuilder::operator() (Var *node)
+{
+    assert(node->declaration());
+    auto it = varMap.find(node->declaration());
+    assert(it != varMap.end()); // Use befor initialization should be checked by analizers
+
+    return node->declaration()->is(VarDecl::argument) ? it->second : builder.CreateLoad(it->second);
+}
+
+llvm::Value *ExpressionBuilder::operator() (Assigment *node)
+{
+    PRECONDITION(node->declaration());
+    PRECONDITION(!node->declaration()->is(VarDecl::argument));
+    PRECONDITION(varMap.count(node->declaration()) == 1);
+    auto it = varMap.find(node->declaration());
+    llvm::Value *val = dispatch(*this, node->value());
+    builder.CreateStore(val, it->second);
+    return val;
+}
+
+llvm::Value *ExpressionBuilder::operator() (BinaryOp *node) // TODO
+{
+    llvm::Value *left = dispatch(*this, node->left());
+    llvm::Value *right = dispatch(*this, node->right());
+    switch (node->operation()) {
+        case BinaryOp::add: return builder.CreateAdd(left, right);
+        case BinaryOp::sub: return builder.CreateSub(left, right);
+        case BinaryOp::mul: return builder.CreateMul(left, right);
+        case BinaryOp::div: return builder.CreateSDiv(left, right);
+
+        case BinaryOp::equal: return builder.CreateICmpEQ(left, right);
+        case BinaryOp::noteq: return builder.CreateICmpNE(left, right);
+
+        case BinaryOp::less: return builder.CreateICmpSLT(left, right);
+        case BinaryOp::lesseq: return builder.CreateICmpSLE(left, right);
+        case BinaryOp::greater: return builder.CreateICmpSGT(left, right);
+        case BinaryOp::greatereq: return builder.CreateICmpSGE(left, right);
+
+        case BinaryOp::boolAnd: return builder.CreateAnd(left, right);
+        case BinaryOp::boolOr: return builder.CreateOr(left, right);
+    }
+    assert(false);
+    return nullptr;
+}
+
+llvm::Value *ExpressionBuilder::operator() (PrefixOp *node) // TODO
+{
+    llvm::Value *val = dispatch(*this, node->operand());
+    switch (node->operation()) {
+        case PrefixOp::negative: return builder.CreateNeg(val);
+        case PrefixOp::positive: return val;
+        case PrefixOp::boolnot: return builder.CreateNot(val);
+    }
+    assert(false);
+    return nullptr;
+}
+
 bool ModuleBuilder::visit(Function *node)
 {
     mCurrBlockTerminated = false;
@@ -40,22 +137,49 @@ bool ModuleBuilder::visit(Function *node)
     return true;
 }
 
-void ModuleBuilder::returnValue(Return *node, llvm::Value *val)
+bool ModuleBuilder::visit(Return *node)
 {
-    builder.CreateRet(val);
     mCurrBlockTerminated = true;
+    auto children = node->getChildren<Node>();
+    if (children.empty()) {
+        builder.CreateRetVoid();
+        return false;
+    }
+    assert(children.size() == 1);
+    ExpressionBuilder evaluator = {env, mVarMap, builder};
+    builder.CreateRet(dispatch(evaluator, children.front()));
+    return false;
 }
 
-void ModuleBuilder::returnVoid(Return *node)
+namespace {
+inline llvm::AllocaInst *addLocalVar(llvm::Function *func, llvm::Type *type, const std::string &name)
 {
-    builder.CreateRetVoid();
-    mCurrBlockTerminated = true;
+    llvm::IRBuilder<> builder(&(func->getEntryBlock()), func->getEntryBlock().begin());
+    return builder.CreateAlloca(type, 0, name.c_str());
+}
 }
 
-void ModuleBuilder::ifCond(If *node, llvm::Value *val)
+bool ModuleBuilder::visit(VarDecl *node)
 {
+    if (node->is(VarDecl::argument))
+        return false;
+    auto type = env.getType(node->type());
+    assert(type != nullptr); // types integrity should be checked by analyzers
+    auto allocaVal = mVarMap[node] = addLocalVar(builder.GetInsertBlock()->getParent(), type, node->name());
+    if (!node->initExpr())
+        return false;
+    ExpressionBuilder evaluator = {env, mVarMap, builder};
+    llvm::Value *val = dispatch(evaluator, node->initExpr());
+    builder.CreateStore(val, allocaVal);
+    return false;
+}
+
+bool ModuleBuilder::visit(If *node)
+{
+    ExpressionBuilder evaluator = {env, mVarMap, builder};
+    llvm::Value *val = dispatch(evaluator, node->condition());
     if (!node->thenBlock() && !node->elseBlock()) // "if (cond) ;" || "if (cond) ; else ;" no additional generation needed
-        return;
+        return false;
     llvm::Function *func = builder.GetInsertBlock()->getParent();
     auto mergeBB = llvm::BasicBlock::Create(env.context, "merge");
     auto thenBB = node->thenBlock() ? llvm::BasicBlock::Create(env.context, "then") : mergeBB;
@@ -81,116 +205,19 @@ void ModuleBuilder::ifCond(If *node, llvm::Value *val)
     }
     func->getBasicBlockList().push_back(mergeBB);
     builder.SetInsertPoint(mergeBB);
+    return false;
 }
 
-llvm::Value *ModuleBuilder::call(Call *node, const std::vector<llvm::Value*> &args)
+bool ModuleBuilder::visit(CodeBlock *)
 {
-    llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node->function()));
-    if (!func) {
-        assert(node->function() != nullptr);
-        func = env.addFunction(node->function());
-    }
-    assert(func->arg_size() == args.size());
-    return builder.CreateCall(func, args);
+    return true; // TODO: push var map in order to pop it in a leave function
 }
 
-llvm::Value *ModuleBuilder::number(Number *node)
+bool ModuleBuilder::visit(ExprStatement *node)
 {
-    llvm::Type *type = env.getType(node->type());
-    return llvm::ConstantInt::get(type, node->value(), true);
-}
-
-llvm::Value *ModuleBuilder::literal(Literal *node)
-{
-    llvm::Type *type = env.getType(node->type());
-    switch (node->value()) {
-        case Literal::trueVal: return llvm::ConstantInt::getTrue(type);
-        case Literal::falseVal:return llvm::ConstantInt::getFalse(type);
-    }
-    assert(false);
-    return nullptr;
-}
-
-llvm::Value *ModuleBuilder::strLiteral(StrLiteral *node)
-{
-    return llvm::ConstantStruct::get(env.string,
-        llvm::ConstantPointerNull::get(llvm::Type::getInt32PtrTy(env.context)), // no refcounter
-        llvm::ConstantDataArray::getString(env.context, llvm::StringRef(node->value().data(), node->value().size()), false), // data
-        llvm::ConstantInt::get(llvm::Type::getInt32Ty(env.context), node->value().size(), false), // size
-    nullptr);
-}
-
-llvm::Value *ModuleBuilder::var(Var *node)
-{
-    assert(node->declaration());
-    auto it = mVarMap.find(node->declaration());
-    assert(it != mVarMap.end()); // Use befor initialization should be checked by analizers
-
-    return node->declaration()->is(VarDecl::argument) ? it->second : builder.CreateLoad(it->second);
-}
-
-namespace {
-inline llvm::AllocaInst *addLocalVar(llvm::Function *func, llvm::Type *type, const std::string &name)
-{
-    llvm::IRBuilder<> builder(&(func->getEntryBlock()), func->getEntryBlock().begin());
-    return builder.CreateAlloca(type, 0, name.c_str());
-}
-}
-
-void ModuleBuilder::varInit(VarDecl *node, llvm::Value *val)
-{
-    auto type = env.getType(node->type());
-    assert(type != nullptr); // types integrity should be checked by analyzers
-    auto allocaVal = mVarMap[node] = addLocalVar(builder.GetInsertBlock()->getParent(), type, node->name());
-    builder.CreateStore(val, allocaVal);
-}
-
-llvm::Value *ModuleBuilder::assign(Assigment *node, llvm::Value *val)
-{
-    assert(!node->declaration()->is(VarDecl::argument));
-    auto it = mVarMap.find(node->declaration());
-    if (it == mVarMap.end()) {
-        auto type = env.getType(node->declaration()->type());
-        assert(type != nullptr); // types integrity should be checked by analyzers
-        mVarMap[node->declaration()] = addLocalVar(builder.GetInsertBlock()->getParent(), type, node->declaration()->name());
-        it = mVarMap.find(node->declaration());
-    }
-    builder.CreateStore(val, it->second);
-    return val;
-}
-
-llvm::Value *ModuleBuilder::binaryOp(BinaryOp *node, llvm::Value *left, llvm::Value *right)
-{
-    switch (node->operation()) {
-        case BinaryOp::add: return builder.CreateAdd(left, right);
-        case BinaryOp::sub: return builder.CreateSub(left, right);
-        case BinaryOp::mul: return builder.CreateMul(left, right);
-        case BinaryOp::div: return builder.CreateSDiv(left, right);
-
-        case BinaryOp::equal: return builder.CreateICmpEQ(left, right);
-        case BinaryOp::noteq: return builder.CreateICmpNE(left, right);
-
-        case BinaryOp::less: return builder.CreateICmpSLT(left, right);
-        case BinaryOp::lesseq: return builder.CreateICmpSLE(left, right);
-        case BinaryOp::greater: return builder.CreateICmpSGT(left, right);
-        case BinaryOp::greatereq: return builder.CreateICmpSGE(left, right);
-
-        case BinaryOp::boolAnd: return builder.CreateAnd(left, right);
-        case BinaryOp::boolOr: return builder.CreateOr(left,right);
-    }
-    assert(false);
-    return nullptr;
-}
-
-llvm::Value *ModuleBuilder::prefixOp(PrefixOp *node, llvm::Value *val)
-{
-    switch (node->operation()) {
-        case PrefixOp::negative: return builder.CreateNeg(val);
-        case PrefixOp::positive: return val;
-        case PrefixOp::boolnot: return builder.CreateNot(val);
-    }
-    assert(false);
-    return nullptr;
+    ExpressionBuilder evaluator = {env, mVarMap, builder};
+    dispatch(evaluator, node->expression());
+    return false;
 }
 
 void ModuleBuilder::save(const std::string &path)

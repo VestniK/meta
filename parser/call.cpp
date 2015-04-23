@@ -46,16 +46,9 @@ void Call::setFunction(Function *func)
     }
 }
 
-Node *Call::arg(size_t pos)
+const std::vector<Node*> &Call::args() const
 {
-    if (pos < children.size())
-        return children[pos];
-    return nullptr;
+    return children;
 }
 
-size_t Call::argsCount() const
-{
-    return children.size();
-}
-
-}
+} // namespace meta

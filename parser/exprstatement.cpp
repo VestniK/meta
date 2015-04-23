@@ -16,14 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include "utils/contract.h"
 
 #include "exprstatement.h"
 
 namespace meta {
 
-ExprStatement::ExprStatement(const StackFrame *start, size_t size): Visitable<Node, ExprStatement>(start, size)
+ExprStatement::ExprStatement(const StackFrame *reduction, size_t size): Visitable<Node, ExprStatement>(reduction, size)
 {
+    PRECONDITION(size == 2);
+    PRECONDITION(reduction[0].nodes.size() == 1);
+    PRECONDITION(reduction[1].nodes.empty());
+}
 
+Node *ExprStatement::expression()
+{
+    PRECONDITION(children.size() == 1);
+    return children[0];
 }
 
 } // namespace meta
