@@ -10,6 +10,7 @@ set(LLVM_REQUIRED_LIBS LLVMBitWriter LLVMCore LLVMSupport)
 
 set(SRC
   environment.cpp
+  expressionbuilder.cpp
   generator.cpp
   modulebuilder.cpp
 )

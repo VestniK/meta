@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2015  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,40 +18,40 @@
  */
 #pragma once
 
+#include <stdexcept>
 #include <map>
-#include <string>
 
 #include <llvm/IR/IRBuilder.h>
 
-#include "parser/metaparser.h"
 #include "parser/metanodes.h"
-
-#include "generators/llvmgen/environment.h"
-#include "generators/llvmgen/privateheadercheck.h"
+#include "parser/metaparser.h"
 
 namespace meta {
 namespace generators {
 namespace llvmgen {
 
-class ModuleBuilder: public Visitor
+struct Environment;
+
+struct ExpressionBuilder
 {
-public:
-    ModuleBuilder(Environment &env): env(env), builder(env.context) {}
+    llvm::Value *operator() (Node *) {throw std::invalid_argument("Can't evaluate llvm::Value for non expression node");}
+    llvm::Value *operator() (Expression *) {throw std::runtime_error("Unknown expression type");}
 
-    bool visit(Function *node) override;
-    bool visit(VarDecl *node) override;
-    bool visit(Return *node) override;
-    bool visit(If *node) override;
-    bool visit(ExprStatement *node) override;
-    bool visit(CodeBlock *node) override;
+    // Values
+    llvm::Value *operator() (Number *node);
+    llvm::Value *operator() (Literal *node);
+    llvm::Value *operator() (StrLiteral *node);
+    llvm::Value *operator() (Var *node);
 
-    void save(const std::string &path);
+    // Operations
+    llvm::Value *operator() (Call *node);
+    llvm::Value *operator() (Assigment *node);
+    llvm::Value *operator() (BinaryOp *node);
+    llvm::Value *operator() (PrefixOp *node);
 
-private:
     Environment &env;
-    std::map<VarDecl *, llvm::Value *> mVarMap;
-    llvm::IRBuilder<> builder;
-    bool mCurrBlockTerminated = false;
+    const std::map<VarDecl *, llvm::Value *> &varMap;
+    llvm::IRBuilder<> &builder;
 };
 
 } // namespace llvmgen
