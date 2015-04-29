@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2015  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,34 +17,23 @@
  */
 #pragma once
 
+#include <exception>
 #include <string>
-
-#include "utils/exception.h"
-
-#include "parser/metalexer.h"
+#include <vector>
 
 namespace meta {
-class Node;
+namespace utils {
 
-namespace analysers {
-
-class SemanticError: public utils::Exception
-{
+class Exception: public std::exception {
 public:
-    SemanticError(Node *node, const char *format, ...) __attribute__((format(printf, 3, 4)));
-    ~SemanticError();
+    Exception();
+    virtual ~Exception() = default;
 
-    virtual const char *what() const noexcept override;
-    const TokenSequence &tokens() const {return mTokens;}
-    const std::string &sourcePath() const {return mSrc;}
+    const std::vector<std::string> &backtrace() const {return mBacktrace;}
 
 private:
-    std::string mMsg;
-    std::string mErrContext;
-    TokenSequence mTokens;
-    std::string mSrc;
+    std::vector<std::string> mBacktrace;
 };
 
-} // namespace analysers
+} // namespace utils
 } // namespace meta
-

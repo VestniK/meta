@@ -13,10 +13,8 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-
 #include <cstdarg>
 #include <cstdio>
 
@@ -28,7 +26,7 @@ namespace meta {
 namespace analysers {
 
 SemanticError::SemanticError(Node *node, const char *format, ...):
-    mTokens(node->tokens()), mSrc(node->sourcePath())
+    utils::Exception(), mTokens(node->tokens()), mSrc(node->sourcePath())
 {
     va_list args;
     va_start(args, format);
