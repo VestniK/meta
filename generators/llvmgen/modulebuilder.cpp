@@ -28,6 +28,12 @@
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
 
+#include "utils/contract.h"
+
+#include "typesystem/type.h"
+
+#include "analysers/semanticerror.h"
+
 #include "generators/llvmgen/expressionbuilder.h"
 #include "generators/llvmgen/modulebuilder.h"
 #include "generators/abi/mangling.h"
@@ -56,20 +62,14 @@ bool ModuleBuilder::visit(Function *node)
 
     llvm::BasicBlock *body = llvm::BasicBlock::Create(env.context, "", func);
     builder.SetInsertPoint(body);
-    return true;
-}
-
-bool ModuleBuilder::visit(Return *node)
-{
-    mCurrBlockTerminated = true;
-    auto children = node->getChildren<Node>();
-    if (children.empty()) {
-        builder.CreateRetVoid();
+    StatementBuilder statementBuilder;
+    Context ctx = {env, mVarMap, builder};
+    const ExecStatus status = statementBuilder(node->body(), ctx);
+    if (status == ExecStatus::stop) // Function body ends with terminating instruction
         return false;
-    }
-    assert(children.size() == 1);
-    ExpressionBuilder evaluator = {env, mVarMap, builder};
-    builder.CreateRet(dispatch(evaluator, children.front()));
+    if (node->type()->typeId() != typesystem::Type::Void)
+        throw analysers::SemanticError(node, "Non-void function ends without return");
+    builder.CreateRetVoid(); // Void function with implicit return.
     return false;
 }
 
@@ -81,65 +81,87 @@ inline llvm::AllocaInst *addLocalVar(llvm::Function *func, llvm::Type *type, con
 }
 }
 
-bool ModuleBuilder::visit(VarDecl *node)
+ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx)
 {
-    if (node->is(VarDecl::argument))
-        return false;
-    auto type = env.getType(node->type());
+    PRECONDITION(!node->is(VarDecl::argument));
+    auto type = ctx.env.getType(node->type());
     assert(type != nullptr); // types integrity should be checked by analyzers
-    auto allocaVal = mVarMap[node] = addLocalVar(builder.GetInsertBlock()->getParent(), type, node->name());
+    // TODO: good point to check for multiple definitions
+    auto allocaVal = ctx.varMap[node] = addLocalVar(ctx.builder.GetInsertBlock()->getParent(), type, node->name());
     if (!node->initExpr())
-        return false;
-    ExpressionBuilder evaluator = {env, mVarMap, builder};
+        return ExecStatus::cont;
+    ExpressionBuilder evaluator = {ctx.env, ctx.varMap, ctx.builder};
     llvm::Value *val = dispatch(evaluator, node->initExpr());
-    builder.CreateStore(val, allocaVal);
-    return false;
+    ctx.builder.CreateStore(val, allocaVal);
+    return ExecStatus::cont;
 }
 
-bool ModuleBuilder::visit(If *node)
+ExecStatus StatementBuilder::operator() (Return *node, Context &ctx)
 {
-    ExpressionBuilder evaluator = {env, mVarMap, builder};
+    auto children = node->getChildren<Node>();
+    if (children.empty()) {
+        ctx.builder.CreateRetVoid();
+        return ExecStatus::stop;
+    }
+    assert(children.size() == 1);
+    ExpressionBuilder evaluator = {ctx.env, ctx.varMap, ctx.builder};
+    ctx.builder.CreateRet(dispatch(evaluator, children.front()));
+    return ExecStatus::stop;
+}
+
+ExecStatus StatementBuilder::operator() (If *node, Context &ctx)
+{
+    ExpressionBuilder evaluator = {ctx.env, ctx.varMap, ctx.builder};
     llvm::Value *val = dispatch(evaluator, node->condition());
     if (!node->thenBlock() && !node->elseBlock()) // "if (cond) ;" || "if (cond) ; else ;" no additional generation needed
-        return false;
-    llvm::Function *func = builder.GetInsertBlock()->getParent();
-    auto mergeBB = llvm::BasicBlock::Create(env.context, "merge");
-    auto thenBB = node->thenBlock() ? llvm::BasicBlock::Create(env.context, "then") : mergeBB;
-    auto elseBB = node->elseBlock() ? llvm::BasicBlock::Create(env.context, "else") : mergeBB;
+        return ExecStatus::cont;
+    llvm::Function *func = ctx.builder.GetInsertBlock()->getParent();
+    auto mergeBB = llvm::BasicBlock::Create(ctx.env.context, "merge");
+    auto thenBB = node->thenBlock() ? llvm::BasicBlock::Create(ctx.env.context, "then") : mergeBB;
+    auto elseBB = node->elseBlock() ? llvm::BasicBlock::Create(ctx.env.context, "else") : mergeBB;
 
-    builder.CreateCondBr(val, thenBB, elseBB);
+    ctx.builder.CreateCondBr(val, thenBB, elseBB);
 
     if (node->thenBlock()) {
         func->getBasicBlockList().push_back(thenBB);
-        builder.SetInsertPoint(thenBB);
-        node->thenBlock()->walk(this);
-        if (!mCurrBlockTerminated)
-            builder.CreateBr(mergeBB);
-        mCurrBlockTerminated = false;
+        ctx.builder.SetInsertPoint(thenBB);
+        if (dispatch(*this, node->thenBlock(), ctx) != ExecStatus::stop)
+            ctx.builder.CreateBr(mergeBB);
     }
     if (node->elseBlock()) {
         func->getBasicBlockList().push_back(elseBB);
-        builder.SetInsertPoint(elseBB);
-        node->elseBlock()->walk(this);
-        if (!mCurrBlockTerminated)
-            builder.CreateBr(mergeBB);
-        mCurrBlockTerminated = false;
+        ctx.builder.SetInsertPoint(elseBB);
+        if (dispatch(*this, node->elseBlock(), ctx) != ExecStatus::stop)
+            ctx.builder.CreateBr(mergeBB);
     }
     func->getBasicBlockList().push_back(mergeBB);
-    builder.SetInsertPoint(mergeBB);
-    return false;
+    ctx.builder.SetInsertPoint(mergeBB);
+    return ExecStatus::cont;
 }
 
-bool ModuleBuilder::visit(CodeBlock *)
+ExecStatus StatementBuilder::operator() (CodeBlock *block, Context &ctx)
 {
-    return true; // TODO: push var map in order to pop it in a leave function
+    ExecStatus lastStatus = ExecStatus::cont;
+    Node *lastStatement = nullptr;
+    for (Node *statement: block->statements()) {
+        assert(lastStatement || lastStatus == ExecStatus::cont);
+        if (lastStatus == ExecStatus::stop)
+            throw analysers::SemanticError(
+                statement, "Code is unreachable due to terminating statement at position %d:%d",
+                lastStatement->tokens().linenum(), lastStatement->tokens().colnum()
+            );
+
+        lastStatement = statement;
+        lastStatus = dispatch(*this, statement, ctx);
+    }
+    return lastStatus;
 }
 
-bool ModuleBuilder::visit(ExprStatement *node)
+ExecStatus StatementBuilder::operator() (ExprStatement *node, Context &ctx)
 {
-    ExpressionBuilder evaluator = {env, mVarMap, builder};
+    ExpressionBuilder evaluator = {ctx.env, ctx.varMap, ctx.builder};
     dispatch(evaluator, node->expression());
-    return false;
+    return ExecStatus::cont;
 }
 
 void ModuleBuilder::save(const std::string &path)

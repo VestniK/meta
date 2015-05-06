@@ -28,6 +28,7 @@ public:
     CodeBlock(const StackFrame *start, size_t size);
 
     void add(Node *statement);
+    const std::vector<Node*> &statements() const;
 };
 
 } // namespace meta

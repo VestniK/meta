@@ -31,4 +31,9 @@ void CodeBlock::add(Node *statement)
     children.push_back(statement);
 }
 
+const std::vector<Node*> &CodeBlock::statements() const
+{
+    return children;
+}
+
 } // namespace meta

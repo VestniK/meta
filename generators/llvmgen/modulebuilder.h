@@ -26,6 +26,8 @@
 #include "parser/metaparser.h"
 #include "parser/metanodes.h"
 
+#include "analysers/unexpectednode.h"
+
 #include "generators/llvmgen/environment.h"
 #include "generators/llvmgen/privateheadercheck.h"
 
@@ -33,17 +35,37 @@ namespace meta {
 namespace generators {
 namespace llvmgen {
 
+struct Context
+{
+    Environment &env;
+    std::map<VarDecl *, llvm::Value *> varMap;
+    llvm::IRBuilder<> builder;
+};
+
+enum class ExecStatus: bool
+{
+    stop = true,
+    cont = false
+};
+
+struct StatementBuilder {
+
+    ExecStatus operator() (Node *node, Context &ctx) {throw analysers::UnexpectedNode(node, "The node is not statement don't know how to compile it");}
+
+    ExecStatus operator() (CodeBlock *node, Context &ctx);
+    ExecStatus operator() (Return *node, Context &ctx);
+    ExecStatus operator() (If *node, Context &ctx);
+    ExecStatus operator() (ExprStatement *node, Context &ctx);
+
+    ExecStatus operator() (VarDecl *node, Context &ctx); // TODO: think about proper way to handle declarations as statements.
+};
+
 class ModuleBuilder: public Visitor
 {
 public:
     ModuleBuilder(Environment &env): env(env), builder(env.context) {}
 
     bool visit(Function *node) override;
-    bool visit(VarDecl *node) override;
-    bool visit(Return *node) override;
-    bool visit(If *node) override;
-    bool visit(ExprStatement *node) override;
-    bool visit(CodeBlock *node) override;
 
     void save(const std::string &path);
 
