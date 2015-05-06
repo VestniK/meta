@@ -26,7 +26,7 @@ namespace meta {
 namespace analysers {
 
 SemanticError::SemanticError(Node *node, const char *format, ...):
-    utils::Exception(), mTokens(node->tokens()), mSrc(node->sourcePath())
+    NodeException(node)
 {
     va_list args;
     va_start(args, format);
@@ -34,19 +34,12 @@ SemanticError::SemanticError(Node *node, const char *format, ...):
     char buf[size];
     va_start(args, format);
     vsnprintf(buf, size, format, args);
-    mMsg.assign(buf, size);
-    mTokens.detach(mErrContext);
+    setMsg(std::string(buf, size));
 }
 
 SemanticError::~SemanticError()
 {
 }
 
-const char *SemanticError::what() const noexcept
-{
-    return mMsg.c_str();
-}
-
 } // namespace analysers
 } // namespace meta
-

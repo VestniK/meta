@@ -18,10 +18,11 @@
  */
 #pragma once
 
-#include <stdexcept>
 #include <map>
 
 #include <llvm/IR/IRBuilder.h>
+
+#include "analysers/unexpectednode.h"
 
 #include "parser/metanodes.h"
 #include "parser/metaparser.h"
@@ -34,8 +35,8 @@ struct Environment;
 
 struct ExpressionBuilder
 {
-    llvm::Value *operator() (Node *) {throw std::invalid_argument("Can't evaluate llvm::Value for non expression node");}
-    llvm::Value *operator() (Expression *) {throw std::runtime_error("Unknown expression type");}
+    llvm::Value *operator() (Node *node) {throw analysers::UnexpectedNode(node, "Can't evaluate llvm::Value for non expression node");}
+    llvm::Value *operator() (Expression *node) {throw analysers::UnexpectedNode(node, "Unknown expression type");}
 
     // Values
     llvm::Value *operator() (Number *node);

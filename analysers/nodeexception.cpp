@@ -13,25 +13,29 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
-#pragma once
-
-#include <string>
-
-#include "parser/metalexer.h"
+#include "parser/metaparser.h"
 
 #include "analysers/nodeexception.h"
 
 namespace meta {
 namespace analysers {
 
-class SemanticError: public NodeException
+NodeException::NodeException(Node *node, const std::string &msg):
+    utils::Exception(), mMsg(msg), mTokens(node->tokens()), mSrc(node->sourcePath())
 {
-public:
-    SemanticError(Node *node, const char *format, ...) __attribute__((format(printf, 3, 4)));
-    ~SemanticError();
-};
+    mTokens.detach(mErrContext);
+}
+
+NodeException::~NodeException()
+{
+}
+
+const char *NodeException::what() const noexcept
+{
+    return mMsg.c_str();
+}
 
 } // namespace analysers
 } // namespace meta

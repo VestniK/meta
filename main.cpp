@@ -31,6 +31,7 @@
 #include "typesystem/typesstore.h"
 
 #include "analysers/metaprocessor.h"
+#include "analysers/nodeexception.h"
 #include "analysers/reachabilitychecker.h"
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
@@ -172,8 +173,23 @@ bool run(const Options &opts) noexcept try
         std::cerr << '^' << std::endl;
     }
     return false;
-} catch(const std::exception &err) {
+// Opts visibility is ignored bellow since those exceptions caused by internal compiler bugs
+} catch(const analysers::NodeException &err) {
+    std::cerr <<
+        err.sourcePath() << ':' << err.tokens().begin()->line <<
+        ':' << err.tokens().begin()->column << ": " << err.what() <<
+        ":" << std::endl
+    ;
+    std::cerr << err.tokens().lineStr() << "..." << std::endl;
+    for (int i = 1; i < err.tokens().colnum(); ++i)
+        std::cerr << ' ';
+    std::cerr << '^' << std::endl;
+    for (const auto &frame: err.backtrace())
+        std::cerr << "\t" << frame << std::endl;
+    return false;
+} catch(const utils::Exception &err) {
     std::cerr << "Internal compiler error: " << err.what() << std::endl;
+    for (const auto &frame: err.backtrace())
+        std::cerr << "\t" << frame << std::endl;
     return false;
 }
-
