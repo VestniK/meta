@@ -35,13 +35,6 @@ namespace meta {
 namespace generators {
 namespace llvmgen {
 
-struct Context
-{
-    Environment &env;
-    std::map<VarDecl *, llvm::Value *> varMap;
-    llvm::IRBuilder<> builder;
-};
-
 enum class ExecStatus: bool
 {
     stop = true,
@@ -63,17 +56,14 @@ struct StatementBuilder {
 class ModuleBuilder: public Visitor
 {
 public:
-    ModuleBuilder(Environment &env): env(env), builder(env.context) {}
+    ModuleBuilder(Environment &env): mCtx(Context{env, std::map<VarDecl *, llvm::Value *>{}, llvm::IRBuilder<>{env.context}}) {}
 
     bool visit(Function *node) override;
 
     void save(const std::string &path);
 
 private:
-    Environment &env;
-    std::map<VarDecl *, llvm::Value *> mVarMap;
-    llvm::IRBuilder<> builder;
-    bool mCurrBlockTerminated = false;
+    Context mCtx;
 };
 
 } // namespace llvmgen

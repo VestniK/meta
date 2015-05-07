@@ -29,29 +29,29 @@ namespace meta {
 namespace generators {
 namespace llvmgen {
 
-llvm::Value *ExpressionBuilder::operator() (Call *node)
+llvm::Value *ExpressionBuilder::operator() (Call *node, Context &ctx)
 {
-    llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node->function()));
+    llvm::Function *func = ctx.env.module->getFunction(generators::abi::mangledName(node->function()));
     if (!func) {
         assert(node->function() != nullptr);
-        func = env.addFunction(node->function());
+        func = ctx.env.addFunction(node->function());
     }
     std::vector<llvm::Value*> args;
     for (auto argNode: node->args())
-        args.push_back(dispatch(*this, argNode));
+        args.push_back(dispatch(*this, argNode, ctx));
     assert(func->arg_size() == args.size());
-    return builder.CreateCall(func, args);
+    return ctx.builder.CreateCall(func, args);
 }
 
-llvm::Value *ExpressionBuilder::operator() (Number *node)
+llvm::Value *ExpressionBuilder::operator() (Number *node, Context &ctx)
 {
-    llvm::Type *type = env.getType(node->type());
+    llvm::Type *type = ctx.env.getType(node->type());
     return llvm::ConstantInt::get(type, node->value(), true);
 }
 
-llvm::Value *ExpressionBuilder::operator() (Literal *node)
+llvm::Value *ExpressionBuilder::operator() (Literal *node, Context &ctx)
 {
-    llvm::Type *type = env.getType(node->type());
+    llvm::Type *type = ctx.env.getType(node->type());
     switch (node->value()) {
         case Literal::trueVal: return llvm::ConstantInt::getTrue(type);
         case Literal::falseVal:return llvm::ConstantInt::getFalse(type);
@@ -60,67 +60,67 @@ llvm::Value *ExpressionBuilder::operator() (Literal *node)
     return nullptr;
 }
 
-llvm::Value *ExpressionBuilder::operator() (StrLiteral *node)
+llvm::Value *ExpressionBuilder::operator() (StrLiteral *node, Context &ctx)
 {
-    return llvm::ConstantStruct::get(env.string,
-        llvm::ConstantPointerNull::get(llvm::Type::getInt32PtrTy(env.context)), // no refcounter
-        llvm::ConstantDataArray::getString(env.context, llvm::StringRef(node->value().data(), node->value().size()), false), // data
-        llvm::ConstantInt::get(llvm::Type::getInt32Ty(env.context), node->value().size(), false), // size
+    return llvm::ConstantStruct::get(ctx.env.string,
+        llvm::ConstantPointerNull::get(llvm::Type::getInt32PtrTy(ctx.env.context)), // no refcounter
+        llvm::ConstantDataArray::getString(ctx.env.context, llvm::StringRef(node->value().data(), node->value().size()), false), // data
+        llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx.env.context), node->value().size(), false), // size
     nullptr);
 }
 
-llvm::Value *ExpressionBuilder::operator() (Var *node)
+llvm::Value *ExpressionBuilder::operator() (Var *node, Context &ctx)
 {
     assert(node->declaration());
-    auto it = varMap.find(node->declaration());
-    assert(it != varMap.end()); // Use befor initialization should be checked by analizers
+    auto it = ctx.varMap.find(node->declaration());
+    assert(it != ctx.varMap.end()); // Use befor initialization should be checked by analizers
 
-    return node->declaration()->is(VarDecl::argument) ? it->second : builder.CreateLoad(it->second);
+    return node->declaration()->is(VarDecl::argument) ? it->second : ctx.builder.CreateLoad(it->second);
 }
 
-llvm::Value *ExpressionBuilder::operator() (Assigment *node)
+llvm::Value *ExpressionBuilder::operator() (Assigment *node, Context &ctx)
 {
     PRECONDITION(node->declaration());
     PRECONDITION(!node->declaration()->is(VarDecl::argument));
-    PRECONDITION(varMap.count(node->declaration()) == 1);
-    auto it = varMap.find(node->declaration());
-    llvm::Value *val = dispatch(*this, node->value());
-    builder.CreateStore(val, it->second);
+    PRECONDITION(ctx.varMap.count(node->declaration()) == 1);
+    auto it = ctx.varMap.find(node->declaration());
+    llvm::Value *val = dispatch(*this, node->value(), ctx);
+    ctx.builder.CreateStore(val, it->second);
     return val;
 }
 
-llvm::Value *ExpressionBuilder::operator() (BinaryOp *node) // TODO
+llvm::Value *ExpressionBuilder::operator() (BinaryOp *node, Context &ctx)
 {
-    llvm::Value *left = dispatch(*this, node->left());
-    llvm::Value *right = dispatch(*this, node->right());
+    llvm::Value *left = dispatch(*this, node->left(), ctx);
+    llvm::Value *right = dispatch(*this, node->right(), ctx);
     switch (node->operation()) {
-        case BinaryOp::add: return builder.CreateAdd(left, right);
-        case BinaryOp::sub: return builder.CreateSub(left, right);
-        case BinaryOp::mul: return builder.CreateMul(left, right);
-        case BinaryOp::div: return builder.CreateSDiv(left, right);
+        case BinaryOp::add: return ctx.builder.CreateAdd(left, right);
+        case BinaryOp::sub: return ctx.builder.CreateSub(left, right);
+        case BinaryOp::mul: return ctx.builder.CreateMul(left, right);
+        case BinaryOp::div: return ctx.builder.CreateSDiv(left, right);
 
-        case BinaryOp::equal: return builder.CreateICmpEQ(left, right);
-        case BinaryOp::noteq: return builder.CreateICmpNE(left, right);
+        case BinaryOp::equal: return ctx.builder.CreateICmpEQ(left, right);
+        case BinaryOp::noteq: return ctx.builder.CreateICmpNE(left, right);
 
-        case BinaryOp::less: return builder.CreateICmpSLT(left, right);
-        case BinaryOp::lesseq: return builder.CreateICmpSLE(left, right);
-        case BinaryOp::greater: return builder.CreateICmpSGT(left, right);
-        case BinaryOp::greatereq: return builder.CreateICmpSGE(left, right);
+        case BinaryOp::less: return ctx.builder.CreateICmpSLT(left, right);
+        case BinaryOp::lesseq: return ctx.builder.CreateICmpSLE(left, right);
+        case BinaryOp::greater: return ctx.builder.CreateICmpSGT(left, right);
+        case BinaryOp::greatereq: return ctx.builder.CreateICmpSGE(left, right);
 
-        case BinaryOp::boolAnd: return builder.CreateAnd(left, right);
-        case BinaryOp::boolOr: return builder.CreateOr(left, right);
+        case BinaryOp::boolAnd: return ctx.builder.CreateAnd(left, right);
+        case BinaryOp::boolOr: return ctx.builder.CreateOr(left, right);
     }
     assert(false);
     return nullptr;
 }
 
-llvm::Value *ExpressionBuilder::operator() (PrefixOp *node) // TODO
+llvm::Value *ExpressionBuilder::operator() (PrefixOp *node, Context &ctx)
 {
-    llvm::Value *val = dispatch(*this, node->operand());
+    llvm::Value *val = dispatch(*this, node->operand(), ctx);
     switch (node->operation()) {
-        case PrefixOp::negative: return builder.CreateNeg(val);
+        case PrefixOp::negative: return ctx.builder.CreateNeg(val);
         case PrefixOp::positive: return val;
-        case PrefixOp::boolnot: return builder.CreateNot(val);
+        case PrefixOp::boolnot: return ctx.builder.CreateNot(val);
     }
     assert(false);
     return nullptr;

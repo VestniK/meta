@@ -20,39 +20,34 @@
 
 #include <map>
 
-#include <llvm/IR/IRBuilder.h>
-
-#include "analysers/unexpectednode.h"
-
 #include "parser/metanodes.h"
 #include "parser/metaparser.h"
+
+#include "analysers/unexpectednode.h"
 
 namespace meta {
 namespace generators {
 namespace llvmgen {
 
 struct Environment;
+struct Context;
 
 struct ExpressionBuilder
 {
-    llvm::Value *operator() (Node *node) {throw analysers::UnexpectedNode(node, "Can't evaluate llvm::Value for non expression node");}
-    llvm::Value *operator() (Expression *node) {throw analysers::UnexpectedNode(node, "Unknown expression type");}
+    llvm::Value *operator() (Node *node, Context &) {throw analysers::UnexpectedNode(node, "Can't evaluate llvm::Value for non expression node");}
+    llvm::Value *operator() (Expression *node, Context &) {throw analysers::UnexpectedNode(node, "Unknown expression type");}
 
     // Values
-    llvm::Value *operator() (Number *node);
-    llvm::Value *operator() (Literal *node);
-    llvm::Value *operator() (StrLiteral *node);
-    llvm::Value *operator() (Var *node);
+    llvm::Value *operator() (Number *node, Context &ctx);
+    llvm::Value *operator() (Literal *node, Context &ctx);
+    llvm::Value *operator() (StrLiteral *node, Context &ctx);
+    llvm::Value *operator() (Var *node, Context &ctx);
 
     // Operations
-    llvm::Value *operator() (Call *node);
-    llvm::Value *operator() (Assigment *node);
-    llvm::Value *operator() (BinaryOp *node);
-    llvm::Value *operator() (PrefixOp *node);
-
-    Environment &env;
-    const std::map<VarDecl *, llvm::Value *> &varMap;
-    llvm::IRBuilder<> &builder;
+    llvm::Value *operator() (Call *node, Context &ctx);
+    llvm::Value *operator() (Assigment *node, Context &ctx);
+    llvm::Value *operator() (BinaryOp *node, Context &ctx);
+    llvm::Value *operator() (PrefixOp *node, Context &ctx);
 };
 
 } // namespace llvmgen

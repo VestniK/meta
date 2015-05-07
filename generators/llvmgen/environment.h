@@ -18,7 +18,10 @@
  */
 #pragma once
 
+#include <map>
 #include <memory>
+
+#include <llvm/IR/IRBuilder.h>
 
 #include "generators/llvmgen/privateheadercheck.h"
 
@@ -28,12 +31,14 @@ class LLVMContext;
 class Module;
 class Type;
 class StructType;
+class Value;
 
 }
 
 namespace meta {
 
 class Function;
+class VarDecl;
 
 namespace typesystem {
 
@@ -55,6 +60,13 @@ struct Environment
     llvm::LLVMContext &context;
     std::unique_ptr<llvm::Module> module;
     llvm::StructType *string;
+};
+
+struct Context
+{
+    Environment &env;
+    std::map<VarDecl *, llvm::Value *> varMap;
+    llvm::IRBuilder<> builder;
 };
 
 } // namespace llvmgen

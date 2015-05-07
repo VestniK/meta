@@ -44,32 +44,30 @@ namespace llvmgen {
 
 bool ModuleBuilder::visit(Function *node)
 {
-    mCurrBlockTerminated = false;
-    mVarMap.clear();
-    llvm::Function *func = env.module->getFunction(generators::abi::mangledName(node));
+    mCtx.varMap.clear();
+    llvm::Function *func = mCtx.env.module->getFunction(generators::abi::mangledName(node));
     if (!func)
-        func = env.addFunction(node);
+        func = mCtx.env.addFunction(node);
     if (node->visibility() == Visibility::Extern)
         return false;
 
     llvm::Function::arg_iterator it = func->arg_begin();
     for (const auto arg : node->args()) {
-        mVarMap[arg] = it;
+        mCtx.varMap[arg] = it;
         assert(it != func->arg_end());
         ++it;
     }
     assert(it == func->arg_end());
 
-    llvm::BasicBlock *body = llvm::BasicBlock::Create(env.context, "", func);
-    builder.SetInsertPoint(body);
+    llvm::BasicBlock *body = llvm::BasicBlock::Create(mCtx.env.context, "", func);
+    mCtx.builder.SetInsertPoint(body);
     StatementBuilder statementBuilder;
-    Context ctx = {env, mVarMap, builder};
-    const ExecStatus status = statementBuilder(node->body(), ctx);
+    const ExecStatus status = statementBuilder(node->body(), mCtx);
     if (status == ExecStatus::stop) // Function body ends with terminating instruction
         return false;
     if (node->type()->typeId() != typesystem::Type::Void)
         throw analysers::SemanticError(node, "Non-void function ends without return");
-    builder.CreateRetVoid(); // Void function with implicit return.
+    mCtx.builder.CreateRetVoid(); // Void function with implicit return.
     return false;
 }
 
@@ -90,8 +88,8 @@ ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx)
     auto allocaVal = ctx.varMap[node] = addLocalVar(ctx.builder.GetInsertBlock()->getParent(), type, node->name());
     if (!node->initExpr())
         return ExecStatus::cont;
-    ExpressionBuilder evaluator = {ctx.env, ctx.varMap, ctx.builder};
-    llvm::Value *val = dispatch(evaluator, node->initExpr());
+    ExpressionBuilder evaluator;
+    llvm::Value *val = dispatch(evaluator, node->initExpr(), ctx);
     ctx.builder.CreateStore(val, allocaVal);
     return ExecStatus::cont;
 }
@@ -104,15 +102,15 @@ ExecStatus StatementBuilder::operator() (Return *node, Context &ctx)
         return ExecStatus::stop;
     }
     assert(children.size() == 1);
-    ExpressionBuilder evaluator = {ctx.env, ctx.varMap, ctx.builder};
-    ctx.builder.CreateRet(dispatch(evaluator, children.front()));
+    ExpressionBuilder evaluator;
+    ctx.builder.CreateRet(dispatch(evaluator, children.front(), ctx));
     return ExecStatus::stop;
 }
 
 ExecStatus StatementBuilder::operator() (If *node, Context &ctx)
 {
-    ExpressionBuilder evaluator = {ctx.env, ctx.varMap, ctx.builder};
-    llvm::Value *val = dispatch(evaluator, node->condition());
+    ExpressionBuilder evaluator;
+    llvm::Value *val = dispatch(evaluator, node->condition(), ctx);
     if (!node->thenBlock() && !node->elseBlock()) // "if (cond) ;" || "if (cond) ; else ;" no additional generation needed
         return ExecStatus::cont;
     llvm::Function *func = ctx.builder.GetInsertBlock()->getParent();
@@ -159,8 +157,8 @@ ExecStatus StatementBuilder::operator() (CodeBlock *block, Context &ctx)
 
 ExecStatus StatementBuilder::operator() (ExprStatement *node, Context &ctx)
 {
-    ExpressionBuilder evaluator = {ctx.env, ctx.varMap, ctx.builder};
-    dispatch(evaluator, node->expression());
+    ExpressionBuilder evaluator;
+    dispatch(evaluator, node->expression(), ctx);
     return ExecStatus::cont;
 }
 
@@ -168,7 +166,7 @@ void ModuleBuilder::save(const std::string &path)
 {
     std::error_code errCode;
     llvm::raw_fd_ostream out(path.c_str(), errCode, llvm::sys::fs::F_None);
-    llvm::WriteBitcodeToFile(env.module.get(), out);
+    llvm::WriteBitcodeToFile(mCtx.env.module.get(), out);
     out.close();
     if (out.has_error())
         throw std::system_error(errCode);
