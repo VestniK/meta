@@ -43,7 +43,9 @@ enum class ExecStatus: bool
 
 struct StatementBuilder {
 
-    ExecStatus operator() (Node *node, Context &ctx) {throw analysers::UnexpectedNode(node, "The node is not statement don't know how to compile it");}
+    ExecStatus operator() (Node *node, Context &) {
+        throw analysers::UnexpectedNode(node, "The node is not statement don't know how to compile it");
+    }
 
     ExecStatus operator() (CodeBlock *node, Context &ctx);
     ExecStatus operator() (Return *node, Context &ctx);

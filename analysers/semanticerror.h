@@ -29,7 +29,8 @@ namespace analysers {
 class SemanticError: public NodeException
 {
 public:
-    SemanticError(Node *node, const char *format, ...) __attribute__((format(printf, 3, 4)));
+    [[gnu::format(printf, 3, 4)]]
+    SemanticError(Node *node, const char *format, ...);
     ~SemanticError();
 };
 

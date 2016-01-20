@@ -34,8 +34,12 @@ struct Context;
 
 struct ExpressionBuilder
 {
-    llvm::Value *operator() (Node *node, Context &) {throw analysers::UnexpectedNode(node, "Can't evaluate llvm::Value for non expression node");}
-    llvm::Value *operator() (Expression *node, Context &) {throw analysers::UnexpectedNode(node, "Unknown expression type");}
+    llvm::Value *operator() (Node *node, Context &) {
+        throw analysers::UnexpectedNode(node, "Can't evaluate llvm::Value for non expression node");
+    }
+    llvm::Value *operator() (Expression *node, Context &) {
+        throw analysers::UnexpectedNode(node, "Unknown expression type");
+    }
 
     // Values
     llvm::Value *operator() (Number *node, Context &ctx);
