@@ -24,7 +24,7 @@ namespace meta {
 
 Import::Import(const StackFrame *reduction, size_t size): Visitable<Node, Import>(reduction, size)
 {
-    assert(size == 3 || size == 5);
+    PRECONDITION(size == 3 || size == 5);
     Token target;
     TokenSequence package;
     for (auto token : reduction[1].tokens) {

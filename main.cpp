@@ -125,8 +125,7 @@ bool run(const Options &opts) noexcept try
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     for (const auto &src: opts.sources) {
-        input.push_back(std::vector<char>());
-        readWholeFile(src, input.back());
+        input.emplace_back(readWholeFile(src));
         parser.setSourcePath(src);
         parser.parse(input.back().data(), input.back().size());
     }

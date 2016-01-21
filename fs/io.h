@@ -21,4 +21,4 @@
 #include <string>
 #include <vector>
 
-void readWholeFile(const std::string &path, std::vector<char> &dst);
+std::vector<char> readWholeFile(const std::string &path);

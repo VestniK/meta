@@ -38,7 +38,7 @@ public:
     Type *getVoid() const;
 
 private:
-    std::map< std::string, std::unique_ptr<Type> > mTypes;
+    std::map<std::string, std::unique_ptr<Type>> mTypes;
 };
 
 } // namespace typesystem
