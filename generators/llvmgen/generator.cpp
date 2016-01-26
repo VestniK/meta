@@ -22,9 +22,9 @@ public:
     }
 };
 
-Generator *createLlvmGenerator()
+std::unique_ptr<Generator> createLlvmGenerator()
 {
-    return new LlvmGen;
+    return std::make_unique<LlvmGen>();
 }
 
 } // namespace llvmgen

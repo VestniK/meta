@@ -19,5 +19,5 @@ add_subdirectory(analysers)
 add_subdirectory(generators)
 
 add_executable(meta main.cpp)
-target_link_libraries(meta parser fs analysers llvmgenerator ${Boost_LIBRARIES})
+target_link_libraries(meta parser fs analysers llvmgenerator cppgenerator ${Boost_LIBRARIES})
 install(TARGETS meta RUNTIME DESTINATION bin)

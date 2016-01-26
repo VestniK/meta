@@ -137,7 +137,7 @@ bool run(const Options &opts) noexcept try
     analysers::checkReachability(ast);
     analysers::processMeta(ast);
     // generate
-    std::unique_ptr<generators::Generator> gen(generators::llvmgen::createLlvmGenerator());
+    std::unique_ptr<generators::Generator> gen = generators::llvmgen::createLlvmGenerator();
     gen->generate(ast, opts.output);
     return true;
 } catch(const SyntaxError &err) {

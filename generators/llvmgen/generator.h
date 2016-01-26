@@ -27,7 +27,7 @@ namespace meta {
 namespace generators {
 namespace llvmgen {
 
-Generator *createLlvmGenerator();
+std::unique_ptr<Generator> createLlvmGenerator();
 
 } // namespace llvmgen
 } // namespace generators

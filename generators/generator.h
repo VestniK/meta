@@ -18,8 +18,10 @@
  */
 #pragma once
 
+#include <map>
 #include <memory>
 #include <string>
+#include <stdexcept>
 
 namespace meta {
 class AST;
@@ -29,12 +31,8 @@ namespace generators {
 class Generator
 {
 public:
-    virtual ~Generator() {}
-
+    virtual ~Generator() = default;
     virtual void generate(AST *ast, const std::string &output) = 0;
-
-protected:
-    Generator() {}
 };
 
 } // namespace generators
