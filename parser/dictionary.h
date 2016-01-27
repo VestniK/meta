@@ -25,7 +25,7 @@ namespace meta {
 
 class Function;
 
-typedef std::multimap<std::string, Function*> DeclarationsDict;
-typedef std::map<std::string, DeclarationsDict> Dictionary;
+using DeclarationsDict = std::multimap<std::string, Function*>;
+using Dictionary = std::map<std::string, DeclarationsDict>;
 
 } // namespace meta

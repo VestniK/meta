@@ -12,6 +12,20 @@ namespace meta {
 namespace generators{
 namespace cppgen {
 
+void printFuncDecl(std::ostream& out, Function* func)
+{
+    out << func->type()->name() << " " << func->name() << "(";
+    bool first = true;
+    for (auto* arg: func->args()) {
+        if (!first)
+            out << ",";
+        else
+            first = false;
+        out << arg->type()->name() << " " << arg->name();
+    }
+    out << ");\n";
+}
+
 class CppGen: public Generator
 {
 public:
@@ -21,16 +35,7 @@ public:
         out.exceptions(std::fstream::badbit);
         out.open(output, std::fstream::trunc | std::fstream::binary);
         walk<Function, TopDown>(ast, [&out](Function* func) {
-            out << func->type()->name() << " " << func->name() << "(";
-            bool first = true;
-            for (auto* arg: func->args()) {
-                if (!first)
-                    out << ",";
-                else
-                    first = false;
-                out << arg->type()->name() << " " << arg->name();
-            }
-            out << ");\n";
+            printFuncDecl(out, func);
             return false;
         });
     }

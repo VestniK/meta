@@ -58,7 +58,7 @@ bool isChildPackage(const std::string &subpkg, const std::string &parentpkg)
 class ResolveVisitor: public Visitor
 {
 public:
-    ResolveVisitor(AST *ast, Dictionary &dict): mGlobalDict(dict)
+    ResolveVisitor(Dictionary &dict): mGlobalDict(dict)
     {
     }
 
@@ -74,7 +74,11 @@ public:
     {
         if (node->targetPackage() == mCurrSrcPackage)
             return;
-        for (auto it = mGlobalDict[node->targetPackage()].lower_bound(node->target()); it != mGlobalDict[node->targetPackage()].upper_bound(node->target()); ++it) {
+        for (
+            auto it = mGlobalDict[node->targetPackage()].lower_bound(node->target());
+            it != mGlobalDict[node->targetPackage()].upper_bound(node->target());
+            ++it
+        ) {
             Function *func = it->second;
             if (func->visibility() == Visibility::Private)
                 throw SemanticError(node, "Can't import private declaration '%s.%s'", func->package().c_str(), func->name().c_str());
@@ -193,15 +197,15 @@ private:
         }
     };
 
-    Dictionary &mGlobalDict;
+    Dictionary& mGlobalDict;
     DeclarationsDict mCurrDecls;
     std::string mCurrSrcPackage;
     std::map<std::string, VarSrc> mVars;
 };
 
-void resolve(AST *ast, Dictionary &dict)
+void resolve(AST* ast, Dictionary& dict)
 {
-    ResolveVisitor resolver(ast, dict);
+    ResolveVisitor resolver(dict);
     ast->walk(&resolver);
 }
 

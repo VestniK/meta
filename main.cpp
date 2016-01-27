@@ -78,7 +78,7 @@ std::istream& operator>> (std::istream &in, ErrorVerbosity &verbosity)
 }
 
 
-bool run(const Options &opts) noexcept;
+bool run(const Options &opts);
 
 int main(int argc, char **argv)
 {
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
     return run(opts) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-bool run(const Options &opts) noexcept try
+bool run(const Options &opts) try
 {
     // parse
     std::vector<std::vector<char>> input;
