@@ -16,19 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <cassert>
-
 #include "parser/actions.h"
 #include "parser/function.h"
 #include "parser/sourcefile.h"
 
 namespace meta {
-
-void Actions::package(const StackFrame *reduction, size_t size)
-{
-    assert(size == 3);
-    mPackage = reduction[1].tokens;
-}
 
 void Actions::changeVisibility(const StackFrame *reduction, size_t size)
 {
