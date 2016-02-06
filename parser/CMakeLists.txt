@@ -25,7 +25,7 @@ set(SRC
   visibility.cpp
 )
 
-lrstar_grammar(GRM_SRC meta SKEL c++11)
+lrstar_grammar(GRM_SRC meta CUSTOM_SKEL ${CMAKE_CURRENT_SOURCE_DIR}/skels)
 add_library(parser STATIC ${GRM_SRC} ${SRC})
 
 add_subdirectory(tests)
