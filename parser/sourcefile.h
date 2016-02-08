@@ -25,13 +25,13 @@ namespace meta {
 class SourceFile: public Visitable<Node, SourceFile>
 {
 public:
-    SourceFile(const StackFrame *reduction, size_t size);
+    SourceFile(const StackFrame* reduction, size_t size);
 
-    void setPackage(const std::string &val) {mPackage = val;}
-    const std::string &package() const {return mPackage;}
+    void setPackage(const std::experimental::string_view& val) {mPackage = val;}
+    const std::experimental::string_view& package() const {return mPackage;}
 
 private:
-    std::string mPackage;
+    std::experimental::string_view mPackage;
 };
 
 } // namespace meta

@@ -35,7 +35,7 @@ void Actions::onFunction(Function *node)
     node->setPackage(mPackage);
     if (node->visibility() == Visibility::Default)
         node->setVisibility(mDefaultVisibility);
-    mDictionary[mPackage].insert({node->name(), node});
+    mDictionary[mPackage].emplace(node->name(), node);
 }
 
 void Actions::onSourceFile(SourceFile *node)

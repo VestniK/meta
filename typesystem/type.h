@@ -19,8 +19,9 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <vector>
+
+#include <experimental/string_view>
 
 namespace meta {
 namespace typesystem {
@@ -44,7 +45,7 @@ public:
         String = primitive
     };
 
-    virtual std::string name() const = 0;
+    virtual std::experimental::string_view name() const = 0;
     virtual TypeId typeId() const = 0;
     virtual bool is(TypeClass type) const;
 

@@ -43,7 +43,11 @@ public:
             return false;
         node->setType(mTypes.getByName(node->retType()));
         if (node->type() == nullptr)
-            throw analysers::SemanticError(node, "Function '%s' returns unknown type '%s'", node->name().c_str(), node->retType().c_str());
+            throw analysers::SemanticError(
+                node, "Function '%*.s' returns unknown type '%*.s'",
+                static_cast<int>(node->name().size()), node->name().data(),
+                static_cast<int>(node->retType().size()), node->retType().data()
+            );
         mCurrFunc = node;
         return true;
     }
@@ -89,11 +93,18 @@ public:
 
         node->setType(mTypes.getByName(node->typeName()));
         if (node->type() == nullptr)
-            throw analysers::SemanticError(node, "Variable '%s' has unknown type '%s'", node->name().c_str(), node->typeName().c_str());
+            throw analysers::SemanticError(
+                node, "Variable '%*.s' has unknown type '%*.s'",
+                static_cast<int>(node->name().size()), node->name().data(),
+                static_cast<int>(node->typeName().size()), node->typeName().data()
+            );
         if (node->inited())
             return Evaluator<const typesystem::Type*>::leave(node);
         if (node->type()->typeId() == typesystem::Type::Auto)
-            throw analysers::SemanticError(node, "Can't deduce variable '%s' type.", node->name().c_str());
+            throw analysers::SemanticError(
+                node, "Can't deduce variable '%*.s' type.",
+                static_cast<int>(node->name().size()), node->name().data()
+            );
     }
     virtual void varInit(VarDecl *node, const typesystem::Type *val) override
     {
@@ -103,15 +114,20 @@ public:
         }
         if (node->type() != val) // TODO: implicit type conversations here
             throw analysers::SemanticError(
-                node, "Attempt to init variable '%s' of type '%s' with value of type '%s'",
-                node->name().c_str(), node->type()->name().c_str(), val->name().c_str()
+                node, "Attempt to init variable '%*.s' of type '%*.s' with value of type '%*.s'",
+                static_cast<int>(node->name().size()), node->name().data(),
+                static_cast<int>(node->type()->name().size()), node->type()->name().data(),
+                static_cast<int>(val->name().size()), val->name().data()
             );
     }
 
     virtual void ifCond(If *node, const typesystem::Type *val) override
     {
         if (!val->is(typesystem::Type::boolean))
-            throw SemanticError(node->condition(), "If statement can't work with condition of type '%s'", val->name().c_str());
+            throw SemanticError(
+                node->condition(), "If statement can't work with condition of type '%*.s'",
+                static_cast<int>(val->name().size()), val->name().data()
+            );
         if (node->thenBlock())
             node->thenBlock()->walk(this);
         if (node->elseBlock())
@@ -127,7 +143,11 @@ public:
             return;
         }
         if (mCurrFunc->type() != val)
-            throw analysers::SemanticError(node, "Attempt to return value of type '%s' from function returning '%s'", val->name().c_str(), mCurrFunc->type()->name().c_str());
+            throw analysers::SemanticError(
+                node, "Attempt to return value of type '%*.s' from function returning '%*.s'",
+                static_cast<int>(val->name().size()), val->name().data(),
+                static_cast<int>(mCurrFunc->type()->name().size()), mCurrFunc->type()->name().data()
+            );
     }
 
     virtual void returnVoid(Return *node) override
@@ -139,8 +159,10 @@ public:
     {
         if (node->declaration()->type() != val) // TODO: implicit type conversations here
             throw analysers::SemanticError(
-                node, "Attempt to assign value of type '%s' to a the variable '%s' of type '%s'",
-                val->name().c_str(), node->varName().c_str(), node->declaration()->type()->name().c_str()
+                node, "Attempt to assign value of type '%*.s' to a the variable '%*.s' of type '%*.s'",
+                static_cast<int>(val->name().size()), val->name().data(),
+                static_cast<int>(node->varName().size()), node->varName().data(),
+                static_cast<int>(node->declaration()->type()->name().size()), node->declaration()->type()->name().data()
             );
         return node->declaration()->type();
     }
@@ -151,11 +173,16 @@ public:
             case PrefixOp::positive:
             case PrefixOp::negative:
                 if (!val->is(typesystem::Type::numeric))
-                    throw analysers::SemanticError(node, "Can't perform arythmetic operation on value of type '%s'", val->name().c_str());
+                    throw analysers::SemanticError(
+                        node, "Can't perform arythmetic operation on value of type '%*.s'",
+                        static_cast<int>(val->name().size()), val->name().data()
+                    );
                 break;
             case PrefixOp::boolnot:
                 if (!val->is(typesystem::Type::boolean))
-                    throw analysers::SemanticError(node, "Can't perform boolean not operation on value of type '%s'", val->name().c_str());
+                    throw analysers::SemanticError(
+                        node, "Can't perform boolean not operation on value of type '%*.s'",
+                        static_cast<int>(val->name().size()), val->name().data());
                 break;
         }
         node->setType(val);
@@ -172,14 +199,22 @@ public:
             case BinaryOp::sub:
             case BinaryOp::mul:
                 if (!left->is(typesystem::Type::numeric) || !right->is(typesystem::Type::numeric))
-                    throw analysers::SemanticError(node, "Can't perform arythmetic operation on values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
+                    throw analysers::SemanticError(
+                        node, "Can't perform arythmetic operation on values of types '%*.s' and '%*.s'",
+                        static_cast<int>(left->name().size()), left->name().data(),
+                        static_cast<int>(right->name().size()), right->name().data()
+                    );
                 node->setType(left); // TODO: should return widest type of left or right. Now there is only one numeric type so it's ok to return first arg type
                 break;
 
             case BinaryOp::equal:
             case BinaryOp::noteq:
                 if (left != right)
-                    throw analysers::SemanticError(node, "Can't compare values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
+                    throw analysers::SemanticError(
+                        node, "Can't compare values of types '%*.s' and '%*.s'",
+                        static_cast<int>(left->name().size()), left->name().data(),
+                        static_cast<int>(right->name().size()), right->name().data()
+                    );
                 node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
                 break;
             case BinaryOp::greater:
@@ -187,14 +222,21 @@ public:
             case BinaryOp::less:
             case BinaryOp::lesseq:
                 if (!left->is(typesystem::Type::numeric) || !right->is(typesystem::Type::numeric))
-                    throw analysers::SemanticError(node, "Can't compare values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
+                    throw analysers::SemanticError(
+                        node, "Can't compare values of types '%*.s' and '%*.s'",
+                        static_cast<int>(left->name().size()), left->name().data(),
+                        static_cast<int>(right->name().size()), right->name().data()
+                    );
                 node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
                 break;
 
             case BinaryOp::boolAnd:
             case BinaryOp::boolOr:
                 if (!left->is(typesystem::Type::boolean) || !right->is(typesystem::Type::boolean))
-                    throw analysers::SemanticError(node, "Can't perform boolean operations on values of types '%s' and '%s'", left->name().c_str(), right->name().c_str());
+                    throw analysers::SemanticError(
+                        node, "Can't perform boolean operations on values of types '%*.s' and '%*.s'",
+                        static_cast<int>(left->name().size()), left->name().data(),
+                        static_cast<int>(right->name().size()), right->name().data());
                 node->setType(mTypes.getPrimitive(typesystem::Type::Bool));
                 break;
         }
@@ -214,8 +256,11 @@ public:
         for (size_t i = 0; i < args.size(); ++i) {
             if (argdecls[i]->type() != args[i])
                 throw analysers::SemanticError(
-                    node->args()[i], "Can't call function '%s' with argument %u of type '%s'. Expected type is '%s'",
-                    node->function()->name().c_str(), (unsigned)i, args[i]->name().c_str(), argdecls[i]->type()->name().c_str()
+                    node->args()[i], "Can't call function '%*.s' with argument %u of type '%*.s'. Expected type is '%*.s'",
+                    static_cast<int>(node->function()->name().size()), node->function()->name().data(),
+                    (unsigned)i,
+                    static_cast<int>(args[i]->name().size()), args[i]->name().data(),
+                    static_cast<int>(argdecls[i]->type()->name().size()), argdecls[i]->type()->name().data()
                 );
         }
         return node->function()->type();

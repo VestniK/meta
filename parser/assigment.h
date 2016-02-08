@@ -27,13 +27,13 @@ class Assigment: public Visitable<Expression, Assigment>
 public:
     Assigment(const StackFrame* start, size_t size);
 
-    const std::string &varName() const {return mVarName;}
+    const std::experimental::string_view &varName() const {return mVarName;}
     VarDecl *declaration() {return mDeclaration;}
     void setDeclaration(VarDecl *decl) {mDeclaration = decl;}
     Node *value();
 
 private:
-    std::string mVarName;
+    std::experimental::string_view mVarName;
     VarDecl *mDeclaration;
 };
 

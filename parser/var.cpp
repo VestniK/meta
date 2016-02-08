@@ -17,7 +17,7 @@
  *
  */
 
-#include <cassert>
+#include "utils/contract.h"
 
 #include "parser/var.h"
 
@@ -25,7 +25,7 @@ namespace meta {
 
 Var::Var(const StackFrame *start, size_t size): Visitable<Expression, Var>(start, size)
 {
-    assert(size == 1);
+    PRECONDITION(size == 1);
     mName = start[0].tokens;
 }
 

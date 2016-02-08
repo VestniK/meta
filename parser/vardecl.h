@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <string>
+#include <experimental/string_view>
 
 #include "parser/metaparser.h"
 #include "parser/typed.h"
@@ -35,9 +35,9 @@ public:
         argument = (1<<0)
     };
 
-    const std::string &name() const {return mName;}
+    const std::experimental::string_view &name() const {return mName;}
 
-    const std::string &typeName() const {return mTypeName;}
+    const std::experimental::string_view &typeName() const {return mTypeName;}
 
     bool inited() const;
     Node *initExpr();
@@ -45,7 +45,7 @@ public:
     void set(Flags flag, bool val = true);
 
 private:
-    std::string mName, mTypeName;
+    std::experimental::string_view mName, mTypeName;
     int mFlags;
 };
 

@@ -40,7 +40,7 @@ namespace
 {
 
 inline
-bool isChildPackage(const std::string &subpkg, const std::string &parentpkg)
+bool isChildPackage(const std::experimental::string_view& subpkg, const std::experimental::string_view& parentpkg)
 {
     /// @todo rewrite using TokenSequence
     if (parentpkg.length() > subpkg.length())
@@ -81,11 +81,18 @@ public:
         ) {
             Function *func = it->second;
             if (func->visibility() == Visibility::Private)
-                throw SemanticError(node, "Can't import private declaration '%s.%s'", func->package().c_str(), func->name().c_str());
+                throw SemanticError(
+                    node, "Can't import private declaration '%*.s.%*.s'",
+                    static_cast<int>(func->package().size()), func->package().data(),
+                    static_cast<int>(func->name().size()), func->name().data()
+                );
             if (func->visibility() == Visibility::Protected && !isChildPackage(mCurrSrcPackage, node->targetPackage()))
                 throw SemanticError(
-                    node, "Can't import protected declaration '%s.%s' from package '%s' which is not a subpackage of '%s'",
-                    func->package().c_str(), func->name().c_str(), mCurrSrcPackage.c_str(), node->targetPackage().c_str()
+                    node, "Can't import protected declaration '%*.s.%*.s' from package '%*.s' which is not a subpackage of '%*.s'",
+                    static_cast<int>(func->package().size()), func->package().data(),
+                    static_cast<int>(func->name().size()), func->name().data(),
+                    static_cast<int>(mCurrSrcPackage.size()), mCurrSrcPackage.data(),
+                    static_cast<int>(node->targetPackage().size()), node->targetPackage().data()
                 );
             assert(mCurrDecls.count(node->name()) == 0); /// @todo support for function overloads instead of assert here!!!
             mCurrDecls.insert({node->name(), it->second});
@@ -97,28 +104,43 @@ public:
         assert(mCurrDecls.count(node->functionName()) == 1); /// @todo support for function overloads instead of assert here!!!
         auto it = mCurrDecls.lower_bound(node->functionName());
         if (it == mCurrDecls.end())
-            throw SemanticError(node, "Unresolved function call '%s'", node->functionName().c_str());
+            throw SemanticError(
+                node, "Unresolved function call '%*.s'",
+                static_cast<int>(node->functionName().size()), node->functionName().data()
+            );
         node->setFunction(it->second); /// @todo: handle overloads
         auto expectedArgs = node->function()->args();
         auto passedArgs = node->getChildren<Node>(1);
         if (expectedArgs.size() != passedArgs.size())
-            throw SemanticError(node, "Call to function '%s' with incorrect number of arguments", node->functionName().c_str());
+            throw SemanticError(
+                node, "Call to function '%*.s' with incorrect number of arguments",
+                static_cast<int>(node->functionName().size()), node->functionName().data()
+            );
         return true;
     }
 
     virtual bool visit(Function *node) override
     {
         if (node->visibility() != Visibility::Extern && node->body() == nullptr)
-            throw SemanticError(node, "Implementation missing for the function '%s'", node->name().c_str());
+            throw SemanticError(
+                node, "Implementation missing for the function '%*.s'",
+                static_cast<int>(node->name().size()), node->name().data()
+            );
         if (node->visibility() == Visibility::Extern && node->body() != nullptr)
-            throw SemanticError(node, "Extern function '%s' must not have implementation", node->name().c_str());
+            throw SemanticError(
+                node, "Extern function '%*.s' must not have implementation",
+                static_cast<int>(node->name().size()), node->name().data()
+            );
 
         bool hasDefaultValues = false;
         for (auto arg : node->args()) {
             if (arg->inited())
                 hasDefaultValues = true;
             if (hasDefaultValues && !arg->inited())
-                throw SemanticError(arg, "Argument '%s' has no default value while previous argument has", arg->name().c_str());
+                throw SemanticError(
+                    arg, "Argument '%*.s' has no default value while previous argument has",
+                    static_cast<int>(arg->name().size()), arg->name().data()
+                );
         }
         mVars.clear();
         return true;
@@ -130,7 +152,10 @@ public:
             return; // Skip check for unused arguments on extern functions since they have no implementation to use them
         for (const auto &var : mVars) {
             if (var.second.accessCount == 0)
-                throw SemanticError(var.second.decl, "Variable '%s' declared but never used", var.first.c_str());
+                throw SemanticError(
+                    var.second.decl, "Variable '%*.s' declared but never used",
+                    static_cast<int>(var.first.size()), var.first.data()
+                );
         }
     }
 
@@ -139,8 +164,9 @@ public:
         auto prev = mVars.find(node->name());
         if (prev != mVars.end())
             throw SemanticError(
-                node, "Redefinition of the variable '%s' first defined at line %d, column %d",
-                node->name().c_str(), prev->second.decl->tokens().begin()->line, prev->second.decl->tokens().begin()->column
+                node, "Redefinition of the variable '%*.s' first defined at line %d, column %d",
+                static_cast<int>(node->name().size()), node->name().data(),
+                prev->second.decl->tokens().begin()->line, prev->second.decl->tokens().begin()->column
             );
         mVars[node->name()] = VarSrc(node);
         return true;
@@ -150,9 +176,15 @@ public:
     {
         auto decl = mVars.find(node->name());
         if (decl == mVars.end())
-            throw SemanticError(node, "Reference to undefined variable '%s'", node->name().c_str());
+            throw SemanticError(
+                node, "Reference to undefined variable '%*.s'",
+                static_cast<int>(node->name().size()), node->name().data()
+            );
         if (decl->second.modifyCount == 0)
-            throw SemanticError(node, "Variable '%s' used before initialization", node->name().c_str());
+            throw SemanticError(
+                node, "Variable '%*.s' used before initialization",
+                static_cast<int>(node->name().size()), node->name().data()
+            );
         node->setDeclaration(decl->second.decl);
         ++decl->second.accessCount;
         return true;
@@ -162,9 +194,15 @@ public:
     {
         auto decl = mVars.find(node->varName());
         if (decl == mVars.end())
-            throw SemanticError(node, "Reference to undefined variable '%s'", node->varName().c_str());
+            throw SemanticError(
+                node, "Reference to undefined variable '%*.s'",
+                static_cast<int>(node->varName().size()), node->varName().data()
+            );
         if (decl->second.decl->is(VarDecl::argument))
-            throw SemanticError(node, "Attempt to modify function argument '%s'", node->varName().c_str());
+            throw SemanticError(
+                node, "Attempt to modify function argument '%*.s'",
+                static_cast<int>(node->varName().size()), node->varName().data()
+            );
         node->setDeclaration(decl->second.decl);
         ++decl->second.modifyCount;
         return true;
@@ -199,8 +237,8 @@ private:
 
     Dictionary& mGlobalDict;
     DeclarationsDict mCurrDecls;
-    std::string mCurrSrcPackage;
-    std::map<std::string, VarSrc> mVars;
+    std::experimental::string_view mCurrSrcPackage;
+    std::map<std::experimental::string_view, VarSrc> mVars;
 };
 
 void resolve(AST* ast, Dictionary& dict)

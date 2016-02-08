@@ -20,7 +20,6 @@
 
 #include <map>
 #include <memory>
-#include <string>
 
 #include "typesystem/type.h"
 
@@ -33,12 +32,12 @@ public:
     TypesStore();
     ~TypesStore();
 
-    Type *getByName(const std::string &name) const;
+    Type *getByName(const std::experimental::string_view& name) const;
     Type *getPrimitive(Type::TypeId id) const;
     Type *getVoid() const;
 
 private:
-    std::map<std::string, std::unique_ptr<Type>> mTypes;
+    std::map<std::experimental::string_view, std::unique_ptr<Type>> mTypes;
 };
 
 } // namespace typesystem

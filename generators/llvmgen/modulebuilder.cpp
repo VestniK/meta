@@ -72,10 +72,10 @@ bool ModuleBuilder::visit(Function *node)
 }
 
 namespace {
-inline llvm::AllocaInst *addLocalVar(llvm::Function *func, llvm::Type *type, const std::string &name)
+inline llvm::AllocaInst *addLocalVar(llvm::Function *func, llvm::Type *type, const std::experimental::string_view& name)
 {
     llvm::IRBuilder<> builder(&(func->getEntryBlock()), func->getEntryBlock().begin());
-    return builder.CreateAlloca(type, 0, name.c_str());
+    return builder.CreateAlloca(type, 0, llvm::StringRef(name.data(), name.size()));
 }
 }
 

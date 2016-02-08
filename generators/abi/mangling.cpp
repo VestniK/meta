@@ -17,7 +17,8 @@
  *
  */
 
-#include <iostream>
+#include <algorithm>
+#include <string>
 
 #include "parser/function.h"
 
@@ -31,12 +32,17 @@ std::string mangledName(Function *func)
 {
     if (func->is(Function::entrypoint))
         return "main";
-    if (func->mangledName() != nullptr)
-        return *func->mangledName();
+    if (func->mangledName() != std::experimental::nullopt)
+        return static_cast<std::string>(*func->mangledName());
     // Perform mangling based on regular rules
-    std::string res = func->package() + '_' + func->name();
-    for (auto &symb : res)
-        symb = symb == '.' ? '_' : symb;
+    std::string res;
+    res.reserve(func->package().size() + func->name().size() + 1);
+    std::transform(
+        func->package().begin(), func->package().end(), std::back_inserter(res),
+        [](char ch) {return ch == '.' ? '_' : ch;}
+    );
+    res.push_back('_');
+    std::copy(func->name().begin(), func->name().end(), std::back_inserter(res));
     return res;
 }
 

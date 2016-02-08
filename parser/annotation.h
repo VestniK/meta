@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <string>
+#include <experimental/string_view>
 
 #include "parser/metaparser.h"
 
@@ -29,15 +29,15 @@ class Declaration;
 class Annotation: public Visitable<Node, Annotation>
 {
 public:
-    Annotation (const StackFrame *reduction, size_t size);
+    Annotation(const StackFrame *reduction, size_t size);
 
-    const std::string &name() const {return mName;}
+    const std::experimental::string_view& name() const {return mName;}
 
     void setTarget(Declaration *val) {mTarget = val;}
     Declaration *target() {return mTarget;}
 
 private:
-    std::string mName;
+    std::experimental::string_view mName;
     Declaration *mTarget;
 };
 

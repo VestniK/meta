@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <string>
+#include <experimental/string_view>
 
 #include "parser/metaparser.h"
 
@@ -29,14 +29,14 @@ class Import: public Visitable<Node, Import>
 public:
     Import(const StackFrame *reduction, size_t size);
 
-    const std::string &name() const {return mName;}
-    const std::string &targetPackage() const {return mPackage;}
-    const std::string &target() const {return mTarget;}
+    const std::experimental::string_view &name() const {return mName;}
+    const std::experimental::string_view &targetPackage() const {return mPackage;}
+    const std::experimental::string_view &target() const {return mTarget;}
 
 private:
-    std::string mPackage;
-    std::string mTarget;
-    std::string mName;
+    std::experimental::string_view mPackage;
+    std::experimental::string_view mTarget;
+    std::experimental::string_view mName;
 };
 
 } // namespace meta

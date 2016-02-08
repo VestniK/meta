@@ -18,9 +18,8 @@
  */
 #pragma once
 
-#include <string>
-
-#include <boost/optional.hpp>
+#include <experimental/string_view>
+#include <experimental/optional>
 
 #include "parser/declaration.h"
 #include "parser/metaparser.h"
@@ -41,13 +40,13 @@ public:
 
     virtual const Declaration::AttributesMap &attributes() const override {return attrMap;}
 
-    const std::string &name() const {return mName;}
-    const std::string &retType() const {return mRetType;}
-    const std::string &package() const {return mPackage;}
-    void setPackage(const std::string &pkg) {mPackage = pkg;}
-    void setMangledName(const std::string &val) {mMangledName = val;}
-    void setMangledName(std::nullptr_t) {mMangledName = boost::none;}
-    const std::string *mangledName() const {return mMangledName.get_ptr();}
+    const std::experimental::string_view &name() const {return mName;}
+    const std::experimental::string_view &retType() const {return mRetType;}
+    const std::experimental::string_view &package() const {return mPackage;}
+    void setPackage(const std::experimental::string_view &pkg) {mPackage = pkg;}
+    void setMangledName(const std::experimental::string_view &val) {mMangledName = val;}
+    void setMangledName(std::nullptr_t) {mMangledName = std::experimental::nullopt;}
+    const std::experimental::optional<std::experimental::string_view>& mangledName() const {return mMangledName;}
     std::vector<VarDecl*> args();
     CodeBlock *body();
 
@@ -58,10 +57,10 @@ public:
     bool is(Attribute attr) const;
 
 private:
-    std::string mPackage;
-    std::string mName;
-    std::string mRetType;
-    boost::optional<std::string> mMangledName;
+    std::experimental::string_view mPackage;
+    std::experimental::string_view mName;
+    std::experimental::string_view mRetType;
+    std::experimental::optional<std::experimental::string_view> mMangledName;
     Visibility mVisibility = Visibility::Default;
     int mAttributes = 0;
 

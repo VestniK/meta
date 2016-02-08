@@ -69,7 +69,7 @@ llvm::Function *Environment::addFunction(Function *func)
     llvm::Function *prototype = llvm::Function::Create(funcType, linkType, abi::mangledName(func), module.get());
     llvm::Function::arg_iterator it = prototype->arg_begin();
     for (const auto arg : args) {
-        it->setName(arg->name());
+        it->setName(llvm::StringRef(arg->name().data(), arg->name().size()));
         assert(it != prototype->arg_end());
         ++it;
     }

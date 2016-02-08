@@ -16,9 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include <cassert>
 #include <cstdlib>
 #include <string>
+
+#include "utils/contract.h"
+#include "utils/string.h"
 
 #include "parser/number.h"
 
@@ -26,8 +28,8 @@ namespace meta {
 
 Number::Number(const StackFrame* start, size_t size): Visitable<Expression, Number>(start, size)
 {
-    assert(size == 1);
-    mValue = atoi(std::string(start[0].tokens).c_str());
+    PRECONDITION(size == 1);
+    mValue = *utils::number<int>(start[0].tokens);
 }
 
 }

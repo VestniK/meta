@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include <cassert>
 #include <deque>
 #include <set>
-#include <string>
 
 #include <experimental/string_view>
+
+#include "utils/contract.h"
 
 #include "parser/dictionary.h"
 #include "parser/metaparser.h"
@@ -91,7 +91,7 @@ public:
         for (const Token tok: reduction[1].tokens) {
             if (tok.termNum != identifier)
                 continue;
-            parent = mModule.upsert(parent, {tok.start, static_cast<size_t>(tok.end - tok.start)});
+            parent = mModule.upsert(parent, tok);
         }
     }
     void changeVisibility(const StackFrame *reduction, size_t size) override;
@@ -102,7 +102,7 @@ public:
     const Module& module() const {return mModule;}
 
 private:
-    std::string mPackage;
+    std::experimental::string_view mPackage;
     Visibility mDefaultVisibility = Visibility::Private;
     Dictionary mDictionary;
     Module mModule;

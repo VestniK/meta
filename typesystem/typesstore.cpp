@@ -17,7 +17,9 @@
  *
  */
 
-#include <cassert>
+#include <experimental/string_view>
+
+#include "utils/contract.h"
 
 #include "typesystem/type.h"
 #include "typesystem/typesstore.h"
@@ -32,17 +34,17 @@ class PrimitiveType: public Type
 public:
     explicit PrimitiveType(Type::TypeId id): id(id) {}
 
-    virtual std::string name() const
-    {
+    std::experimental::string_view name() const override {
+        std::experimental::string_view res;
+        POSTCONDITION(!res.empty());
         switch (id) {
-            case Auto: return "auto"; break;
-            case Void: return "void"; break;
-            case Int: return "int"; break;
-            case Bool: return "bool"; break;
-            case String: return "string"; break;
+            case Auto: res = "auto"; break;
+            case Void: res = "void"; break;
+            case Int: res = "int"; break;
+            case Bool: res = "bool"; break;
+            case String: res = "string"; break;
         }
-        assert(false);
-        return "";
+        return res;
     }
 
     virtual TypeId typeId() const {return id;}
@@ -68,7 +70,7 @@ TypesStore::~TypesStore()
 {
 }
 
-Type *TypesStore::getByName(const std::string &name) const
+Type* TypesStore::getByName(const std::experimental::string_view& name) const
 {
     auto it = mTypes.find(name);
     if (it == mTypes.end())

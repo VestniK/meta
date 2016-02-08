@@ -17,7 +17,7 @@
  *
  */
 
-#include <cassert>
+#include "utils/contract.h"
 
 #include "parser/vardecl.h"
 
@@ -25,7 +25,7 @@ namespace meta {
 
 VarDecl::VarDecl(const StackFrame* start, size_t size): Visitable<Node, VarDecl>(start, size), mFlags(0)
 {
-    assert(size == 3);
+    PRECONDITION(size == 3);
     mTypeName = start[0].tokens;
     mName = start[1].tokens;
 }

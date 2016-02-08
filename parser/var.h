@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <string>
+#include <experimental/string_view>
 
 #include "parser/expression.h"
 
@@ -29,12 +29,12 @@ class Var: public Visitable<Expression, Var>
 public:
     Var(const StackFrame *start, size_t size);
 
-    const std::string &name() const {return mName;}
+    const std::experimental::string_view &name() const {return mName;}
     VarDecl *declaration() {return mDeclaration;}
     void setDeclaration(VarDecl *decl) {mDeclaration = decl;}
 
 private:
-    std::string mName;
+    std::experimental::string_view mName;
     VarDecl *mDeclaration;
 };
 

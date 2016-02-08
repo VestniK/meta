@@ -33,9 +33,10 @@ void processMeta(AST *ast)
         PRECONDITION(node->target() != nullptr);
 
         /// @todo process user defined metas here
-        auto attrSetter = node->target()->attributes().find(node->name());
+        const auto name = static_cast<std::string>(node->name());
+        auto attrSetter = node->target()->attributes().find(name);
         if (attrSetter == node->target()->attributes().end())
-            throw SemanticError(node, "Invalid attribute '%s'", node->name().c_str());
+            throw SemanticError(node, "Invalid attribute '%s'", name.c_str());
         attrSetter->second(node->target());
         return false;
     });
