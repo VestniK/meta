@@ -19,6 +19,8 @@
 
 #include <string>
 
+#include "utils/string.h"
+
 #include "parser/metalexer.h"
 
 #include "analysers/nodeexception.h"
@@ -29,9 +31,15 @@ namespace analysers {
 class SemanticError: public NodeException
 {
 public:
-    [[gnu::format(printf, 3, 4)]]
-    SemanticError(Node *node, const char *format, ...);
-    ~SemanticError();
+    SemanticError(Node* node, const char* msg): NodeException(node) {
+        setMsg(msg);
+    };
+
+    template<typename... A>
+    SemanticError(Node* node, const char* fmt, A&& ...a): NodeException(node) {
+        setMsg(utils::format(boost::format(fmt), std::forward<A>(a)...).str());
+    };
+    ~SemanticError() = default;
 };
 
 } // namespace analysers

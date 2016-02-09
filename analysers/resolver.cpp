@@ -81,18 +81,11 @@ public:
         ) {
             Function *func = it->second;
             if (func->visibility() == Visibility::Private)
-                throw SemanticError(
-                    node, "Can't import private declaration '%*.s.%*.s'",
-                    static_cast<int>(func->package().size()), func->package().data(),
-                    static_cast<int>(func->name().size()), func->name().data()
-                );
+                throw SemanticError(node, "Can't import private declaration '%s.%s'", func->package(), func->name());
             if (func->visibility() == Visibility::Protected && !isChildPackage(mCurrSrcPackage, node->targetPackage()))
                 throw SemanticError(
-                    node, "Can't import protected declaration '%*.s.%*.s' from package '%*.s' which is not a subpackage of '%*.s'",
-                    static_cast<int>(func->package().size()), func->package().data(),
-                    static_cast<int>(func->name().size()), func->name().data(),
-                    static_cast<int>(mCurrSrcPackage.size()), mCurrSrcPackage.data(),
-                    static_cast<int>(node->targetPackage().size()), node->targetPackage().data()
+                    node, "Can't import protected declaration '%s.%s' from package '%s' which is not a subpackage of '%s'",
+                    func->package(), func->name(), mCurrSrcPackage, node->targetPackage()
                 );
             assert(mCurrDecls.count(node->name()) == 0); /// @todo support for function overloads instead of assert here!!!
             mCurrDecls.insert({node->name(), it->second});
@@ -104,43 +97,28 @@ public:
         assert(mCurrDecls.count(node->functionName()) == 1); /// @todo support for function overloads instead of assert here!!!
         auto it = mCurrDecls.lower_bound(node->functionName());
         if (it == mCurrDecls.end())
-            throw SemanticError(
-                node, "Unresolved function call '%*.s'",
-                static_cast<int>(node->functionName().size()), node->functionName().data()
-            );
+            throw SemanticError(node, "Unresolved function call '%s'", node->functionName());
         node->setFunction(it->second); /// @todo: handle overloads
         auto expectedArgs = node->function()->args();
         auto passedArgs = node->getChildren<Node>(1);
         if (expectedArgs.size() != passedArgs.size())
-            throw SemanticError(
-                node, "Call to function '%*.s' with incorrect number of arguments",
-                static_cast<int>(node->functionName().size()), node->functionName().data()
-            );
+            throw SemanticError(node, "Call to function '%s' with incorrect number of arguments", node->functionName());
         return true;
     }
 
     virtual bool visit(Function *node) override
     {
         if (node->visibility() != Visibility::Extern && node->body() == nullptr)
-            throw SemanticError(
-                node, "Implementation missing for the function '%*.s'",
-                static_cast<int>(node->name().size()), node->name().data()
-            );
+            throw SemanticError(node, "Implementation missing for the function '%s'", node->name());
         if (node->visibility() == Visibility::Extern && node->body() != nullptr)
-            throw SemanticError(
-                node, "Extern function '%*.s' must not have implementation",
-                static_cast<int>(node->name().size()), node->name().data()
-            );
+            throw SemanticError(node, "Extern function '%s' must not have implementation", node->name());
 
         bool hasDefaultValues = false;
         for (auto arg : node->args()) {
             if (arg->inited())
                 hasDefaultValues = true;
             if (hasDefaultValues && !arg->inited())
-                throw SemanticError(
-                    arg, "Argument '%*.s' has no default value while previous argument has",
-                    static_cast<int>(arg->name().size()), arg->name().data()
-                );
+                throw SemanticError(arg, "Argument '%s' has no default value while previous argument has", arg->name());
         }
         mVars.clear();
         return true;
@@ -152,10 +130,7 @@ public:
             return; // Skip check for unused arguments on extern functions since they have no implementation to use them
         for (const auto &var : mVars) {
             if (var.second.accessCount == 0)
-                throw SemanticError(
-                    var.second.decl, "Variable '%*.s' declared but never used",
-                    static_cast<int>(var.first.size()), var.first.data()
-                );
+                throw SemanticError(var.second.decl, "Variable '%s' declared but never used", var.first);
         }
     }
 
@@ -164,8 +139,8 @@ public:
         auto prev = mVars.find(node->name());
         if (prev != mVars.end())
             throw SemanticError(
-                node, "Redefinition of the variable '%*.s' first defined at line %d, column %d",
-                static_cast<int>(node->name().size()), node->name().data(),
+                node, "Redefinition of the variable '%s' first defined at line %d, column %d",
+                node->name(),
                 prev->second.decl->tokens().begin()->line, prev->second.decl->tokens().begin()->column
             );
         mVars[node->name()] = VarSrc(node);
@@ -176,15 +151,9 @@ public:
     {
         auto decl = mVars.find(node->name());
         if (decl == mVars.end())
-            throw SemanticError(
-                node, "Reference to undefined variable '%*.s'",
-                static_cast<int>(node->name().size()), node->name().data()
-            );
+            throw SemanticError(node, "Reference to undefined variable '%s'", node->name());
         if (decl->second.modifyCount == 0)
-            throw SemanticError(
-                node, "Variable '%*.s' used before initialization",
-                static_cast<int>(node->name().size()), node->name().data()
-            );
+            throw SemanticError(node, "Variable '%s' used before initialization", node->name());
         node->setDeclaration(decl->second.decl);
         ++decl->second.accessCount;
         return true;
@@ -194,15 +163,9 @@ public:
     {
         auto decl = mVars.find(node->varName());
         if (decl == mVars.end())
-            throw SemanticError(
-                node, "Reference to undefined variable '%*.s'",
-                static_cast<int>(node->varName().size()), node->varName().data()
-            );
+            throw SemanticError(node, "Reference to undefined variable '%s'", node->varName());
         if (decl->second.decl->is(VarDecl::argument))
-            throw SemanticError(
-                node, "Attempt to modify function argument '%*.s'",
-                static_cast<int>(node->varName().size()), node->varName().data()
-            );
+            throw SemanticError(node, "Attempt to modify function argument '%s'", node->varName());
         node->setDeclaration(decl->second.decl);
         ++decl->second.modifyCount;
         return true;
@@ -249,4 +212,3 @@ void resolve(AST* ast, Dictionary& dict)
 
 } // namespace analysers
 } // namespace meta
-

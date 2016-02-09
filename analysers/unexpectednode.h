@@ -17,6 +17,8 @@
  */
 #pragma once
 
+#include "utils/string.h"
+
 #include "analysers/nodeexception.h"
 
 namespace meta {
@@ -25,8 +27,15 @@ namespace analysers {
 class UnexpectedNode: public NodeException
 {
 public:
-    UnexpectedNode(Node *node, const char *format, ...) __attribute__((format(printf, 3, 4)));
-    ~UnexpectedNode();
+    UnexpectedNode(Node* node, const char* msg): NodeException(node) {
+        setMsg(msg);
+    }
+
+    template<typename... A>
+    UnexpectedNode(Node* node, const char* fmt, A&& ...a): NodeException(node) {
+        setMsg(utils::format(boost::format(fmt), std::forward<A>(a)...).str());
+    }
+    ~UnexpectedNode() = default;
 };
 
 } // namespace analysers

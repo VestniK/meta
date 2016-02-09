@@ -19,12 +19,13 @@
 
 #pragma once
 
+#include <boost/format.hpp>
+
 #include <experimental/string_view>
 #include <experimental/optional>
 
 namespace meta {
 namespace utils {
-
 
 /**
  * @return nullopt if string is not a number
@@ -46,6 +47,18 @@ std::experimental::optional<IntType> number(const std::experimental::string_view
             return std::experimental::nullopt;
     }
     return res;
+}
+
+template<typename Head>
+inline
+boost::format format(boost::format&& fmt, Head&& h) {
+    return fmt%h;
+}
+
+template<typename Head, typename... Tail>
+inline
+boost::format format(boost::format&& fmt, Head&& h, Tail&& ...t) {
+    return format(std::move(fmt%h), std::forward<Tail>(t)...);
 }
 
 } // namespace utils
