@@ -32,12 +32,12 @@ public:
     TypesStore();
     ~TypesStore();
 
-    Type *getByName(const std::experimental::string_view& name) const;
+    Type *getByName(const utils::string_view& name) const;
     Type *getPrimitive(Type::TypeId id) const;
     Type *getVoid() const;
 
 private:
-    std::map<std::experimental::string_view, std::unique_ptr<Type>> mTypes;
+    std::map<utils::string_view, std::unique_ptr<Type>> mTypes;
 };
 
 } // namespace typesystem

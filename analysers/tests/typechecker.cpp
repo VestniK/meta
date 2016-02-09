@@ -195,8 +195,8 @@ TEST_P(TypeChekerErrors, typeErrors) {
         checkTypes(ast, typestore);
         ASSERT_TRUE(false) << "Input code contains type integrity or deduce error which was not found";
     } catch (SemanticError &err) {
-        ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << std::experimental::string_view(err.tokens());
-        ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << std::experimental::string_view(err.tokens());
+        ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << utils::string_view(err.tokens());
+        ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << utils::string_view(err.tokens());
     }
 }
 

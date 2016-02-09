@@ -21,8 +21,7 @@
 
 #include <boost/format.hpp>
 
-#include <experimental/string_view>
-#include <experimental/optional>
+#include "utils/types.h"
 
 namespace meta {
 namespace utils {
@@ -33,7 +32,7 @@ namespace utils {
  * @todo handle automatic base detection for 0x prefix and b suffix
  */
 template<typename IntType>
-std::experimental::optional<IntType> number(const std::experimental::string_view& str, uint8_t base = 10) {
+optional<IntType> number(const string_view& str, uint8_t base = 10) {
     IntType res = 0;
     for (char ch: str) {
         res = res*base;
@@ -44,7 +43,7 @@ std::experimental::optional<IntType> number(const std::experimental::string_view
         else if (ch >= 'A' && ch - 'A' + 10 < base)
             res += ch - 'A' + 10;
         else
-            return std::experimental::nullopt;
+            return nullopt;
     }
     return res;
 }

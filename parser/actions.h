@@ -21,9 +21,8 @@
 #include <deque>
 #include <set>
 
-#include <experimental/string_view>
-
 #include "utils/contract.h"
+#include "utils/types.h"
 
 #include "parser/dictionary.h"
 #include "parser/metaparser.h"
@@ -32,7 +31,7 @@
 namespace meta {
 
 struct Package {
-    std::experimental::string_view name;
+    utils::string_view name;
     const Package* parent = nullptr;
 };
 
@@ -50,7 +49,7 @@ public:
     Module(const Module&) = delete;
     const Module& operator= (const Module&) = delete;
 
-    const Package* upsert(const Package* parent, std::experimental::string_view name) {
+    const Package* upsert(const Package* parent, utils::string_view name) {
         Package pkg = {name, parent};
         const auto it = index.find(&pkg);
         if (it != index.end())
@@ -102,7 +101,7 @@ public:
     const Module& module() const {return mModule;}
 
 private:
-    std::experimental::string_view mPackage;
+    utils::string_view mPackage;
     Visibility mDefaultVisibility = Visibility::Private;
     Dictionary mDictionary;
     Module mModule;

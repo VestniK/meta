@@ -65,8 +65,8 @@ TEST_P(Resolver, resolveErrors) {
         resolve(ast, act.dictionary());
         ASSERT_TRUE(false) << "Input code contains symbol resolvation errors which were not found";
     } catch (SemanticError &err) {
-        ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << std::experimental::string_view(err.tokens());
-        ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << std::experimental::string_view(err.tokens());
+        ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << utils::string_view(err.tokens());
+        ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << utils::string_view(err.tokens());
     }
 }
 

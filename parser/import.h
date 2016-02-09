@@ -29,14 +29,14 @@ class Import: public Visitable<Node, Import>
 public:
     Import(const StackFrame *reduction, size_t size);
 
-    const std::experimental::string_view &name() const {return mName;}
-    const std::experimental::string_view &targetPackage() const {return mPackage;}
-    const std::experimental::string_view &target() const {return mTarget;}
+    const utils::string_view &name() const {return mName;}
+    const utils::string_view &targetPackage() const {return mPackage;}
+    const utils::string_view &target() const {return mTarget;}
 
 private:
-    std::experimental::string_view mPackage;
-    std::experimental::string_view mTarget;
-    std::experimental::string_view mName;
+    utils::string_view mPackage;
+    utils::string_view mTarget;
+    utils::string_view mName;
 };
 
 } // namespace meta

@@ -18,12 +18,15 @@
  */
 
 #include <iterator>
-#include <boost/parameter/name.hpp>
 #include <string>
 
 #include <gtest/gtest.h>
 
+#include "utils/types.h"
+
 #include "parser/actions.h"
+
+using namespace meta;
 
 std::ostream& operator<< (std::ostream& out, const meta::Package* const& pkg)
 {
@@ -43,16 +46,16 @@ public:
             const meta::Package* pkg = nullptr;
             while (!package.empty()) {
                 auto dot = package.find('.');
-                const std::experimental::string_view part = package.substr(0, dot);
+                const utils::string_view part = package.substr(0, dot);
                 pkg = module.upsert(pkg, part);
-                package = dot != std::experimental::string_view::npos ? package.substr(dot + 1) : "";
+                package = dot != utils::string_view::npos ? package.substr(dot + 1) : "";
             }
         }
     }
 
     meta::Module module;
 private:
-    const std::vector<std::experimental::string_view> packages = {
+    const std::vector<utils::string_view> packages = {
         "A.A1.A11",
         "A.A1.A12",
         "A.A2.A21",

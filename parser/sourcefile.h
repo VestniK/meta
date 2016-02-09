@@ -27,11 +27,11 @@ class SourceFile: public Visitable<Node, SourceFile>
 public:
     SourceFile(const StackFrame* reduction, size_t size);
 
-    void setPackage(const std::experimental::string_view& val) {mPackage = val;}
-    const std::experimental::string_view& package() const {return mPackage;}
+    void setPackage(const utils::string_view& val) {mPackage = val;}
+    const utils::string_view& package() const {return mPackage;}
 
 private:
-    std::experimental::string_view mPackage;
+    utils::string_view mPackage;
 };
 
 } // namespace meta

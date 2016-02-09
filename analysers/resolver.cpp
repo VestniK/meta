@@ -40,7 +40,7 @@ namespace
 {
 
 inline
-bool isChildPackage(const std::experimental::string_view& subpkg, const std::experimental::string_view& parentpkg)
+bool isChildPackage(const utils::string_view& subpkg, const utils::string_view& parentpkg)
 {
     /// @todo rewrite using TokenSequence
     if (parentpkg.length() > subpkg.length())
@@ -200,8 +200,8 @@ private:
 
     Dictionary& mGlobalDict;
     DeclarationsDict mCurrDecls;
-    std::experimental::string_view mCurrSrcPackage;
-    std::map<std::experimental::string_view, VarSrc> mVars;
+    utils::string_view mCurrSrcPackage;
+    std::map<utils::string_view, VarSrc> mVars;
 };
 
 void resolve(AST* ast, Dictionary& dict)

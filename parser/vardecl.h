@@ -35,9 +35,9 @@ public:
         argument = (1<<0)
     };
 
-    const std::experimental::string_view &name() const {return mName;}
+    const utils::string_view &name() const {return mName;}
 
-    const std::experimental::string_view &typeName() const {return mTypeName;}
+    const utils::string_view &typeName() const {return mTypeName;}
 
     bool inited() const;
     Node *initExpr();
@@ -45,7 +45,7 @@ public:
     void set(Flags flag, bool val = true);
 
 private:
-    std::experimental::string_view mName, mTypeName;
+    utils::string_view mName, mTypeName;
     int mFlags;
 };
 

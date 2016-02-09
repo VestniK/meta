@@ -18,8 +18,7 @@
  */
 #pragma once
 
-#include <experimental/string_view>
-#include <experimental/optional>
+#include "utils/types.h"
 
 #include "parser/declaration.h"
 #include "parser/metaparser.h"
@@ -40,13 +39,13 @@ public:
 
     virtual const Declaration::AttributesMap &attributes() const override {return attrMap;}
 
-    const std::experimental::string_view &name() const {return mName;}
-    const std::experimental::string_view &retType() const {return mRetType;}
-    const std::experimental::string_view &package() const {return mPackage;}
-    void setPackage(const std::experimental::string_view &pkg) {mPackage = pkg;}
-    void setMangledName(const std::experimental::string_view &val) {mMangledName = val;}
-    void setMangledName(std::nullptr_t) {mMangledName = std::experimental::nullopt;}
-    const std::experimental::optional<std::experimental::string_view>& mangledName() const {return mMangledName;}
+    const utils::string_view &name() const {return mName;}
+    const utils::string_view &retType() const {return mRetType;}
+    const utils::string_view &package() const {return mPackage;}
+    void setPackage(const utils::string_view &pkg) {mPackage = pkg;}
+    void setMangledName(const utils::string_view &val) {mMangledName = val;}
+    void setMangledName(std::nullptr_t) {mMangledName = utils::nullopt;}
+    const utils::optional<utils::string_view>& mangledName() const {return mMangledName;}
     std::vector<VarDecl*> args();
     CodeBlock *body();
 
@@ -57,10 +56,10 @@ public:
     bool is(Attribute attr) const;
 
 private:
-    std::experimental::string_view mPackage;
-    std::experimental::string_view mName;
-    std::experimental::string_view mRetType;
-    std::experimental::optional<std::experimental::string_view> mMangledName;
+    utils::string_view mPackage;
+    utils::string_view mName;
+    utils::string_view mRetType;
+    utils::optional<utils::string_view> mMangledName;
     Visibility mVisibility = Visibility::Default;
     int mAttributes = 0;
 

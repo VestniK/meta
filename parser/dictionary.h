@@ -19,13 +19,14 @@
 #pragma once
 
 #include <map>
-#include <experimental/string_view>
+
+#include "utils/types.h"
 
 namespace meta {
 
 class Function;
 
-using DeclarationsDict = std::multimap<std::experimental::string_view, Function*>;
-using Dictionary = std::map<std::experimental::string_view, DeclarationsDict>;
+using DeclarationsDict = std::multimap<utils::string_view, Function*>;
+using Dictionary = std::map<utils::string_view, DeclarationsDict>;
 
 } // namespace meta

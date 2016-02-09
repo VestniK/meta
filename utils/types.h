@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2015  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,28 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 #pragma once
 
-#include <string>
-
-#include "parser/expression.h"
+#include <experimental/string_view>
+#include <experimental/optional>
 
 namespace meta {
+namespace utils {
 
-class Call: public Visitable<Expression, Call>
-{
-public:
-    Call(const StackFrame *reduction, size_t size);
+using std::experimental::string_view;
 
-    const utils::string_view &functionName() const {return mFunctionName;}
-    Function *function() const {return mFunction;}
-    void setFunction(Function *func);
+using std::experimental::optional;
+using std::experimental::nullopt;
 
-    const std::vector<Node*> &args() const;
-
-private:
-    utils::string_view mFunctionName;
-    Function *mFunction;
-};
-
+} // namespace utils
 } // namespace meta

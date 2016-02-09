@@ -21,7 +21,7 @@
 #include <memory>
 #include <vector>
 
-#include <experimental/string_view>
+#include "utils/types.h"
 
 namespace meta {
 namespace typesystem {
@@ -45,7 +45,7 @@ public:
         String = primitive
     };
 
-    virtual std::experimental::string_view name() const = 0;
+    virtual utils::string_view name() const = 0;
     virtual TypeId typeId() const = 0;
     virtual bool is(TypeClass type) const;
 

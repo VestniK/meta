@@ -34,8 +34,8 @@ class PrimitiveType: public Type
 public:
     explicit PrimitiveType(Type::TypeId id): id(id) {}
 
-    std::experimental::string_view name() const override {
-        std::experimental::string_view res;
+    utils::string_view name() const override {
+        utils::string_view res;
         POSTCONDITION(!res.empty());
         switch (id) {
             case Auto: res = "auto"; break;
@@ -70,7 +70,7 @@ TypesStore::~TypesStore()
 {
 }
 
-Type* TypesStore::getByName(const std::experimental::string_view& name) const
+Type* TypesStore::getByName(const utils::string_view& name) const
 {
     auto it = mTypes.find(name);
     if (it == mTypes.end())

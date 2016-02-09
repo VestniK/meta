@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "utils/types.h"
+
 #include "parser/expression.h"
 
 namespace meta {
@@ -27,13 +29,13 @@ class Assigment: public Visitable<Expression, Assigment>
 public:
     Assigment(const StackFrame* start, size_t size);
 
-    const std::experimental::string_view &varName() const {return mVarName;}
+    const utils::string_view &varName() const {return mVarName;}
     VarDecl *declaration() {return mDeclaration;}
     void setDeclaration(VarDecl *decl) {mDeclaration = decl;}
     Node *value();
 
 private:
-    std::experimental::string_view mVarName;
+    utils::string_view mVarName;
     VarDecl *mDeclaration;
 };
 
