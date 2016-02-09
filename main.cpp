@@ -80,7 +80,7 @@ std::istream& operator>> (std::istream &in, ErrorVerbosity &verbosity)
 
 bool run(const Options &opts);
 
-int main(int argc, char **argv)
+int main(int argc, char **argv) try
 {
     Options opts;
     po::options_description desc("Command line options");
@@ -113,6 +113,24 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
     return run(opts) ? EXIT_SUCCESS : EXIT_FAILURE;
+} catch(const analysers::NodeException &err) {
+    std::cerr <<
+        err.sourcePath() << ':' << err.tokens().begin()->line <<
+        ':' << err.tokens().begin()->column << ": " << err.what() <<
+        ":" << std::endl
+    ;
+    std::cerr << err.tokens().lineStr() << "..." << std::endl;
+    for (int i = 1; i < err.tokens().colnum(); ++i)
+        std::cerr << ' ';
+    std::cerr << '^' << std::endl;
+    for (const auto &frame: err.backtrace())
+        std::cerr << "\t" << frame << std::endl;
+    return false;
+} catch(const utils::Exception &err) {
+    std::cerr << "Internal compiler error: " << err.what() << std::endl;
+    for (const auto &frame: err.backtrace())
+        std::cerr << "\t" << frame << std::endl;
+    return EXIT_FAILURE;
 }
 
 bool run(const Options &opts) try
@@ -171,24 +189,5 @@ bool run(const Options &opts) try
             std::cerr << ' ';
         std::cerr << '^' << std::endl;
     }
-    return false;
-// Opts visibility is ignored bellow since those exceptions caused by internal compiler bugs
-} catch(const analysers::NodeException &err) {
-    std::cerr <<
-        err.sourcePath() << ':' << err.tokens().begin()->line <<
-        ':' << err.tokens().begin()->column << ": " << err.what() <<
-        ":" << std::endl
-    ;
-    std::cerr << err.tokens().lineStr() << "..." << std::endl;
-    for (int i = 1; i < err.tokens().colnum(); ++i)
-        std::cerr << ' ';
-    std::cerr << '^' << std::endl;
-    for (const auto &frame: err.backtrace())
-        std::cerr << "\t" << frame << std::endl;
-    return false;
-} catch(const utils::Exception &err) {
-    std::cerr << "Internal compiler error: " << err.what() << std::endl;
-    for (const auto &frame: err.backtrace())
-        std::cerr << "\t" << frame << std::endl;
     return false;
 }
