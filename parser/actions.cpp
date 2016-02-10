@@ -32,15 +32,17 @@ void Actions::changeVisibility(const StackFrame *reduction, size_t size)
 
 void Actions::onFunction(Function *node)
 {
-    node->setPackage(mPackage);
+    PRECONDITION(mCurrentPackage != nullptr);
+    node->setPackage(mCurrentPackage->name);
     if (node->visibility() == Visibility::Default)
         node->setVisibility(mDefaultVisibility);
-    mDictionary[mPackage].emplace(node->name(), node);
+    mDictionary[mCurrentPackage->name].emplace(node->name(), node);
 }
 
 void Actions::onSourceFile(SourceFile *node)
 {
-    node->setPackage(mPackage);
+    PRECONDITION(mCurrentPackage != nullptr);
+    node->setPackage(mCurrentPackage->name);
 }
 
 } // namespace meta

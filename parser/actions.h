@@ -32,12 +32,18 @@ namespace meta {
 
 struct Package {
     utils::string_view name;
-    const Package* parent = nullptr;
-};
 
-template<typename T, typename Comparator = std::less<T>>
-struct TargetComparator {
-    bool operator() (const T* lhs, const T* rhs) const {return Comparator()(*lhs, *rhs);}
+    utils::optional<Package> parent() const {
+        const char* endPos = name.data() + name.size() - 1;
+        while (endPos != name.data() && *endPos != '.')
+            --endPos;
+        if (endPos == name.data())
+            return utils::nullopt;
+
+        return Package{{name.data(), static_cast<size_t>(endPos - name.data()) - 1}};
+    }
+
+    bool operator< (const Package& rhs) const {return name < rhs.name;}
 };
 
 class Module {
@@ -49,49 +55,28 @@ public:
     Module(const Module&) = delete;
     const Module& operator= (const Module&) = delete;
 
-    const Package* upsert(const Package* parent, utils::string_view name) {
-        Package pkg = {name, parent};
-        const auto it = index.find(&pkg);
-        if (it != index.end())
+    const Package& package(const utils::string_view& name) {
+        Package pkg = {name};
+        auto it = mPackages.find(pkg);
+        if (it != mPackages.end())
             return *it;
-        packages.push_back(pkg);
-        const Package* res = &packages.back();
-        index.insert(res);
-        return res;
+        auto res = mPackages.insert(pkg);
+        return *res.first;
     }
 
-    auto begin() const {return index.cbegin();}
-    auto end() const {return index.cend();}
+    const auto& packages() const {return mPackages;}
 
 private:
-    struct IndexComparator {
-        bool operator() (const Package& lhs, const Package& rhs) const {
-            if (lhs.parent == rhs.parent)
-                return lhs.name < rhs.name;
-            if (!lhs.parent)
-                return true;
-            if (!rhs.parent)
-                return false;
-            return operator()(*lhs.parent, *rhs.parent);
-        }
-    };
-
-    std::deque<Package> packages;
-    std::set<const Package*, TargetComparator<Package, IndexComparator>> index;
+    std::set<Package> mPackages;
 };
 
 class Actions : public ParseActions, public NodeActions
 {
 public:
     void package(const StackFrame *reduction, size_t size) override {
-        assert(size == 3);
-        mPackage = reduction[1].tokens;
-        const Package* parent = nullptr;
-        for (const Token tok: reduction[1].tokens) {
-            if (tok.termNum != identifier)
-                continue;
-            parent = mModule.upsert(parent, tok);
-        }
+        PRECONDITION(size == 3);
+        POSTCONDITION(mCurrentPackage != nullptr);
+        mCurrentPackage = &mModule.package(reduction[1].tokens);
     }
     void changeVisibility(const StackFrame *reduction, size_t size) override;
     void onFunction(Function *node) override;
@@ -101,7 +86,7 @@ public:
     const Module& module() const {return mModule;}
 
 private:
-    utils::string_view mPackage;
+    const Package* mCurrentPackage = nullptr;
     Visibility mDefaultVisibility = Visibility::Private;
     Dictionary mDictionary;
     Module mModule;
