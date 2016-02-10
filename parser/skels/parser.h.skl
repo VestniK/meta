@@ -4,8 +4,7 @@
 // Grammar:      @grm_file;
 // Skeleton:     @skl_file;
 // Output:       @out_file;
-#ifndef @grm_name;_parser_h
-#define @grm_name;_parser_h
+#pragma once
 
 #include <cstdint>
 #include <cstdlib>
@@ -414,5 +413,3 @@ private:
 };
 
 } // namespace @grm_name;
-
-#endif // @grm_name;_parser_h

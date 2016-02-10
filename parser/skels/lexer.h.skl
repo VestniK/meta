@@ -4,8 +4,7 @@
 // Grammar:      @grm_file;
 // Skeleton:     @skl_file;
 // Output:       @out_file;
-#ifndef @grm_name;_lexer_h
-#define @grm_name;_lexer_h
+#pragma once
 
 #include <cstdint>
 #include <string>
@@ -160,6 +159,3 @@ private:
 };
 
 } // namespace @grm_name;
-
-#endif // @grm_name;_lexer_h
-
