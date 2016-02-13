@@ -24,25 +24,25 @@ namespace meta {
 
 void Actions::changeVisibility(const StackFrame *reduction, size_t size)
 {
-    assert(size == 2);
-    assert(reduction[0].tokens.begin() != reduction[0].tokens.end());
-    auto token = *(reduction[0].tokens.begin());
+    PRECONDITION(size == 2);
+    PRECONDITION(reduction[0].tokens.begin() != reduction[0].tokens.end());
+    const auto token = *(reduction[0].tokens.begin());
     mDefaultVisibility = fromToken(token);
 }
 
 void Actions::onFunction(Function *node)
 {
-    PRECONDITION(mCurrentPackage != nullptr);
-    node->setPackage(mCurrentPackage->name);
+    PRECONDITION(!mCurrentPackage.empty());
+    node->setPackage(mCurrentPackage);
     if (node->visibility() == Visibility::Default)
         node->setVisibility(mDefaultVisibility);
-    mDictionary[mCurrentPackage->name].emplace(node->name(), node);
+    mDictionary[mCurrentPackage].emplace(node->name(), node);
 }
 
 void Actions::onSourceFile(SourceFile *node)
 {
-    PRECONDITION(mCurrentPackage != nullptr);
-    node->setPackage(mCurrentPackage->name);
+    PRECONDITION(!mCurrentPackage.empty());
+    node->setPackage(mCurrentPackage);
 }
 
 } // namespace meta

@@ -30,66 +30,23 @@
 
 namespace meta {
 
-struct Package {
-    utils::string_view name;
-
-    utils::optional<Package> parent() const {
-        const char* endPos = name.data() + name.size() - 1;
-        while (endPos != name.data() && *endPos != '.')
-            --endPos;
-        if (endPos == name.data())
-            return utils::nullopt;
-
-        return Package{{name.data(), static_cast<size_t>(endPos - name.data()) - 1}};
-    }
-
-    bool operator< (const Package& rhs) const {return name < rhs.name;}
-};
-
-class Module {
-public:
-    Module() = default;
-    ~Module() = default;
-    Module(Module&&) = default;
-    Module& operator= (Module&&) = default;
-    Module(const Module&) = delete;
-    const Module& operator= (const Module&) = delete;
-
-    const Package& package(const utils::string_view& name) {
-        Package pkg = {name};
-        auto it = mPackages.find(pkg);
-        if (it != mPackages.end())
-            return *it;
-        auto res = mPackages.insert(pkg);
-        return *res.first;
-    }
-
-    const auto& packages() const {return mPackages;}
-
-private:
-    std::set<Package> mPackages;
-};
-
-class Actions : public ParseActions, public NodeActions
-{
+class Actions: public ParseActions, public NodeActions {
 public:
     void package(const StackFrame *reduction, size_t size) override {
         PRECONDITION(size == 3);
-        POSTCONDITION(mCurrentPackage != nullptr);
-        mCurrentPackage = &mModule.package(reduction[1].tokens);
+        POSTCONDITION(!mCurrentPackage.empty());
+        mCurrentPackage = reduction[1].tokens;
     }
     void changeVisibility(const StackFrame *reduction, size_t size) override;
     void onFunction(Function *node) override;
     void onSourceFile(SourceFile *node) override;
 
     Dictionary& dictionary() {return mDictionary;}
-    const Module& module() const {return mModule;}
 
 private:
-    const Package* mCurrentPackage = nullptr;
     Visibility mDefaultVisibility = Visibility::Private;
     Dictionary mDictionary;
-    Module mModule;
+    utils::string_view mCurrentPackage;
 };
 
 } // namespace meta

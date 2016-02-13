@@ -4,7 +4,6 @@ include_directories(${GTEST_INCLUDE_DIRS})
 add_executable(ParserTests
   arythmetic.cpp
   lexer.cpp
-  module.cpp
   parser.cpp
   priority.cpp
 )
