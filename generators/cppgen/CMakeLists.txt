@@ -6,3 +6,5 @@ set(SRC
 
 add_library(cppgenerator STATIC ${SRC})
 target_link_libraries(analysers)
+
+add_subdirectory(tests)
