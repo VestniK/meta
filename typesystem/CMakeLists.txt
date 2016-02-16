@@ -3,4 +3,4 @@ set(SRC
   typesstore.cpp
 )
 
-add_library(typesysytem STATIC ${SRC})
+add_library(typesystem STATIC ${SRC})

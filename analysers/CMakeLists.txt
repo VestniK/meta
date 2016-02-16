@@ -7,6 +7,6 @@ set(SRC
 )
 
 add_library(analysers STATIC ${SRC})
-target_link_libraries(analysers typesysytem utils)
+target_link_libraries(analysers typesystem utils)
 
 add_subdirectory(tests)
