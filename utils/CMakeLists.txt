@@ -3,3 +3,4 @@ set(SRC
 )
 
 add_library(utils STATIC ${SRC})
+target_link_libraries(utils stdc++fs)

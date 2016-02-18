@@ -21,14 +21,18 @@
 
 #include <memory>
 
-#include "parser/dictionary.h"
+#include "utils/types.h"
 
-#include "generators/generator.h"
+#include "parser/dictionary.h"
 
 namespace meta {
 namespace generators {
 namespace cppgen {
 
-std::unique_ptr<Generator> createCppGenerator(const Dictionary& dict);
+void generate(
+    const Dictionary& dict,
+    const utils::fs::path& outputHeader,
+    const utils::fs::path& outputCpp
+);
 
 }}} //namespace meta::generators::cppgen

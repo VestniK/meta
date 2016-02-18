@@ -28,12 +28,10 @@ class AST;
 
 namespace generators {
 
-class Generator
-{
+class Generator {
 public:
     virtual ~Generator() = default;
-    virtual void generate(AST *ast, const std::string &output) = 0;
+    virtual void generate(AST* ast, const utils::fs::path& output) = 0;
 };
 
-} // namespace generators
-} // namespace meta
+}} // namespace meta::generators

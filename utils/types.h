@@ -19,8 +19,9 @@
 
 #pragma once
 
-#include <experimental/string_view>
+#include <experimental/filesystem>
 #include <experimental/optional>
+#include <experimental/string_view>
 
 namespace meta {
 namespace utils {
@@ -29,6 +30,8 @@ using std::experimental::string_view;
 
 using std::experimental::optional;
 using std::experimental::nullopt;
+
+namespace fs = std::experimental::filesystem;
 
 } // namespace utils
 } // namespace meta

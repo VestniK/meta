@@ -35,35 +35,27 @@ namespace meta {
 namespace generators{
 namespace cppgen {
 
-class CppGen: public Generator {
-public:
-    CppGen(const Dictionary& dict): mDict(dict) {}
+void generate(
+    const Dictionary& dict,
+    const utils::fs::path& outputHeader,
+    const utils::fs::path& //outputCpp
+) {
+    std::ofstream out(outputHeader, std::fstream::trunc | std::fstream::binary);
+    if (!out)
+        throw std::system_error(errno, std::system_category(), "Failed to open " + outputHeader.string());
+    CppWriter writer(out);
 
-    void generate(meta::AST*, const std::string& output) override {
-        std::ofstream out;
-        out.exceptions(std::fstream::badbit);
-        out.open(output, std::fstream::trunc | std::fstream::binary);
-        CppWriter writer(out);
+    for (const auto& kv: dict) {
+        const auto& functions = kv.second;
 
-        for (const auto& kv: mDict) {
-            const auto& functions = kv.second;
-
-            writer.setPackage(kv.first);
-            for (const auto& func: functions) {
-                Function* f = func.second;
-                if (f->visibility() != Visibility::Export)
-                    continue;
-                writer.forwardDeclare(f);
-            }
+        writer.setPackage(kv.first);
+        for (const auto& func: functions) {
+            Function* f = func.second;
+            if (f->visibility() != Visibility::Export)
+                continue;
+            writer.forwardDeclare(f);
         }
     }
-
-private:
-    const Dictionary& mDict;
-};
-
-std::unique_ptr<Generator> createCppGenerator(const Dictionary& dict) {
-    return std::make_unique<CppGen>(dict);
 }
 
-}}} //namespace meta::generators::cppgen
+}}} // namespace meta::generators::cppgen

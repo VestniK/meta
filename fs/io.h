@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include <string>
 #include <vector>
 
-std::vector<char> readWholeFile(const std::string &path);
+#include "utils/types.h"
+
+std::vector<char> readWholeFile(const meta::utils::fs::path& path);

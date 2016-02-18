@@ -25,6 +25,8 @@
 
 #include "fs/io.h"
 
+#include "utils/types.h"
+
 #include "parser/actions.h"
 #include "parser/metaparser.h"
 
@@ -56,8 +58,9 @@ enum class Generator {llvm, cpp};
 struct Options {
     ErrorVerbosity verbosity = ErrorVerbosity::expectedTerms;
     Generator generator = Generator::llvm;
-    std::string output;
-    std::vector<std::string> sources;
+    utils::fs::path output;
+    utils::fs::path outputHeader;
+    std::vector<utils::fs::path> sources;
 };
 
 namespace po = boost::program_options;
@@ -103,10 +106,11 @@ int main(int argc, char **argv) try
     desc.add_options()
         ("help,h", "Show help")
         ("version,v", "Show version")
-        ("output,o", po::value<std::string>(&opts.output), "Specify output file path")
+        ("output,o", po::value<utils::fs::path>(&opts.output), "Specify output file path")
+        ("output-header,H", po::value<utils::fs::path>(&opts.outputHeader), "Specify output header file path")
         ("verbosity", po::value<ErrorVerbosity>(&opts.verbosity), "Error description verbosity: silent, brief, lineMarked, expectedTerms(default), parserStack")
         ("generator,G", po::value<Generator>(&opts.generator), "Output generator: llvm(default), cpp")
-        ("src", po::value<std::vector<std::string>>(&opts.sources), "Sources to compile")
+        ("src", po::value<std::vector<utils::fs::path>>(&opts.sources), "Sources to compile")
     ;
     po::positional_options_description pos;
     pos.add("src", -1);
@@ -174,7 +178,7 @@ bool run(const Options &opts) try
     // generate
     switch (opts.generator) {
         case Generator::llvm: generators::llvmgen::createLlvmGenerator()->generate(ast, opts.output); break;
-        case Generator::cpp: generators::cppgen::createCppGenerator(act.dictionary())->generate(ast, opts.output); break;
+        case Generator::cpp: generators::cppgen::generate(act.dictionary(), opts.outputHeader, opts.output); break;
     }
 
     return true;
