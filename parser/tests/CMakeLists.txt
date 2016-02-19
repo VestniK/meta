@@ -7,7 +7,7 @@ add_executable(ParserTests
   parser.cpp
   priority.cpp
 )
-target_link_libraries(ParserTests parser fs ${GTEST_BOTH_LIBRARIES})
+target_link_libraries(ParserTests parser ${GTEST_BOTH_LIBRARIES})
 add_test(NAME ParserTests
   COMMAND ParserTests --gtest_output=xml:${CMAKE_BINARY_DIR}/Reports/ParserTests.xml
 )

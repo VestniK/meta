@@ -28,22 +28,24 @@
 using namespace meta;
 using namespace meta::analysers;
 
+using namespace std::literals;
+
 TEST(MetaProcessor, attribute)
 {
-    const char *input = R"META(
+    const auto input = R"META(
         package test;
 
         @entrypoint
         int foo() {return 0;}
 
         int bar() {return 1;}
-    )META";
+    )META"s;
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     parser.setSourcePath("test.meta");
-    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     ASSERT_NO_THROW(processMeta(ast));
     auto functions = ast->getChildren<Function>(-1);

@@ -30,9 +30,11 @@
 using namespace meta;
 using namespace meta::analysers;
 
+using namespace std::literals;
+
 namespace {
 
-class Resolver: public testing::TestWithParam<const char *>
+class Resolver: public testing::TestWithParam<std::string>
 {
 public:
 };
@@ -40,7 +42,7 @@ public:
 }
 
 TEST_P(Resolver, resolveErrors) {
-    const char *lib = R"META(
+    const auto lib = R"META(
         package some.lib;
 
         export int foo1(int x) {return x/2;}
@@ -50,16 +52,16 @@ TEST_P(Resolver, resolveErrors) {
         protected int foo3(int x) {return x*x;}
 
         private int foo4(int x) {return x*x - 2*x;}
-    )META";
-    const char *input = GetParam();
+    )META"s;
+    const std::string& input = GetParam();
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     parser.setSourcePath("lib.meta");
-    ASSERT_NO_THROW(parser.parse(lib, strlen(lib)));
+    ASSERT_NO_THROW(parser.parse(lib));
     parser.setSourcePath("test.meta");
-    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     try {
         resolve(ast, act.dictionary());

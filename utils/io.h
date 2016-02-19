@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2016  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 #pragma once
 
-#include <vector>
+#include <fstream>
+#include <iterator>
+#include <string>
+#include <system_error>
 
 #include "utils/types.h"
 
-std::vector<char> readWholeFile(const meta::utils::fs::path& path);
+namespace meta {
+namespace utils {
+
+std::string readAll(const fs::path& path) {
+    std::ifstream in(path, std::ifstream::in | std::ifstream::binary);
+    if (!in)
+        throw std::system_error(errno, std::system_category(), "Failed to open file: " + path.string());
+    in.unsetf(std::ifstream::skipws);
+    return {std::istream_iterator<char>(in), std::istream_iterator<char>()};
+}
+
+}} // namespace meta::utils

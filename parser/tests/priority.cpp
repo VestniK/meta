@@ -20,6 +20,8 @@
 #include <cassert>
 #include <vector>
 
+#include <boost/format.hpp>
+
 #include <gtest/gtest.h>
 
 #include "parser/actions.h"
@@ -46,14 +48,12 @@ public:
 TEST_P(Priority, priority)
 {
     const auto &param = GetParam();
-    const char *tmpl = "package test; int foo() {return %s;}";
-    char input[sizeof(tmpl) + strlen(param.expr)];
-    sprintf(input, tmpl, param.expr);
+    const std::string input = str(boost::format("package test; int foo() {return %s;}")%param.expr);
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     std::vector<BinaryOp::Operation> opSequence;
     walk<BinaryOp, BottomUp>(*ast, [&](BinaryOp *node) {opSequence.push_back(node->operation());});

@@ -322,9 +322,8 @@ public:
 @numb_nact?;...
     void setNodeActions(NodeActions *actions) {nodeActions = actions;}
 @@
-    void parse(const char *input, size_t size);
-    // Overloaded treats strlen as input size
-    void parse(const char *input);
+    void parse(const std::string& input);
+    void parse(std::string&& input) = delete;
 
 @numb_node?;...
     AST *ast() {return this;}

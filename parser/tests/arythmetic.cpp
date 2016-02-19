@@ -20,6 +20,8 @@
 #include <cassert>
 #include <vector>
 
+#include <boost/format.hpp>
+
 #include <gtest/gtest.h>
 
 #include "parser/binaryop.h"
@@ -27,6 +29,8 @@
 #include "parser/prefixop.h"
 
 using namespace meta;
+
+using namespace std::literals;
 
 struct Operation
 {
@@ -84,7 +88,7 @@ private:
 
 TEST(Arythmetic, parenthesis)
 {
-    const char *input = "package test; int foo() {return 2*(11+5)/8;}";
+    const auto input = "package test; int foo() {return 2*(11+5)/8;}"s;
     Parser parser;
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
@@ -125,12 +129,10 @@ public:
 TEST_P(Arythmetic, calcTest)
 {
     TestData data = GetParam();
-    std::string input = "package test; int foo() {return ";
-    input += data.expression;
-    input += ";}";
+    const std::string input = str(boost::format("package test; int foo() {return %s;}")%data.expression);
 
     Parser parser;
-    ASSERT_NO_THROW(parser.parse(input.c_str()));
+    ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     LoggingCalc calc;
     ast->walk(&calc);

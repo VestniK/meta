@@ -70,7 +70,7 @@ namespace f {
 }
 
 TEST(CppWriterTests, emptyNamespace) {
-    const char* src = "package test; extern int foo();";
+    const auto src = "package test; extern int foo();"s;
     Parser parser;
     parser.parse(src);
     auto* foo = parser.ast()->getChildren<Function>()[0];

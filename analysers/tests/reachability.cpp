@@ -38,12 +38,12 @@ public:
 }
 
 TEST_P(Reachability, resolveErrors) {
-    const char *input = GetParam();
+    const std::string input = GetParam();
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     try {
         checkReachability(ast);

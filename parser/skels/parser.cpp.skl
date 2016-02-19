@@ -135,14 +135,9 @@ Parser::~Parser()
 {
 }
 
-void Parser::parse(const char *input)
+void Parser::parse(const std::string& input)
 {
-    parse(input, std::strlen(input));
-}
-
-void Parser::parse(const char *input, size_t size)
-{
-    lexer.start(input);
+    lexer.start(input.data());
     stateNum = 0;
     stackTop = 0;
     while (true) {
@@ -184,7 +179,11 @@ void Parser::parse(const char *input, size_t size)
 @@
                 return;
             }
-            throw SyntaxError(src, input, size, stack.data() + 1, stackTop > 0 ? stackTop - 1 : 0, stateNum, lexer.currentToken());
+            throw SyntaxError(
+                src, input.data(), input.size(),
+                stack.data() + 1, stackTop > 0 ? stackTop - 1 : 0,
+                stateNum, lexer.currentToken()
+            );
         }
     }
 }

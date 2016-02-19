@@ -7,7 +7,7 @@ add_executable(AnalysersTests
   resolver.cpp
   typechecker.cpp
 )
-target_link_libraries(AnalysersTests analysers parser fs ${GTEST_BOTH_LIBRARIES})
+target_link_libraries(AnalysersTests analysers parser ${GTEST_BOTH_LIBRARIES})
 add_test(NAME AnalysersTests
   COMMAND AnalysersTests --gtest_output=xml:${CMAKE_BINARY_DIR}/Reports/AnalysersTests.xml
 )

@@ -47,9 +47,11 @@ typedef std::vector<NameType> NameTypeList;
 
 struct TestData
 {
-    TestData(const char *src, const NameTypeList &func, const NameTypeList &vars): src(src), functions(func), vars(vars) {}
+    TestData(const char *src, const NameTypeList &func, const NameTypeList &vars):
+        src(src), functions(func), vars(vars)
+    {}
 
-    const char *src;
+    std::string src;
     NameTypeList functions;
     NameTypeList vars;
 };
@@ -67,7 +69,7 @@ TEST_P(TypeCheker, typeCheck) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(param.src, strlen(param.src)));
+    ASSERT_NO_THROW(parser.parse(param.src));
     auto ast = parser.ast();
     ASSERT_NO_THROW(resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;
@@ -174,7 +176,7 @@ INSTANTIATE_TEST_CASE_P(typeCheckAndDeduce, TypeCheker, ::testing::Values(
 
 namespace {
 
-class TypeChekerErrors: public testing::TestWithParam<const char *>
+class TypeChekerErrors: public testing::TestWithParam<std::string>
 {
 public:
 };
@@ -182,12 +184,12 @@ public:
 }
 
 TEST_P(TypeChekerErrors, typeErrors) {
-    const char *input = GetParam();
+    const std::string& input = GetParam();
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input, strlen(input)));
+    ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     ASSERT_NO_THROW(resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;

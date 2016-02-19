@@ -23,8 +23,7 @@
 
 #include <boost/program_options.hpp>
 
-#include "fs/io.h"
-
+#include "utils/io.h"
 #include "utils/types.h"
 
 #include "parser/actions.h"
@@ -44,8 +43,7 @@
 
 using namespace meta;
 
-enum class ErrorVerbosity
-{
+enum class ErrorVerbosity {
     silent,
     brief,
     lineMarked,
@@ -65,8 +63,7 @@ struct Options {
 
 namespace po = boost::program_options;
 
-std::istream& operator>> (std::istream& in, ErrorVerbosity& verbosity)
-{
+std::istream& operator>> (std::istream& in, ErrorVerbosity& verbosity) {
     std::string str;
     in >> str;
     if (str == "silent")
@@ -84,8 +81,7 @@ std::istream& operator>> (std::istream& in, ErrorVerbosity& verbosity)
     return in;
 }
 
-std::istream& operator>> (std::istream& in, Generator& generator)
-{
+std::istream& operator>> (std::istream& in, Generator& generator) {
     std::string str;
     in >> str;
     if (str == "llvm")
@@ -97,10 +93,11 @@ std::istream& operator>> (std::istream& in, Generator& generator)
     return in;
 }
 
-bool run(const Options &opts);
+namespace meta {
+bool main(const Options &opts);
+}
 
-int main(int argc, char **argv) try
-{
+int main(int argc, char **argv) try {
     Options opts;
     po::options_description desc("Command line options");
     desc.add_options()
@@ -133,7 +130,7 @@ int main(int argc, char **argv) try
         std::cerr << desc << std::endl;
         return EXIT_FAILURE;
     }
-    return run(opts) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return meta::main(opts) ? EXIT_SUCCESS : EXIT_FAILURE;
 } catch(const analysers::NodeException &err) {
     std::cerr <<
         err.sourcePath() << ':' << err.tokens().begin()->line <<
@@ -146,7 +143,7 @@ int main(int argc, char **argv) try
     std::cerr << '^' << std::endl;
     for (const auto &frame: err.backtrace())
         std::cerr << "\t" << frame << std::endl;
-    return false;
+    return EXIT_FAILURE;
 } catch(const utils::Exception &err) {
     std::cerr << "Internal compiler error: " << err.what() << std::endl;
     for (const auto &frame: err.backtrace())
@@ -154,19 +151,20 @@ int main(int argc, char **argv) try
     return EXIT_FAILURE;
 }
 
-bool run(const Options &opts) try
-{
+namespace meta {
+
+bool main(const Options &opts) try {
     // parse
-    std::vector<std::vector<char>> input;
+    std::vector<std::string> input;
     input.reserve(opts.sources.size());
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     for (const auto &src: opts.sources) {
-        input.emplace_back(readWholeFile(src));
+        input.emplace_back(utils::readAll(src));
         parser.setSourcePath(src);
-        parser.parse(input.back().data(), input.back().size());
+        parser.parse(input.back());
     }
     auto ast = parser.ast();
     // analyse
@@ -215,3 +213,5 @@ bool run(const Options &opts) try
     }
     return false;
 }
+
+} // namespace meta
