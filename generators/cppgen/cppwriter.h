@@ -32,9 +32,23 @@ namespace meta {
 namespace generators {
 namespace cppgen {
 
+enum class OutType {
+    cpp,
+    header
+};
+
+
+enum class Include {
+    local,
+    global
+};
+
 class CppWriter {
 public:
-    CppWriter(std::ostream& out): mOut(&out) {}
+    CppWriter(std::ostream& out, OutType type): mOut(&out) {
+        if (type == OutType::header)
+            out << "#pragma once" << std::endl;
+    }
     CppWriter(const CppWriter&) = delete;
     CppWriter& operator= (const CppWriter&) = delete;
     CppWriter(CppWriter&&) = default;
@@ -43,6 +57,13 @@ public:
     ~CppWriter() {
         for (; !mPackage.empty(); mPackage = parent(mPackage))
             (*mOut) << '}' << std::endl;
+    }
+
+    void include(const utils::fs::path& path, Include type = Include::local) {
+        switch (type) {
+        case Include::local: (*mOut) << "#include \"" << path.string() << '"' << std::endl; break;
+        case Include::global: (*mOut) << "#include <" << path.string() << '>' << std::endl; break;
+        }
     }
 
     void setPackage(const utils::string_view& pkg) {

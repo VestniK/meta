@@ -32,7 +32,7 @@ using namespace std::string_literals;
 TEST(CppWriterTests, nestedNamespace) {
     std::ostringstream out;
     {
-        CppWriter writer(out);
+        CppWriter writer(out, OutType::cpp);
         writer.setPackage("a.b.c.d");
         writer.setPackage("a.b.e.f");
         writer.setPackage("a.g.h");
@@ -78,7 +78,7 @@ TEST(CppWriterTests, emptyNamespace) {
     foo->setType(typestore.getPrimitive(typesystem::Type::Int));
     std::ostringstream out;
     {
-        CppWriter writer(out);
+        CppWriter writer(out, OutType::cpp);
         writer.setPackage("a.b.c.d");
         writer.setPackage("");
         writer.forwardDeclare(foo);

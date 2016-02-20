@@ -38,22 +38,31 @@ namespace cppgen {
 void generate(
     const Dictionary& dict,
     const utils::fs::path& outputHeader,
-    const utils::fs::path& //outputCpp
+    const utils::fs::path& outputCpp
 ) {
-    std::ofstream out(outputHeader, std::fstream::trunc | std::fstream::binary);
-    if (!out)
+    std::ofstream headerStream(outputHeader, std::fstream::trunc | std::fstream::binary);
+    if (!headerStream)
         throw std::system_error(errno, std::system_category(), "Failed to open " + outputHeader.string());
-    CppWriter writer(out);
+    std::ofstream cppStream(outputCpp, std::fstream::trunc | std::fstream::binary);
+    if (!cppStream)
+        throw std::system_error(errno, std::system_category(), "Failed to open " + outputCpp.string());
+
+    CppWriter cppWriter(cppStream, OutType::cpp);
+    CppWriter headerWriter(headerStream, OutType::header);
+
+    cppWriter.include(outputHeader);
 
     for (const auto& kv: dict) {
         const auto& functions = kv.second;
 
-        writer.setPackage(kv.first);
+        headerWriter.setPackage(kv.first);
+        cppWriter.setPackage(kv.first);
         for (const auto& func: functions) {
             Function* f = func.second;
-            if (f->visibility() != Visibility::Export)
-                continue;
-            writer.forwardDeclare(f);
+            if (f->visibility() == Visibility::Export)
+                headerWriter.forwardDeclare(f);
+            else if (f->visibility() == Visibility::Extern)
+                cppWriter.forwardDeclare(f);
         }
     }
 }
