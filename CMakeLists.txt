@@ -1,5 +1,13 @@
 project(meta)
 cmake_minimum_required(VERSION 3.0)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+option(BUILD_DEPS "Download and build dependencies as part of the build" Off)
+
+if (BUILD_DEPS)
+  include(BuildWithDependencies)
+  return()
+endif()
 
 find_package(Boost COMPONENTS program_options REQUIRED)
 
