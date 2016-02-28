@@ -18,7 +18,7 @@ ExternalProject_Add(gtest
 )
 
 ExternalProject_Add(llvm
-  PREFIX ${CMAKE_CURRENT_BINARY_DIR}
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/deps
   GIT_REPOSITORY https://github.com/llvm-mirror/llvm.git
   GIT_TAG master
   CMAKE_CACHE_ARGS
