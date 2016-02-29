@@ -19,8 +19,7 @@ ExternalProject_Add(gtest
 
 ExternalProject_Add(llvm
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/deps
-  GIT_REPOSITORY https://github.com/llvm-mirror/llvm.git
-  GIT_TAG master
+  SVN_REPOSITORY http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_371/final/
   CMAKE_CACHE_ARGS
     -DCMAKE_INSTALL_PREFIX:path=${CMAKE_CURRENT_BINARY_DIR}/deps
   ${USES_TERMINAL_BUILD_ON}
