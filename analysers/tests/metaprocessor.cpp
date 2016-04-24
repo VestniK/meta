@@ -49,7 +49,7 @@ TEST(MetaProcessor, attribute)
     auto ast = parser.ast();
     ASSERT_NO_THROW(processMeta(ast));
     auto functions = ast->getChildren<Function>(-1);
-    ASSERT_EQ(functions.size(), 2);
+    ASSERT_EQ(functions.size(), 2u);
     ASSERT_EQ(functions[0]->name(), "foo");
     ASSERT_TRUE(functions[0]->is(Function::entrypoint));
 

@@ -94,7 +94,7 @@ TEST(Arythmetic, parenthesis)
     auto ast = parser.ast();
     LoggingCalc calc;
     ast->walk(&calc);
-    ASSERT_EQ(calc.calcSequence().size(), 3);
+    ASSERT_EQ(calc.calcSequence().size(), 3u);
 
     ASSERT_EQ(calc.calcSequence()[0].operation, BinaryOp::add);
     ASSERT_EQ(calc.calcSequence()[0].left, 11);

@@ -76,29 +76,29 @@ TEST(MetaParser, funcDeclarationsAndVisibilities)
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
-    ASSERT_EQ(functions.size(), 5);
+    ASSERT_EQ(functions.size(), 5u);
 
     ASSERT_EQ(functions[0]->name(), "privateByDefault");
     ASSERT_EQ(functions[0]->visibility(), Visibility::Private);
-    ASSERT_EQ(functions[0]->getChildren<Annotation>().size(), 0);
+    ASSERT_EQ(functions[0]->getChildren<Annotation>().size(), 0u);
 
     ASSERT_EQ(functions[1]->name(), "protectedByModifiedDefault1");
     ASSERT_EQ(functions[1]->visibility(), Visibility::Protected);
-    ASSERT_EQ(functions[1]->getChildren<Annotation>().size(), 0);
+    ASSERT_EQ(functions[1]->getChildren<Annotation>().size(), 0u);
 
     ASSERT_EQ(functions[2]->name(), "pubExplicitly");
     ASSERT_EQ(functions[2]->visibility(), Visibility::Public);
-    ASSERT_EQ(functions[2]->getChildren<Annotation>().size(), 0);
+    ASSERT_EQ(functions[2]->getChildren<Annotation>().size(), 0u);
 
     ASSERT_EQ(functions[3]->name(), "protectedByModifiedDefault2");
     ASSERT_EQ(functions[3]->visibility(), Visibility::Protected);
-    ASSERT_EQ(functions[3]->getChildren<Annotation>().size(), 1);
+    ASSERT_EQ(functions[3]->getChildren<Annotation>().size(), 1u);
     ASSERT_EQ(functions[3]->getChildren<Annotation>()[0]->name(), "some");
     ASSERT_EQ(functions[3]->getChildren<Annotation>()[0]->target(), functions[3]);
 
     ASSERT_EQ(functions[4]->name(), "privateExplicitly");
     ASSERT_EQ(functions[4]->visibility(), Visibility::Private);
-    ASSERT_EQ(functions[4]->getChildren<Annotation>().size(), 2);
+    ASSERT_EQ(functions[4]->getChildren<Annotation>().size(), 2u);
     ASSERT_EQ(functions[4]->getChildren<Annotation>()[0]->name(), "some");
     ASSERT_EQ(functions[4]->getChildren<Annotation>()[0]->target(), functions[4]);
     ASSERT_EQ(functions[4]->getChildren<Annotation>()[1]->name(), "other");
@@ -114,10 +114,10 @@ TEST(MetaParser, zeroParamFunc) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
-    ASSERT_EQ(functions.size(), 1);
+    ASSERT_EQ(functions.size(), 1u);
     ASSERT_EQ(functions[0]->name(), "foo");
     ASSERT_EQ(functions[0]->package(), "test");
-    ASSERT_EQ(functions[0]->args().size(), 0);
+    ASSERT_EQ(functions[0]->args().size(), 0u);
 }
 
 TEST(MetaParser, imports) {
@@ -129,7 +129,7 @@ TEST(MetaParser, imports) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     const auto imports = ast->getChildren<Import>(-1);
-    ASSERT_EQ(imports.size(), 2);
+    ASSERT_EQ(imports.size(), 2u);
     ASSERT_EQ(imports[0]->name(), "bar");
     ASSERT_EQ(imports[0]->target(), "bar");
     ASSERT_EQ(imports[0]->targetPackage(), "pkg");
@@ -147,11 +147,11 @@ TEST(MetaParser, oneParamFunc) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
-    ASSERT_EQ(functions.size(), 1);
+    ASSERT_EQ(functions.size(), 1u);
     ASSERT_EQ(functions[0]->name(), "foo");
     ASSERT_EQ(functions[0]->package(), "test");
     const auto args = functions[0]->args();
-    ASSERT_EQ(args.size(), 1);
+    ASSERT_EQ(args.size(), 1u);
     ASSERT_EQ(args[0]->typeName(), "int");
     ASSERT_EQ(args[0]->name(), "x");
 }
@@ -165,11 +165,11 @@ TEST(MetaParser, twoParamFunc) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
-    ASSERT_EQ(functions.size(), 1);
+    ASSERT_EQ(functions.size(), 1u);
     ASSERT_EQ(functions[0]->name(), "foo");
     ASSERT_EQ(functions[0]->package(), "test");
     const auto args = functions[0]->args();
-    ASSERT_EQ(args.size(), 2);
+    ASSERT_EQ(args.size(), 2u);
     ASSERT_EQ(args[0]->typeName(), "int");
     ASSERT_EQ(args[0]->name(), "x");
     ASSERT_EQ(args[1]->typeName(), "int");
@@ -185,19 +185,19 @@ TEST(MetaParser, twoFunc) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
-    ASSERT_EQ(functions.size(), 2);
+    ASSERT_EQ(functions.size(), 2u);
 
     ASSERT_EQ(functions[0]->name(), "foo");
     ASSERT_EQ(functions[0]->package(), "test");
     const auto args1 = functions[0]->args();
-    ASSERT_EQ(args1.size(), 1);
+    ASSERT_EQ(args1.size(), 1u);
     ASSERT_EQ(args1[0]->typeName(), "int");
     ASSERT_EQ(args1[0]->name(), "x");
 
     ASSERT_EQ(functions[1]->name(), "bar");
     ASSERT_EQ(functions[1]->package(), "test");
     const auto args2 = functions[1]->args();
-    ASSERT_EQ(args2.size(), 1);
+    ASSERT_EQ(args2.size(), 1u);
     ASSERT_EQ(args2[0]->typeName(), "int");
     ASSERT_EQ(args2[0]->name(), "x");
 }
@@ -211,19 +211,19 @@ TEST(MetaParser, funcCall) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
-    ASSERT_EQ(functions.size(), 2);
+    ASSERT_EQ(functions.size(), 2u);
 
     ASSERT_EQ(functions[0]->name(), "foo");
     ASSERT_EQ(functions[0]->package(), "test");
     const auto args1 = functions[0]->args();
-    ASSERT_EQ(args1.size(), 1);
+    ASSERT_EQ(args1.size(), 1u);
     ASSERT_EQ(args1[0]->typeName(), "int");
     ASSERT_EQ(args1[0]->name(), "x");
 
     ASSERT_EQ(functions[1]->name(), "bar");
     ASSERT_EQ(functions[1]->package(), "test");
     const auto args2 = functions[1]->args();
-    ASSERT_EQ(args2.size(), 1);
+    ASSERT_EQ(args2.size(), 1u);
     ASSERT_EQ(args2[0]->typeName(), "int");
     ASSERT_EQ(args2[0]->name(), "y");
 }
@@ -237,7 +237,7 @@ TEST(MetaParser, emptyPackage) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
-    ASSERT_EQ(functions.size(), 0);
+    ASSERT_EQ(functions.size(), 0u);
 }
 
 TEST(MetaParser, funcRetType) {
@@ -249,7 +249,7 @@ TEST(MetaParser, funcRetType) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
-    ASSERT_EQ(functions.size(), 2);
+    ASSERT_EQ(functions.size(), 2u);
     ASSERT_EQ(functions[0]->name(), "iFoo");
     ASSERT_EQ(functions[0]->package(), "example.test");
     ASSERT_EQ(functions[0]->retType(), "int");
@@ -276,9 +276,9 @@ TEST(MetaParser, varTest) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     auto blocks = ast->getChildren<CodeBlock>(-1);
-    ASSERT_EQ(blocks.size(), 1);
+    ASSERT_EQ(blocks.size(), 1u);
     auto varDeclarations = blocks.front()->getChildren<VarDecl>(-1);
-    ASSERT_EQ(varDeclarations.size(), 2);
+    ASSERT_EQ(varDeclarations.size(), 2u);
     ASSERT_EQ(varDeclarations[0]->typeName(), "int");
     ASSERT_EQ(varDeclarations[0]->name(), "y");
     ASSERT_TRUE(varDeclarations[0]->inited());
@@ -288,7 +288,7 @@ TEST(MetaParser, varTest) {
     ASSERT_FALSE(varDeclarations[1]->inited());
 
     auto assigments = blocks.front()->getChildren<Assigment>(-1);
-    ASSERT_EQ(assigments.size(), 1);
+    ASSERT_EQ(assigments.size(), 1u);
     ASSERT_EQ(assigments[0]->varName(), "z");
 }
 
@@ -310,9 +310,9 @@ TEST(MetaParser, assignAsExpr) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     auto blocks = ast->getChildren<CodeBlock>(-1);
-    ASSERT_EQ(blocks.size(), 1);
+    ASSERT_EQ(blocks.size(), 1u);
     auto varDeclarations = blocks.front()->getChildren<VarDecl>(-1);
-    ASSERT_EQ(varDeclarations.size(), 2);
+    ASSERT_EQ(varDeclarations.size(), 2u);
     ASSERT_EQ(varDeclarations[0]->typeName(), "int");
     ASSERT_EQ(varDeclarations[0]->name(), "y");
     ASSERT_FALSE(varDeclarations[0]->inited());
@@ -322,7 +322,7 @@ TEST(MetaParser, assignAsExpr) {
     ASSERT_FALSE(varDeclarations[1]->inited());
 
     auto assigments = blocks.front()->getChildren<Assigment>(-1);
-    ASSERT_EQ(assigments.size(), 2);
+    ASSERT_EQ(assigments.size(), 2u);
     ASSERT_EQ(assigments[0]->varName(), "z");
     ASSERT_EQ(assigments[1]->varName(), "y");
 }
@@ -345,16 +345,16 @@ TEST(MetaParser, ifStatement) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
-    ASSERT_EQ(ifs.size(), 1);
+    ASSERT_EQ(ifs.size(), 1u);
     auto calls = ast->getChildren<Call>(-1);
-    ASSERT_EQ(calls.size(), 2);
+    ASSERT_EQ(calls.size(), 2u);
     ASSERT_EQ(calls[0]->functionName(), "foo1");
     ASSERT_EQ(calls[1]->functionName(), "foo2");
 
     ASSERT_NE(ifs[0]->condition(), nullptr);
     ASSERT_NE(ifs[0]->thenBlock(), nullptr);
     ASSERT_EQ(ifs[0]->elseBlock(), nullptr);
-    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1).size(), 1u);
     ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1)[0], calls[0]);
 }
 
@@ -376,9 +376,9 @@ TEST(MetaParser, ifWithEmptyStatement) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
-    ASSERT_EQ(ifs.size(), 1);
+    ASSERT_EQ(ifs.size(), 1u);
     auto calls = ast->getChildren<Call>(-1);
-    ASSERT_EQ(calls.size(), 1);
+    ASSERT_EQ(calls.size(), 1u);
     ASSERT_EQ(calls[0]->functionName(), "foo1");
 
     ASSERT_NE(ifs[0]->condition(), nullptr);
@@ -406,9 +406,9 @@ TEST(MetaParser, ifElseStatement) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
-    ASSERT_EQ(ifs.size(), 1);
+    ASSERT_EQ(ifs.size(), 1u);
     auto calls = ast->getChildren<Call>(-1);
-    ASSERT_EQ(calls.size(), 3);
+    ASSERT_EQ(calls.size(), 3u);
     ASSERT_EQ(calls[0]->functionName(), "foo1");
     ASSERT_EQ(calls[1]->functionName(), "foo2");
     ASSERT_EQ(calls[2]->functionName(), "foo3");
@@ -416,9 +416,9 @@ TEST(MetaParser, ifElseStatement) {
     ASSERT_NE(ifs[0]->condition(), nullptr);
     ASSERT_NE(ifs[0]->thenBlock(), nullptr);
     ASSERT_NE(ifs[0]->elseBlock(), nullptr);
-    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1).size(), 1u);
     ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1)[0], calls[0]);
-    ASSERT_EQ(ifs[0]->elseBlock()->getChildren<Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->elseBlock()->getChildren<Call>(-1).size(), 1u);
     ASSERT_EQ(ifs[0]->elseBlock()->getChildren<Call>(-1)[0], calls[1]);
 }
 
@@ -442,16 +442,16 @@ TEST(MetaParser, ifElseEmptyStatement) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
-    ASSERT_EQ(ifs.size(), 1);
+    ASSERT_EQ(ifs.size(), 1u);
     auto calls = ast->getChildren<Call>(-1);
-    ASSERT_EQ(calls.size(), 2);
+    ASSERT_EQ(calls.size(), 2u);
     ASSERT_EQ(calls[0]->functionName(), "foo1");
     ASSERT_EQ(calls[1]->functionName(), "foo2");
 
     ASSERT_NE(ifs[0]->condition(), nullptr);
     ASSERT_NE(ifs[0]->thenBlock(), nullptr);
     ASSERT_EQ(ifs[0]->elseBlock(), nullptr);
-    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1).size(), 1u);
     ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1)[0], calls[0]);
 }
 
@@ -475,9 +475,9 @@ TEST(MetaParser, ifElseBothEmptyStatements) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
-    ASSERT_EQ(ifs.size(), 1);
+    ASSERT_EQ(ifs.size(), 1u);
     auto calls = ast->getChildren<Call>(-1);
-    ASSERT_EQ(calls.size(), 1);
+    ASSERT_EQ(calls.size(), 1u);
     ASSERT_EQ(calls[0]->functionName(), "foo1");
 
     ASSERT_NE(ifs[0]->condition(), nullptr);
@@ -506,16 +506,16 @@ TEST(MetaParser, ifBlockStatement) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
-    ASSERT_EQ(ifs.size(), 1);
+    ASSERT_EQ(ifs.size(), 1u);
     auto calls = ast->getChildren<Call>(-1);
-    ASSERT_EQ(calls.size(), 2);
+    ASSERT_EQ(calls.size(), 2u);
     ASSERT_EQ(calls[0]->functionName(), "foo1");
     ASSERT_EQ(calls[1]->functionName(), "foo2");
 
     ASSERT_NE(ifs[0]->condition(), nullptr);
     ASSERT_NE(ifs[0]->thenBlock(), nullptr);
     ASSERT_EQ(ifs[0]->elseBlock(), nullptr);
-    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1).size(), 1u);
     ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1)[0], calls[0]);
 }
 
@@ -543,9 +543,9 @@ TEST(MetaParser, ifElseBlockStatement) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
-    ASSERT_EQ(ifs.size(), 1);
+    ASSERT_EQ(ifs.size(), 1u);
     auto calls = ast->getChildren<Call>(-1);
-    ASSERT_EQ(calls.size(), 3);
+    ASSERT_EQ(calls.size(), 3u);
     ASSERT_EQ(calls[0]->functionName(), "foo1");
     ASSERT_EQ(calls[1]->functionName(), "foo2");
     ASSERT_EQ(calls[2]->functionName(), "foo3");
@@ -553,9 +553,9 @@ TEST(MetaParser, ifElseBlockStatement) {
     ASSERT_NE(ifs[0]->condition(), nullptr);
     ASSERT_NE(ifs[0]->thenBlock(), nullptr);
     ASSERT_NE(ifs[0]->elseBlock(), nullptr);
-    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1).size(), 1u);
     ASSERT_EQ(ifs[0]->thenBlock()->getChildren<Call>(-1)[0], calls[0]);
-    ASSERT_EQ(ifs[0]->elseBlock()->getChildren<Call>(-1).size(), 1);
+    ASSERT_EQ(ifs[0]->elseBlock()->getChildren<Call>(-1).size(), 1u);
     ASSERT_EQ(ifs[0]->elseBlock()->getChildren<Call>(-1)[0], calls[1]);
 }
 
@@ -616,7 +616,7 @@ TEST(Parser, stringLiteral) {
     ASSERT_NO_THROW(parser.parse(input));
 
     auto strs = parser.ast()->getChildren<StrLiteral>(-1);
-    ASSERT_EQ(strs.size(), 2);
+    ASSERT_EQ(strs.size(), 2u);
     ASSERT_EQ(strs[0]->value(), str2buf("Hello World"));
     ASSERT_EQ(strs[1]->value(), str2buf("\t \n \r \a \b \f \\ \" \0"));
 }
@@ -645,7 +645,7 @@ TEST_P(MetaParser, binaryOp) {
     ASSERT_NO_THROW(parser.parse(input));
     auto ast = parser.ast();
     auto binops = ast->getChildren<BinaryOp>(-1);
-    ASSERT_EQ(binops.size(), 1);
+    ASSERT_EQ(binops.size(), 1u);
     ASSERT_EQ(binops[0]->operation(), data.op);
 }
 
