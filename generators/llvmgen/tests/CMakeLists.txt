@@ -1,4 +1,5 @@
 find_package(GTest REQUIRED)
+find_package(Threads REQUIRED) # Required by gtest but their *-config.cmake do not do it properly
 include_directories(${GTEST_INCLUDE_DIRS})
 
 find_program(LLC llc)
@@ -26,7 +27,7 @@ add_executable(BuilderTests
   test.o
 )
 
-target_link_libraries(BuilderTests ${GTEST_BOTH_LIBRARIES})
+target_link_libraries(BuilderTests ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 add_test(NAME BuilderTests
   COMMAND BuilderTests --gtest_output=xml:${CMAKE_BINARY_DIR}/Reports/BuilderTests.xml
 )
