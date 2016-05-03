@@ -1,3 +1,4 @@
+find_package(ClangLibs REQUIRED)
 add_definitions(-DCPPGEN_BUILD) # used for private headers check
 
 set(SRC
@@ -5,6 +6,6 @@ set(SRC
 )
 
 add_library(cppgenerator STATIC ${SRC})
-target_link_libraries(analysers)
+target_link_libraries(cppgenerator analysers clang::AST clang::Format)
 
 add_subdirectory(tests)
