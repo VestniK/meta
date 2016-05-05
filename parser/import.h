@@ -27,7 +27,7 @@ namespace meta {
 class Import: public Visitable<Node, Import>
 {
 public:
-    Import(const StackFrame *reduction, size_t size);
+    Import(utils::array_view<StackFrame> reduction);
 
     const utils::string_view &name() const {return mName;}
     const utils::string_view &targetPackage() const {return mPackage;}

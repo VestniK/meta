@@ -32,12 +32,12 @@ namespace meta {
 
 class Actions: public ParseActions, public NodeActions {
 public:
-    void package(const StackFrame *reduction, size_t size) override {
-        PRECONDITION(size == 3);
+    void package(utils::array_view<StackFrame> reduction) override {
+        PRECONDITION(reduction.size() == 3);
         POSTCONDITION(!mCurrentPackage.empty());
         mCurrentPackage = reduction[1].tokens;
     }
-    void changeVisibility(const StackFrame *reduction, size_t size) override;
+    void changeVisibility(utils::array_view<StackFrame> reduction) override;
     void onFunction(Function *node) override;
     void onSourceFile(SourceFile *node) override;
 

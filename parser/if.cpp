@@ -17,15 +17,16 @@
  *
  */
 
-#include <cassert>
+#include "utils/contract.h"
 
 #include "parser/if.h"
 
 namespace meta {
 
-If::If(const StackFrame *reduction, size_t size): Visitable<Node, If>(reduction, size)
+If::If(utils::array_view<StackFrame> reduction): Visitable<Node, If>(reduction)
 {
-    assert(size == 6);
+    PRECONDITION(reduction.size() == 6);
+
     const size_t thenStatementPos = 4;
     const size_t elseStatementPos = 5;
     if (!reduction[thenStatementPos].nodes.empty()) {

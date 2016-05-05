@@ -22,9 +22,10 @@
 
 namespace meta {
 
-Import::Import(const StackFrame *reduction, size_t size): Visitable<Node, Import>(reduction, size)
+Import::Import(utils::array_view<StackFrame> reduction): Visitable<Node, Import>(reduction)
 {
-    PRECONDITION(size == 3 || size == 5);
+    PRECONDITION(reduction.size() == 3 || reduction.size() == 5);
+
     Token target;
     TokenSequence package;
     for (auto token : reduction[1].tokens) {
@@ -35,7 +36,7 @@ Import::Import(const StackFrame *reduction, size_t size): Visitable<Node, Import
     }
     mName = mTarget = target;
     mPackage = package;
-    if (size == 5)
+    if (reduction.size() == 5)
         mName = reduction[3].tokens;
 }
 

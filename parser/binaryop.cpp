@@ -22,9 +22,9 @@
 
 namespace meta {
 
-BinaryOp::BinaryOp(const StackFrame *reduction, size_t size): Visitable<Expression, BinaryOp>(reduction ,size)
+BinaryOp::BinaryOp(utils::array_view<StackFrame> reduction): Visitable<Expression, BinaryOp>(reduction)
 {
-    PRECONDITION(size == 3);
+    PRECONDITION(reduction.size() == 3);
     PRECONDITION(reduction[0].nodes.size() == 1);
     PRECONDITION(reduction[1].symbol > 0);
     PRECONDITION(reduction[2].nodes.size() == 1);

@@ -4,6 +4,7 @@
 // Grammar:      @grm_file;
 // Skeleton:     @skl_file;
 // Output:       @out_file;
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <cstdio>
@@ -18,7 +19,21 @@
 
 namespace @grm_name; {
 
-SyntaxError::SyntaxError(const std::string &srcPath, const char *input, size_t size, StackFrame *stack, size_t stackSz, int stateNum, const Token &token):
+namespace {
+
+bool islinebrk(char ch) {
+    return ch ==  '\r' ||  ch ==  '\n';
+}
+
+}
+
+SyntaxError::SyntaxError(
+    const std::string &srcPath,
+    utils::string_view input,
+    utils::array_view<StackFrame> stack,
+    int stateNum,
+    const Token &token
+):
     errorToken(token), src(srcPath)
 {
     std::stringstream ss;
@@ -26,15 +41,15 @@ SyntaxError::SyntaxError(const std::string &srcPath, const char *input, size_t s
     msg = ss.str();
 
     ss.str(std::string());
-    const char *lineStart = token.start;
-    while (lineStart != input && *lineStart != '\r' && *lineStart != '\n')
-        --lineStart;
-    if (lineStart != token.start && (*lineStart == '\r' || *lineStart == '\n'))
+    const char *lineStart = std::find_if(
+        std::make_reverse_iterator(token.start),
+        std::make_reverse_iterator(input.data()),
+        islinebrk
+    ).base();
+    if (lineStart != token.start && islinebrk(*lineStart))
         ++lineStart;
-    const char *lineEnd = token.end;
-    while (lineEnd != input + size && *lineEnd != '\r' && *lineEnd != '\n')
-        ++lineEnd;
-    ss << std::string(lineStart, lineEnd - lineStart) << std::endl;
+    const char *lineEnd = std::find_if(token.end, input.data() + input.size(), islinebrk);
+    ss << utils::string_view(lineStart, lineEnd - lineStart) << std::endl;
     for (const char *pos = lineStart; pos != lineEnd; ++pos) {
         if (pos == token.start)
             ss << '^';
@@ -61,6 +76,7 @@ SyntaxError::SyntaxError(const std::string &srcPath, const char *input, size_t s
 @optn_exp.gt.1;...
 
     ss.str(std::string());
+    const auto stackSz = stack.size();
     for (size_t pos = 0; pos < stackSz; ++pos) {
         if (stack[stackSz - pos - 1].symbol < 0)
             ss << "\t[" << pos << "] " << nontermNames[-stack[stackSz - pos - 1].symbol] << std::endl;
@@ -86,16 +102,14 @@ const size_t SyntaxError::termsCount = @numb_term.d;;
 @@
 @numb_node?;...
 
-Node::Node(const StackFrame *start, size_t size)
-{
-    for (size_t i = 0; i < size; ++i) {
-        children.insert(children.end(), start[i].nodes.begin(), start[i].nodes.end());
-        srcTokens.join(start[i].tokens);
+Node::Node(utils::array_view<StackFrame> reduction) {
+    for (const auto& frame: reduction) {
+        std::copy(frame.nodes.begin(), frame.nodes.end(), std::back_inserter(children));
+        srcTokens.join(frame.tokens);
     }
 }
 
-void Node::walk(Visitor *visitor, int depth)
-{
+void Node::walk(Visitor* visitor, int depth) {
     if (this->accept(visitor) && depth != 0) {
         for (auto child : children)
             child->walk(visitor, depth - 1);
@@ -180,8 +194,8 @@ void Parser::parse(const std::string& input)
                 return;
             }
             throw SyntaxError(
-                src, input.data(), input.size(),
-                stack.data() + 1, stackTop > 0 ? stackTop - 1 : 0,
+                src, input,
+                utils::array_view<StackFrame>(stack.data() + 1, stackTop > 0 ? stackTop - 1 : 0),
                 stateNum, lexer.currentToken()
             );
         }
@@ -197,7 +211,7 @@ void Parser::reduce(int prodRule)
 @numb_pact?;...
     if (parseActions && parseActionNumber[prodRule] >= 0) {
         switch (parseActionNumber[prodRule]) {
-            @pact_func.1|case %d: parseActions->%s(&stack[stackTop], prodLen[prodRule]+1)\; break\;||\n            |;
+            @pact_func.1|case %d: parseActions->%s(utils::array_view<StackFrame>(&stack[stackTop], prodLen[prodRule]+1))\; break\;||\n            |;
         }
     }
 @@
@@ -212,7 +226,7 @@ void Parser::reduce(int prodRule)
     }
 @numb_node?;...
     switch (nodeNumber[prodRule]) {
-        @node_name.1|case %d: addNode(new %s(&stack[stackTop], prodLen[prodRule]+1))\; break\;||\n        |;
+        @node_name.1|case %d: addNode(new %s(utils::array_view<StackFrame>(&stack[stackTop], prodLen[prodRule]+1)))\; break\;||\n        |;
         default:
             for (int i = 1; i < prodLen[prodRule]+1; ++i)
                 stack[stackTop].nodes.insert(stack[stackTop].nodes.end(), stack[stackTop + i].nodes.begin(), stack[stackTop + i].nodes.end());
@@ -239,7 +253,7 @@ void Parser::reduce(int prodRule)
 }
 
 @numb_node?;...
-void Parser::addNode(Node *node)
+void Parser::addNode(Node* node)
 {
     node->setSourcePath(src);
     nodes.push_back(std::unique_ptr<Node>(node));

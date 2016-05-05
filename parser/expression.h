@@ -26,7 +26,7 @@ namespace meta {
 class Expression: public Node {
 public:
 protected:
-    Expression(const StackFrame *reduction, size_t size): Node(reduction, size) {}
+    Expression(utils::array_view<StackFrame> reduction): Node(reduction) {}
 };
 
 } // namespace meta

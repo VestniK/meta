@@ -27,7 +27,7 @@ namespace meta {
 class StrLiteral: public Visitable<Expression, StrLiteral>, public Typed
 {
 public:
-    StrLiteral(const StackFrame *reduction, size_t size);
+    StrLiteral(utils::array_view<StackFrame> reduction);
 
     const std::vector<char> &value() const {return mVal;}
 

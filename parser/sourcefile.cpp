@@ -21,9 +21,9 @@
 
 namespace meta {
 
-SourceFile::SourceFile(const StackFrame* reduction, size_t size): Visitable<Node, SourceFile>(reduction, size)
+SourceFile::SourceFile(utils::array_view<StackFrame> reduction):
+    Visitable<Node, SourceFile>(reduction)
 {
-
 }
 
 } // namespace meta

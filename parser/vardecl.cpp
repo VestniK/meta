@@ -23,11 +23,13 @@
 
 namespace meta {
 
-VarDecl::VarDecl(const StackFrame* start, size_t size): Visitable<Node, VarDecl>(start, size), mFlags(0)
+VarDecl::VarDecl(utils::array_view<StackFrame> reduction):
+    Visitable<Node, VarDecl>(reduction),
+    mFlags(0)
 {
-    PRECONDITION(size == 3);
-    mTypeName = start[0].tokens;
-    mName = start[1].tokens;
+    PRECONDITION(reduction.size() == 3);
+    mTypeName = reduction[0].tokens;
+    mName = reduction[1].tokens;
 }
 
 bool VarDecl::is(VarDecl::Flags flag) const

@@ -22,9 +22,10 @@
 
 namespace meta {
 
-PrefixOp::PrefixOp(const StackFrame *reduction, size_t size): Visitable<Expression, PrefixOp>(reduction, size)
+PrefixOp::PrefixOp(utils::array_view<StackFrame> reduction):
+    Visitable<Expression, PrefixOp>(reduction)
 {
-    PRECONDITION(size == 2);
+    PRECONDITION(reduction.size() == 2);
     PRECONDITION(reduction[0].symbol > 0); // symbol is terminal
     PRECONDITION(reduction[1].nodes.size() == 1);
     switch (reduction[0].symbol) {

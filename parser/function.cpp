@@ -27,11 +27,12 @@
 
 namespace meta {
 
-Function::Function(const StackFrame *reduction, size_t size): Visitable<Declaration, Function>(reduction, size)
+Function::Function(utils::array_view<StackFrame> reduction):
+    Visitable<Declaration, Function>(reduction)
 {
-    PRECONDITION(size == 7 || size == 8); // with or without annotations
+    PRECONDITION(reduction.size() == 7 || reduction.size() == 8); // with or without annotations
 
-    const bool hasAnnotations = size == 8;
+    const bool hasAnnotations = reduction.size() == 8;
     if (hasAnnotations) {
         for (auto annotataion : reduction[0].nodes)
             invoke<Annotation>(&Annotation::setTarget, annotataion, this);

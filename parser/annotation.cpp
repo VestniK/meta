@@ -23,9 +23,10 @@
 
 namespace meta {
 
-Annotation::Annotation(const StackFrame *reduction, size_t size): Visitable<Node, Annotation>(reduction, size)
+Annotation::Annotation(utils::array_view<StackFrame> reduction):
+    Visitable<Node, Annotation>(reduction)
 {
-    PRECONDITION(size == 1);
+    PRECONDITION(reduction.size() == 1);
     PRECONDITION(reduction[0].tokens.begin() != reduction[0].tokens.end());
     PRECONDITION(reduction[0].tokens.begin()->termNum == annotation);
 

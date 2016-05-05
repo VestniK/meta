@@ -17,7 +17,7 @@
  *
  */
 
-#include <cassert>
+#include "utils/contract.h"
 
 #include "typesystem/typesstore.h"
 
@@ -25,10 +25,11 @@
 
 namespace meta {
 
-Literal::Literal(const StackFrame *reduction, size_t size): Visitable<Expression, Literal>(reduction, size)
+Literal::Literal(utils::array_view<StackFrame> reduction): Visitable<Expression, Literal>(reduction)
 {
-    assert(size == 1);
-    assert(reduction[0].symbol > 0); // symbol is terminal
+    PRECONDITION(reduction.size() == 1);
+    PRECONDITION(reduction[0].symbol > 0); // symbol is terminal
+
     switch (reduction[0].symbol) {
         case meta::trueVal: mVal = trueVal; break;
         case meta::falseVal: mVal = falseVal; break;

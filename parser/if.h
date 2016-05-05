@@ -25,7 +25,7 @@ namespace meta {
 class If: public Visitable<Node, If>
 {
 public:
-    If(const StackFrame *reduction, size_t size);
+    If(utils::array_view<StackFrame> reduction);
 
     Node *condition();
     Node *thenBlock() {return mThen;}

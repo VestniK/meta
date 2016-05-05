@@ -22,15 +22,15 @@
 
 namespace meta {
 
-Assigment::Assigment(const StackFrame* start, size_t size): Visitable<Expression, Assigment>(start, size)
+Assigment::Assigment(utils::array_view<StackFrame> reduction):
+    Visitable<Expression, Assigment>(reduction)
 {
-    PRECONDITION(size == 3);
-    PRECONDITION(start[0].nodes.empty() && start[1].nodes.empty() && start[2].nodes.size() == 1);
-    mVarName = start[0].tokens;
+    PRECONDITION(reduction.size() == 3);
+    PRECONDITION(reduction[0].nodes.empty() && reduction[1].nodes.empty() && reduction[2].nodes.size() == 1);
+    mVarName = reduction[0].tokens;
 }
 
-Node *Assigment::value()
-{
+Node* Assigment::value() {
     PRECONDITION(children.size() == 1);
     return children.front();
 }

@@ -23,9 +23,10 @@
 
 namespace meta {
 
-StrLiteral::StrLiteral(const StackFrame *reduction, size_t size): Visitable<Expression, StrLiteral>(reduction, size)
+StrLiteral::StrLiteral(utils::array_view<StackFrame> reduction):
+    Visitable<Expression, StrLiteral>(reduction)
 {
-    PRECONDITION(size == 1);
+    PRECONDITION(reduction.size() == 1);
     PRECONDITION(reduction[0].symbol == strLiteral);
     auto token = *reduction[0].tokens.begin();
     bool escape = false;

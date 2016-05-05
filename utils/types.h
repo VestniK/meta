@@ -23,6 +23,8 @@
 #include <experimental/optional>
 #include <experimental/string_view>
 
+#include "utils/array_view.h"
+
 namespace meta {
 namespace utils {
 

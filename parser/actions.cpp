@@ -22,9 +22,9 @@
 
 namespace meta {
 
-void Actions::changeVisibility(const StackFrame *reduction, size_t size)
+void Actions::changeVisibility(utils::array_view<StackFrame> reduction)
 {
-    PRECONDITION(size == 2);
+    PRECONDITION(reduction.size() == 2);
     PRECONDITION(reduction[0].tokens.begin() != reduction[0].tokens.end());
     const auto token = *(reduction[0].tokens.begin());
     mDefaultVisibility = fromToken(token);

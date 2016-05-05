@@ -22,13 +22,12 @@
 
 namespace meta {
 
-class BinaryOp: public Visitable<Expression, BinaryOp>, public Typed
-{
+class BinaryOp: public Visitable<Expression, BinaryOp>, public Typed {
 public:
-    BinaryOp(const StackFrame *reduction, size_t size);
+    BinaryOp(utils::array_view<StackFrame> reduction);
 
-    Node *left();
-    Node *right();
+    Node* left();
+    Node* right();
 
     enum Operation {
         // Arythmetic

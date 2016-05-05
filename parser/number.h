@@ -22,10 +22,9 @@
 
 namespace meta {
 
-class Number: public Visitable<Expression, Number>, public Typed
-{
+class Number: public Visitable<Expression, Number>, public Typed {
 public:
-    Number(const StackFrame *start, size_t size);
+    Number(utils::array_view<StackFrame> reduction);
 
     int value() const {return mValue;}
 

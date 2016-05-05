@@ -23,10 +23,11 @@
 
 namespace meta {
 
-Var::Var(const StackFrame *start, size_t size): Visitable<Expression, Var>(start, size)
+Var::Var(utils::array_view<StackFrame> reduction):
+    Visitable<Expression, Var>(reduction)
 {
-    PRECONDITION(size == 1);
-    mName = start[0].tokens;
+    PRECONDITION(reduction.size() == 1);
+    mName = reduction[0].tokens;
 }
 
 } // namespace meta

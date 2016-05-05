@@ -25,7 +25,7 @@ namespace meta {
 class Literal: public Visitable<Expression, Literal>, public Typed
 {
 public:
-    Literal(const StackFrame *reduction, size_t size);
+    Literal(utils::array_view<StackFrame> reduction);
 
     enum Value {
         // boolean

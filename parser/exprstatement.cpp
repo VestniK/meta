@@ -22,15 +22,15 @@
 
 namespace meta {
 
-ExprStatement::ExprStatement(const StackFrame *reduction, size_t size): Visitable<Node, ExprStatement>(reduction, size)
+ExprStatement::ExprStatement(utils::array_view<StackFrame> reduction):
+    Visitable<Node, ExprStatement>(reduction)
 {
-    PRECONDITION(size == 2);
+    PRECONDITION(reduction.size() == 2);
     PRECONDITION(reduction[0].nodes.size() == 1);
     PRECONDITION(reduction[1].nodes.empty());
 }
 
-Node *ExprStatement::expression()
-{
+Node* ExprStatement::expression() {
     PRECONDITION(children.size() == 1);
     return children[0];
 }

@@ -26,10 +26,11 @@
 
 namespace meta {
 
-Number::Number(const StackFrame* start, size_t size): Visitable<Expression, Number>(start, size)
+Number::Number(utils::array_view<StackFrame> reduction):
+    Visitable<Expression, Number>(reduction)
 {
-    PRECONDITION(size == 1);
-    mValue = *utils::number<int>(start[0].tokens);
+    PRECONDITION(reduction.size() == 1);
+    mValue = *utils::number<int>(reduction[0].tokens);
 }
 
 }

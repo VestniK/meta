@@ -25,10 +25,10 @@ namespace meta {
 class CodeBlock: public Visitable<Node, CodeBlock>
 {
 public:
-    CodeBlock(const StackFrame *start, size_t size);
+    CodeBlock(utils::array_view<StackFrame> reduction);
 
-    void add(Node *statement);
-    const std::vector<Node*> &statements() const;
+    void add(Node* statement);
+    const std::vector<Node*>& statements() const;
 };
 
 } // namespace meta

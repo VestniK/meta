@@ -24,20 +24,19 @@
 
 namespace meta {
 
-class Call: public Visitable<Expression, Call>
-{
+class Call: public Visitable<Expression, Call> {
 public:
-    Call(const StackFrame *reduction, size_t size);
+    Call(utils::array_view<StackFrame> reduction);
 
     const utils::string_view &functionName() const {return mFunctionName;}
     Function *function() const {return mFunction;}
     void setFunction(Function *func);
 
-    const std::vector<Node*> &args() const;
+    const std::vector<Node*>& args() const {return children;}
 
 private:
     utils::string_view mFunctionName;
-    Function *mFunction;
+    Function* mFunction;
 };
 
 } // namespace meta

@@ -25,19 +25,18 @@
 
 namespace meta {
 
-class VarDecl: public Visitable<Node, VarDecl>, public Typed
-{
+class VarDecl: public Visitable<Node, VarDecl>, public Typed {
 public:
-    VarDecl(const StackFrame* start, size_t size);
+    VarDecl(utils::array_view<StackFrame> reduction);
 
     enum Flags
     {
         argument = (1<<0)
     };
 
-    const utils::string_view &name() const {return mName;}
+    const utils::string_view& name() const {return mName;}
 
-    const utils::string_view &typeName() const {return mTypeName;}
+    const utils::string_view& typeName() const {return mTypeName;}
 
     bool inited() const;
     Node *initExpr();

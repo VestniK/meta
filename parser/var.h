@@ -24,18 +24,17 @@
 
 namespace meta {
 
-class Var: public Visitable<Expression, Var>
-{
+class Var: public Visitable<Expression, Var> {
 public:
-    Var(const StackFrame *start, size_t size);
+    Var(utils::array_view<StackFrame> reduction);
 
-    const utils::string_view &name() const {return mName;}
-    VarDecl *declaration() {return mDeclaration;}
-    void setDeclaration(VarDecl *decl) {mDeclaration = decl;}
+    const utils::string_view& name() const {return mName;}
+    VarDecl* declaration() {return mDeclaration;}
+    void setDeclaration(VarDecl* decl) {mDeclaration = decl;}
 
 private:
     utils::string_view mName;
-    VarDecl *mDeclaration;
+    VarDecl* mDeclaration;
 };
 
 }

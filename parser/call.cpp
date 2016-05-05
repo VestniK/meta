@@ -17,7 +17,7 @@
  *
  */
 
-#include <cassert>
+#include "utils/contract.h"
 
 #include "parser/function.h"
 #include "parser/call.h"
@@ -25,16 +25,15 @@
 
 namespace meta {
 
-Call::Call(const StackFrame *reduction, size_t size):
-    Visitable<Expression, Call>(reduction ,size),
+Call::Call(utils::array_view<StackFrame> reduction):
+    Visitable<Expression, Call>(reduction),
     mFunction(nullptr)
 {
-    assert(size == 4);
+    PRECONDITION(reduction.size() == 4);
     mFunctionName = reduction[0].tokens;
 }
 
-void Call::setFunction(Function *func)
-{
+void Call::setFunction(Function* func) {
     mFunction = func;
     // use default args if needed and possible
     auto declaredArgs = func->args();
@@ -44,11 +43,6 @@ void Call::setFunction(Function *func)
             break;
         children.push_back(defaultVal);
     }
-}
-
-const std::vector<Node*> &Call::args() const
-{
-    return children;
 }
 
 } // namespace meta

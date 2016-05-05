@@ -30,7 +30,7 @@ namespace meta {
 class Function: public Visitable<Declaration, Function>, public Typed
 {
 public:
-    Function(const StackFrame *start, size_t size);
+    Function(utils::array_view<StackFrame> reduction);
 
     enum Attribute {
         invalid = 0,

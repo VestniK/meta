@@ -26,19 +26,18 @@ namespace meta {
 
 class Declaration;
 
-class Annotation: public Visitable<Node, Annotation>
-{
+class Annotation: public Visitable<Node, Annotation> {
 public:
-    Annotation(const StackFrame *reduction, size_t size);
+    Annotation(utils::array_view<StackFrame> reduction);
 
     const utils::string_view& name() const {return mName;}
 
-    void setTarget(Declaration *val) {mTarget = val;}
-    Declaration *target() {return mTarget;}
+    void setTarget(Declaration* val) {mTarget = val;}
+    Declaration* target() {return mTarget;}
 
 private:
     utils::string_view mName;
-    Declaration *mTarget;
+    Declaration* mTarget;
 };
 
 } // namespace meta

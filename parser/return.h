@@ -22,10 +22,9 @@
 
 namespace meta {
 
-class Return: public Visitable<Node, Return>
-{
+class Return: public Visitable<Node, Return> {
 public:
-    Return(const StackFrame *reduction, size_t size);
+    Return(utils::array_view<StackFrame> reduction);
 };
 
 }

@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2016  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,26 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 #pragma once
 
-#include "utils/types.h"
-
-#include "parser/expression.h"
+#include <cassert>
+#include <cstddef>
 
 namespace meta {
+namespace utils {
 
-class Assigment: public Visitable<Expression, Assigment> {
+template<typename T>
+class array_view {
 public:
-    Assigment(utils::array_view<StackFrame> reduction);
+    array_view() = default;
+    array_view(const T* data, size_t size): mData(data), mSize(size) {}
 
-    const utils::string_view &varName() const {return mVarName;}
-    VarDecl* declaration() {return mDeclaration;}
-    void setDeclaration(VarDecl* decl) {mDeclaration = decl;}
-    Node* value();
+    const T* data() const {return mData;}
+    size_t size() const {return mSize;}
+
+    const T& operator[] (size_t pos) const {
+        assert(pos < mSize);
+        return mData[pos];
+    }
+
+    const T* begin() const {return mData;}
+    const T* end() const {return mData + mSize;}
 
 private:
-    utils::string_view mVarName;
-    VarDecl* mDeclaration;
+    const T* mData = nullptr;
+    size_t mSize = 0;
 };
 
-}
+} // namespace utils
+} // namespace meta

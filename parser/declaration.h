@@ -32,7 +32,7 @@ public:
     virtual const AttributesMap &attributes() const = 0;
 
 protected:
-    Declaration(const StackFrame *reduction, size_t size): Node(reduction, size) {}
+    Declaration(utils::array_view<StackFrame> reduction): Node(reduction) {}
 };
 
 } // namespace meta
