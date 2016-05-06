@@ -44,10 +44,11 @@ enum class Include {
 };
 
 class CppWriter {
+    constexpr static char endl = '\n';
 public:
     CppWriter(std::ostream& out, OutType type): mOut(&out) {
         if (type == OutType::header)
-            out << "#pragma once" << std::endl;
+            out << "#pragma once" << endl;
     }
     CppWriter(const CppWriter&) = delete;
     CppWriter& operator= (const CppWriter&) = delete;
@@ -56,25 +57,25 @@ public:
 
     ~CppWriter() {
         for (; !mPackage.empty(); mPackage = parent(mPackage))
-            (*mOut) << '}' << std::endl;
+            (*mOut) << '}' << endl;
     }
 
     void include(const utils::fs::path& path, Include type = Include::local) {
         switch (type) {
-        case Include::local: (*mOut) << "#include \"" << path.string() << '"' << std::endl; break;
-        case Include::global: (*mOut) << "#include <" << path.string() << '>' << std::endl; break;
+        case Include::local: (*mOut) << "#include \"" << path.string() << '"' << endl; break;
+        case Include::global: (*mOut) << "#include <" << path.string() << '>' << endl; break;
         }
     }
 
     void setPackage(const utils::string_view& pkg) {
         for (; !mPackage.empty() && !isSubpackage(pkg, mPackage); mPackage = parent(mPackage))
-            (*mOut) << '}' << std::endl;
+            (*mOut) << '}' << endl;
 
         for (auto relativePkg = stripParent(pkg, mPackage); !relativePkg.empty(); ) {
             utils::string_view head;
             std::tie(head, relativePkg) = split(relativePkg, '.');
             assert(!head.empty());
-            (*mOut) << "namespace " << head << " {" << std::endl;
+            (*mOut) << "namespace " << head << " {" << endl;
         }
         mPackage = pkg;
     }
@@ -83,14 +84,14 @@ public:
         PRECONDITION(func->package() == mPackage);
         (*mOut) << func->type()->name() << " " << func->name() << "(";
         bool first = true;
-	for (auto* arg: func->args()) {
+        for (auto* arg: func->args()) {
             if (!first)
                 (*mOut) << ",";
             else
                 first = false;
             (*mOut) << arg->type()->name() << " " << arg->name();
         }
-        (*mOut) << ");" << std::endl;
+        (*mOut) << ");" << endl;
     }
 
 private:
