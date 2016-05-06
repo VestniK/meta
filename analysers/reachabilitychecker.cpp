@@ -61,7 +61,6 @@ void ReachabilityChecker::leave(Function *node)
         return;
     if (node->type()->typeId() != typesystem::Type::Void)
         throw SemanticError(node, "Non-void function ends without return");
-    node->body()->add(new Return({})); /// @todo not needed any more since StatementBuilder doing the job
 }
 
 
