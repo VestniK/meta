@@ -29,10 +29,36 @@
 namespace meta {
 namespace utils {
 
+enum class IO {in, out};
+
+namespace detail {
+template<IO dir>
+struct FStreamChooser;
+
+template<>
+struct FStreamChooser<IO::in> {
+    using type = std::ifstream;
+};
+
+template<>
+struct FStreamChooser<IO::out> {
+    using type = std::ofstream;
+};
+}
+
+template<IO dir>
+using FStream = typename detail::FStreamChooser<dir>::type;
+
+template<IO dir>
+FStream<dir> open(const fs::path& path, std::ios_base::openmode mode) {
+    FStream<dir> res(path, mode);
+    if (!res)
+        throw std::system_error(errno, std::system_category(), path.string());
+    return res;
+}
+
 std::string readAll(const fs::path& path) {
-    std::ifstream in(path, std::ifstream::in | std::ifstream::binary);
-    if (!in)
-        throw std::system_error(errno, std::system_category(), "Failed to open file: " + path.string());
+    auto in = open<IO::in>(path, std::ifstream::in | std::ifstream::binary);
     in.unsetf(std::ifstream::skipws);
     return {std::istream_iterator<char>(in), std::istream_iterator<char>()};
 }

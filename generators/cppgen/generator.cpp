@@ -21,6 +21,7 @@
 #include <fstream>
 
 #include "utils/contract.h"
+#include "utils/io.h"
 
 #include "typesystem/type.h"
 
@@ -40,12 +41,8 @@ void generate(
     const utils::fs::path& outputHeader,
     const utils::fs::path& outputCpp
 ) {
-    std::ofstream headerStream(outputHeader, std::fstream::trunc | std::fstream::binary);
-    if (!headerStream)
-        throw std::system_error(errno, std::system_category(), "Failed to open " + outputHeader.string());
-    std::ofstream cppStream(outputCpp, std::fstream::trunc | std::fstream::binary);
-    if (!cppStream)
-        throw std::system_error(errno, std::system_category(), "Failed to open " + outputCpp.string());
+    auto headerStream = utils::open<utils::IO::out>(outputHeader, std::fstream::trunc | std::fstream::binary);
+    auto cppStream = utils::open<utils::IO::out>(outputCpp, std::fstream::trunc | std::fstream::binary);
 
     CppWriter cppWriter(cppStream, OutType::cpp);
     CppWriter headerWriter(headerStream, OutType::header);
