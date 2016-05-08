@@ -39,7 +39,6 @@
 #include "analysers/typechecker.h"
 
 #include "generators/llvmgen/generator.h"
-#include "generators/cppgen/generator.h"
 
 using namespace meta;
 
@@ -51,11 +50,8 @@ enum class ErrorVerbosity {
     parserStack
 };
 
-enum class Generator {llvm, cpp};
-
 struct Options {
     ErrorVerbosity verbosity = ErrorVerbosity::expectedTerms;
-    Generator generator = Generator::llvm;
     utils::fs::path output;
     utils::fs::path outputHeader;
     std::vector<utils::fs::path> sources;
@@ -81,18 +77,6 @@ std::istream& operator>> (std::istream& in, ErrorVerbosity& verbosity) {
     return in;
 }
 
-std::istream& operator>> (std::istream& in, Generator& generator) {
-    std::string str;
-    in >> str;
-    if (str == "llvm")
-        generator = Generator::llvm;
-    else if (str == "cpp")
-        generator = Generator::cpp;
-    else
-        throw po::invalid_option_value(str);
-    return in;
-}
-
 namespace meta {
 bool main(const Options &opts);
 }
@@ -106,7 +90,6 @@ int main(int argc, char **argv) try {
         ("output,o", po::value<utils::fs::path>(&opts.output), "Specify output file path")
         ("output-header,H", po::value<utils::fs::path>(&opts.outputHeader), "Specify output header file path")
         ("verbosity", po::value<ErrorVerbosity>(&opts.verbosity), "Error description verbosity: silent, brief, lineMarked, expectedTerms(default), parserStack")
-        ("generator,G", po::value<Generator>(&opts.generator), "Output generator: llvm(default), cpp")
         ("src", po::value<std::vector<utils::fs::path>>(&opts.sources), "Sources to compile")
     ;
     po::positional_options_description pos;
@@ -121,7 +104,7 @@ int main(int argc, char **argv) try {
             std::cout << desc << std::endl;
             return EXIT_SUCCESS;
         } else if (vm.count("version") != 0) {
-            std::cout << "0.0.0" << std::endl; // TODO: extract version from git tags
+            std::cout << "0.0.0" << std::endl; /// TODO: extract version from git tags
             return EXIT_SUCCESS;
         }
     } catch(std::exception &err) {
@@ -174,10 +157,7 @@ bool main(const Options &opts) try {
     analysers::checkReachability(ast);
     analysers::processMeta(ast);
     // generate
-    switch (opts.generator) {
-        case Generator::llvm: generators::llvmgen::createLlvmGenerator()->generate(ast, opts.output); break;
-        case Generator::cpp: generators::cppgen::generate(act.dictionary(), opts.outputHeader, opts.output); break;
-    }
+    generators::llvmgen::createLlvmGenerator()->generate(ast, opts.output);
 
     return true;
 } catch(const SyntaxError &err) {
