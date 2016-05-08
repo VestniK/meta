@@ -16,35 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#pragma once
 
-#include <algorithm>
 #include <string>
 
-#include "parser/function.h"
-
-#include "generators/abi/mangling.h"
+#include "generators/llvmgen/privateheadercheck.h"
 
 namespace meta {
-namespace generators {
-namespace abi {
 
-std::string mangledName(Function *func)
-{
-    if (func->is(Function::entrypoint))
-        return "main";
-    if (func->mangledName() != std::experimental::nullopt)
-        return static_cast<std::string>(*func->mangledName());
-    // Perform mangling based on regular rules
-    std::string res;
-    res.reserve(func->package().size() + func->name().size() + 1);
-    std::transform(
-        func->package().begin(), func->package().end(), std::back_inserter(res),
-        [](char ch) {return ch == '.' ? '_' : ch;}
-    );
-    res.push_back('_');
-    std::copy(func->name().begin(), func->name().end(), std::back_inserter(res));
-    return res;
-}
+class Function;
+
+namespace generators {
+namespace llvmgen {
+
+std::string mangledName(Function* func);
 
 } // namespace abi
 } // namespace generators

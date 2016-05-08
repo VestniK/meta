@@ -36,7 +36,7 @@
 
 #include "generators/llvmgen/expressionbuilder.h"
 #include "generators/llvmgen/modulebuilder.h"
-#include "generators/abi/mangling.h"
+#include "generators/llvmgen/mangling.h"
 
 namespace meta {
 namespace generators {
@@ -45,7 +45,7 @@ namespace llvmgen {
 bool ModuleBuilder::visit(Function *node)
 {
     mCtx.varMap.clear();
-    llvm::Function *func = mCtx.env.module->getFunction(generators::abi::mangledName(node));
+    llvm::Function *func = mCtx.env.module->getFunction(mangledName(node));
     if (!func)
         func = mCtx.env.addFunction(node);
     if (node->visibility() == Visibility::Extern)

@@ -12,10 +12,11 @@ set(SRC
   environment.cpp
   expressionbuilder.cpp
   generator.cpp
+  mangling.cpp
   modulebuilder.cpp
 )
 
 add_library(llvmgenerator STATIC ${SRC})
-target_link_libraries(llvmgenerator analysers ${LLVM_DEPS} ${LLVM_REQUIRED_LIBS} abi)
+target_link_libraries(llvmgenerator analysers ${LLVM_DEPS} ${LLVM_REQUIRED_LIBS})
 
 add_subdirectory(tests)

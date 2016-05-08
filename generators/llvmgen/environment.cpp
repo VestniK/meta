@@ -27,7 +27,7 @@
 
 #include "typesystem/type.h"
 
-#include "generators/abi/mangling.h"
+#include "generators/llvmgen/mangling.h"
 #include "generators/llvmgen/environment.h"
 
 namespace meta {
@@ -66,7 +66,7 @@ llvm::Function *Environment::addFunction(Function *func)
         llvm::GlobalValue::ExternalLinkage :
         llvm::GlobalValue::PrivateLinkage
     ;
-    llvm::Function *prototype = llvm::Function::Create(funcType, linkType, abi::mangledName(func), module.get());
+    llvm::Function *prototype = llvm::Function::Create(funcType, linkType, mangledName(func), module.get());
     llvm::Function::arg_iterator it = prototype->arg_begin();
     for (const auto arg : args) {
         it->setName(llvm::StringRef(arg->name().data(), arg->name().size()));

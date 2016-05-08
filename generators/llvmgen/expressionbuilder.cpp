@@ -21,9 +21,9 @@
 
 #include "utils/contract.h"
 
-#include "generators/abi/mangling.h"
 #include "generators/llvmgen/environment.h"
 #include "generators/llvmgen/expressionbuilder.h"
+#include "generators/llvmgen/mangling.h"
 
 namespace meta {
 namespace generators {
@@ -31,7 +31,7 @@ namespace llvmgen {
 
 llvm::Value *ExpressionBuilder::operator() (Call *node, Context &ctx)
 {
-    llvm::Function *func = ctx.env.module->getFunction(generators::abi::mangledName(node->function()));
+    llvm::Function *func = ctx.env.module->getFunction(mangledName(node->function()));
     if (!func) {
         assert(node->function() != nullptr);
         func = ctx.env.addFunction(node->function());
