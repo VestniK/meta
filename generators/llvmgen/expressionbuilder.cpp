@@ -71,9 +71,10 @@ llvm::Value *ExpressionBuilder::operator() (StrLiteral *node, Context &ctx)
 
 llvm::Value *ExpressionBuilder::operator() (Var *node, Context &ctx)
 {
-    assert(node->declaration());
+    PRECONDITION(node->declaration());
+    // Use before initialization must be rejected by analysers before generation
+    PRECONDITION(ctx.varMap.count(node->declaration()) == 1);
     auto it = ctx.varMap.find(node->declaration());
-    assert(it != ctx.varMap.end()); // Use befor initialization should be checked by analizers
 
     return node->declaration()->is(VarDecl::argument) ? it->second : ctx.builder.CreateLoad(it->second);
 }

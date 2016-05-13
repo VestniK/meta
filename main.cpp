@@ -177,6 +177,7 @@ bool main(const Options &opts) try {
         std::cerr << "Expected one of the following terms:" << std::endl << err.expected();
     if (opts.verbosity > ErrorVerbosity::expectedTerms)
         std::cerr << "Parser stack dump:" << std::endl << err.parserStack();
+
     return false;
 } catch(const analysers::SemanticError &err) {
     if (opts.verbosity > ErrorVerbosity::silent)

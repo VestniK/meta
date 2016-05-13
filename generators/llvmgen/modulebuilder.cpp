@@ -82,8 +82,9 @@ inline llvm::AllocaInst *addLocalVar(llvm::Function *func, llvm::Type *type, con
 ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx)
 {
     PRECONDITION(!node->is(VarDecl::argument));
+    // types integrity should be checked by analyzers
+    PRECONDITION(ctx.env.getType(node->type()) != nullptr);
     auto type = ctx.env.getType(node->type());
-    assert(type != nullptr); // types integrity should be checked by analyzers
     // TODO: good point to check for multiple definitions
     auto allocaVal = ctx.varMap[node] = addLocalVar(ctx.builder.GetInsertBlock()->getParent(), type, node->name());
     if (!node->initExpr())
@@ -96,12 +97,12 @@ ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx)
 
 ExecStatus StatementBuilder::operator() (Return *node, Context &ctx)
 {
+    PRECONDITION(node->getChildren<Node>().empty() || node->getChildren<Node>().size() == 1);
     auto children = node->getChildren<Node>();
     if (children.empty()) {
         ctx.builder.CreateRetVoid();
         return ExecStatus::stop;
     }
-    assert(children.size() == 1);
     ExpressionBuilder evaluator;
     ctx.builder.CreateRet(dispatch(evaluator, children.front(), ctx));
     return ExecStatus::stop;

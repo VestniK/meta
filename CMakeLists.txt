@@ -22,4 +22,15 @@ add_subdirectory(generators)
 
 add_executable(meta main.cpp)
 target_link_libraries(meta parser analysers llvmgenerator ${Boost_LIBRARIES})
-install(TARGETS meta RUNTIME DESTINATION bin)
+install(TARGETS meta EXPORT meta
+  RUNTIME DESTINATION bin
+)
+
+install(EXPORT meta NAMESPACE meta:: DESTINATION lib/cmake/meta)
+file(WRITE ${CMAKE_BINARY_DIR}/meta-config.cmake
+  "include(\"\${CMAKE_CURRENT_LIST_DIR}/meta.cmake\")"
+)
+install(FILES ${CMAKE_BINARY_DIR}/meta-config.cmake
+  DESTINATION lib/cmake/meta
+)
+

@@ -38,7 +38,7 @@ Environment::Environment(const std::string& moduleName):
     context(llvm::getGlobalContext()),
     module(new llvm::Module(moduleName, context)),
     string(llvm::StructType::get(
-        llvm::Type::getInt32PtrTy(context), // refcount ptr
+        llvm::Type::getInt32PtrTy(context), // control block pointer used by meta-rt only
         llvm::Type::getInt8PtrTy(context), // content ptr
         llvm::Type::getInt32Ty(context), // size
     nullptr))
