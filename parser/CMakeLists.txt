@@ -20,6 +20,7 @@ set(SRC
   return.cpp
   sourcefile.cpp
   strliteral.cpp
+  struct.cpp
   var.cpp
   vardecl.cpp
   visibility.cpp

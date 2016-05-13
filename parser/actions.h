@@ -38,8 +38,9 @@ public:
         mCurrentPackage = reduction[1].tokens;
     }
     void changeVisibility(utils::array_view<StackFrame> reduction) override;
-    void onFunction(Function *node) override;
-    void onSourceFile(SourceFile *node) override;
+    void onFunction(Function* node) override;
+    void onSourceFile(SourceFile* node) override;
+    void onStruct(Struct* node) override;
 
     Dictionary& dictionary() {return mDictionary;}
 

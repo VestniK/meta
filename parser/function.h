@@ -37,7 +37,7 @@ public:
         entrypoint = (1<<0)
     };
 
-    virtual const Declaration::AttributesMap &attributes() const override {return attrMap;}
+    const Declaration::AttributesMap &attributes() const override {return attrMap;}
 
     const utils::string_view &name() const {return mName;}
     const utils::string_view &retType() const {return mRetType;}

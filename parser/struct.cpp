@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2016  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,23 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
+#include <algorithm>
 
-#include "parser/annotation.h"
-#include "parser/assigment.h"
-#include "parser/binaryop.h"
-#include "parser/call.h"
-#include "parser/codeblock.h"
-#include "parser/exprstatement.h"
-#include "parser/function.h"
-#include "parser/if.h"
-#include "parser/import.h"
-#include "parser/literal.h"
-#include "parser/number.h"
-#include "parser/prefixop.h"
-#include "parser/return.h"
-#include "parser/sourcefile.h"
-#include "parser/strliteral.h"
 #include "parser/struct.h"
-#include "parser/var.h"
-#include "parser/vardecl.h"
+
+namespace meta {
+
+Struct::Struct(utils::array_view<StackFrame> reduction):
+    Visitable<Declaration, Struct>(reduction)
+{
+    auto it = std::find_if(reduction.begin(), reduction.end(), [](const StackFrame& frame) {
+        return frame.symbol == Terminal::structKeyword;
+    });
+    assert(it != reduction.end());
+    ++it;
+    assert(it != reduction.end());
+    assert(it->symbol == Terminal::identifier);
+    mName = it->tokens;
+}
+
+const Declaration::AttributesMap Struct::attrMap = {};
+
+}

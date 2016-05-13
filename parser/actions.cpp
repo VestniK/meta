@@ -19,6 +19,7 @@
 #include "parser/actions.h"
 #include "parser/function.h"
 #include "parser/sourcefile.h"
+#include "parser/struct.h"
 
 namespace meta {
 
@@ -30,7 +31,7 @@ void Actions::changeVisibility(utils::array_view<StackFrame> reduction)
     mDefaultVisibility = fromToken(token);
 }
 
-void Actions::onFunction(Function *node)
+void Actions::onFunction(Function* node)
 {
     PRECONDITION(!mCurrentPackage.empty());
     node->setPackage(mCurrentPackage);
@@ -39,10 +40,17 @@ void Actions::onFunction(Function *node)
     mDictionary[mCurrentPackage].emplace(node->name(), node);
 }
 
-void Actions::onSourceFile(SourceFile *node)
-{
+void Actions::onSourceFile(SourceFile* node) {
     PRECONDITION(!mCurrentPackage.empty());
     node->setPackage(mCurrentPackage);
 }
+
+void Actions::onStruct(Struct* node) {
+    PRECONDITION(!mCurrentPackage.empty());
+    node->setPackage(mCurrentPackage);
+    if (node->visibility() == Visibility::Default)
+        node->setVisibility(mDefaultVisibility);
+}
+
 
 } // namespace meta
