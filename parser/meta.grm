@@ -66,8 +66,8 @@ Function -> [Visibility] Type <identifier> '(' [VarDecl]/','... ')' (CodeBlock|'
          -> Annotation... [Visibility] Type <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') *> Function
 CodeBlock -> [Visibility] '{' (Statement)... '}' +> CodeBlock
 
-Struct -> 'struct' <identifier> '{' [Declaration]... '}' *> Struct
-       -> Annotation... [Visibility] 'struct' <identifier> '{' [Declaration]... '}' *> Struct
+Struct -> [Visibility] 'struct' <identifier> '{' [VarDecl ';']... '}' *> Struct
+       -> Annotation... [Visibility] 'struct' <identifier> '{' [VarDecl ';']... '}' *> Struct
 
 VarDecl -> Type <identifier> ['=' Expr] +> VarDecl
 Type -> 'int'
