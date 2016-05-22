@@ -53,7 +53,7 @@ bool ModuleBuilder::visit(Function *node)
 
     llvm::Function::arg_iterator it = func->arg_begin();
     for (const auto arg : node->args()) {
-        mCtx.varMap[arg] = it;
+        mCtx.varMap[arg] = &(*it);
         assert(it != func->arg_end());
         ++it;
     }
