@@ -3,6 +3,7 @@ include(TestTools)
 AddGTest(ParserTests
   arythmetic.cpp
   lexer.cpp
+  parse_functions.cpp
   parser.cpp
   priority.cpp
 )
