@@ -48,6 +48,10 @@ TEST(StructParsing, simpleStruct) {
     auto structs = ast->getChildren<Struct>();
     ASSERT_EQ(structs.size(), 1u);
     EXPECT_EQ(structs[0]->name(), "Point");
+    auto members = structs[0]->getChildren<VarDecl>();
+    ASSERT_EQ(members.size(), 2u);
+    EXPECT_EQ(members[0]->name(), "x");
+    EXPECT_EQ(members[1]->name(), "y");
 }
 
 TEST(StructParsing, defaultValsOnMembers) {
@@ -68,4 +72,35 @@ TEST(StructParsing, defaultValsOnMembers) {
     auto structs = ast->getChildren<Struct>();
     ASSERT_EQ(structs.size(), 1u);
     EXPECT_EQ(structs[0]->name(), "Point");
+    auto members = structs[0]->getChildren<VarDecl>();
+    ASSERT_EQ(members.size(), 2u);
+    EXPECT_EQ(members[0]->name(), "x");
+    EXPECT_EQ(static_cast<utils::string_view>(members[0]->initExpr()->tokens()), "0");
+    EXPECT_EQ(members[1]->name(), "y");
+    EXPECT_EQ(static_cast<utils::string_view>(members[1]->initExpr()->tokens()), "0");
+}
+
+TEST(StructParsing, declareStructVar) {
+     const auto input = R"META(
+        package test;
+
+        struct Point {
+            int x = 0;
+            int y = 0;
+        }
+
+        void foo() {
+            Point pt;
+        }
+    )META"s;
+    Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input));
+    auto ast = parser.ast();
+    auto vars = ast->getChildren<VarDecl>(infinitDepth);
+    ASSERT_EQ(vars.size(), 3u);
+    EXPECT_EQ(vars[2]->name(), "pt");
+    EXPECT_EQ(vars[2]->typeName(), "Point");
 }
