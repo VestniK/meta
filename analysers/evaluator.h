@@ -104,8 +104,9 @@ public:
     virtual bool visit(Assigment *) override {mStack.push(std::vector<Value>()); return true;}
     virtual void leave(Assigment *node) override
     {
-        assert(mStack.top().size() == 1);
-        auto res = assign(node, mStack.top()[0]);
+        /// @todo switch to meta::dispatch and traverse tree properly.
+        PRECONDITION(mStack.top().size() == 2);
+        auto res = assign(node, mStack.top()[1]);
         mStack.pop();
         mStack.top().push_back(res);
     }

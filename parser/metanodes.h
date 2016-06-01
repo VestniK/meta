@@ -28,6 +28,7 @@
 #include "parser/if.h"
 #include "parser/import.h"
 #include "parser/literal.h"
+#include "parser/memberaccess.h"
 #include "parser/number.h"
 #include "parser/prefixop.h"
 #include "parser/return.h"

@@ -159,21 +159,16 @@ public:
         return true;
     }
 
-    virtual bool visit(Assigment *node) override
-    {
-        auto decl = mVars.find(node->varName());
-        if (decl == mVars.end())
-            throw SemanticError(node, "Reference to undefined variable '%s'", node->varName());
-        if (decl->second.decl->is(VarDecl::argument))
-            throw SemanticError(node, "Attempt to modify function argument '%s'", node->varName());
-        node->setDeclaration(decl->second.decl);
+    bool visit(Assigment *node) override {
+        auto decl = mVars.find(node->targetVarName());
         ++decl->second.modifyCount;
+        if (decl->second.decl->is(VarDecl::argument))
+            throw SemanticError(node, "Attempt to modify function argument '%s'", node->targetVarName());
         return true;
     }
 
 private:
-    struct VarSrc
-    {
+    struct VarSrc {
         VarSrc(VarDecl *decl = nullptr):
             decl(decl),
             modifyCount(decl && (decl->inited() || decl->is(VarDecl::argument)) ? 1 : 0),
@@ -185,18 +180,6 @@ private:
         unsigned accessCount;
     };
 
-    class FuncComparator
-    {
-    public:
-        bool operator() (Function *left, Function *right) const
-        {
-            if (left->package().compare(right->package()) < 0)
-                return true;
-            if (left->name().compare(right->name()) < 0)
-                return true;
-            return false;
-        }
-    };
 
     Dictionary& mGlobalDict;
     DeclarationsDict mCurrDecls;

@@ -87,6 +87,7 @@ Statement -> CodeBlock
 If -> 'if' '(' Expr ')' Statement ['else' Statement] +> If
 
 Expr -> UnaryExpr
+     -> MemberAccess
      -> Expr '+' Expr +> BinaryOp
      -> Expr '-' Expr +> BinaryOp
      -> Expr '*' Expr +> BinaryOp
@@ -99,7 +100,10 @@ Expr -> UnaryExpr
      -> Expr '<=' Expr +> BinaryOp
      -> Expr '&&' Expr +> BinaryOp
      -> Expr '||' Expr +> BinaryOp
-     -> Var '=' Expr +> Assigment
+     -> (Var | MemberAccess) '=' Expr +> Assigment
+
+MemberAccess -> Expr '.' <identifier> +> MemberAccess
+             -> MemberAccess '.' <identifier> +> MemberAccess
 
 UnaryExpr -> '+' UnaryExpr +> PrefixOp
           -> '-' UnaryExpr +> PrefixOp
@@ -107,11 +111,11 @@ UnaryExpr -> '+' UnaryExpr +> PrefixOp
           -> <num> +> Number
           -> <str> +> StrLiteral
           -> ValueLiteral
-          -> Var  +> Var
+          -> Var
           -> '(' Expr ')'
           ->  <identifier> '(' [Expr]/','... ')' +> Call
 
-Var -> <identifier>
+Var -> <identifier> +> Var
 
 ValueLiteral -> 'true' +> Literal
              -> 'false' +> Literal

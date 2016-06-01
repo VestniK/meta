@@ -19,6 +19,7 @@
 #include "utils/contract.h"
 
 #include "parser/assigment.h"
+#include "parser/metanodes.h"
 
 namespace meta {
 
@@ -26,13 +27,44 @@ Assigment::Assigment(utils::array_view<StackFrame> reduction):
     Visitable<Expression, Assigment>(reduction)
 {
     PRECONDITION(reduction.size() == 3);
-    PRECONDITION(reduction[0].nodes.empty() && reduction[1].nodes.empty() && reduction[2].nodes.size() == 1);
-    mVarName = reduction[0].tokens;
+    PRECONDITION(reduction[0].nodes.size() == 1);
+    PRECONDITION(reduction[1].nodes.empty());
+    PRECONDITION(reduction[2].nodes.size() == 1);
 }
 
 Node* Assigment::value() {
-    PRECONDITION(children.size() == 1);
-    return children.front();
+    PRECONDITION(children.size() == 2);
+    return children.back();
+}
+
+VarDecl* Assigment::targetDeclaration() {
+    PRECONDITION(children.size() == 2);
+
+    struct {
+
+    VarDecl* operator() (Node*) {assert(false); return nullptr;} // TODO: throw UnexpectedNode here!!!
+
+    VarDecl* operator() (Var* var) {return var->declaration();}
+    VarDecl* operator() (MemberAccess* member) {return member->memberDecl();}
+
+    } getVarDecl;
+
+    return dispatch(getVarDecl, children.front());
+}
+
+utils::string_view Assigment::targetVarName() {
+    PRECONDITION(children.size() == 2);
+
+    struct {
+
+    utils::string_view operator() (Node*) {assert(false); return {};} // TODO: throw UnexpectedNode here!!!
+
+    utils::string_view operator() (Var* var) {return var->name();}
+    utils::string_view operator() (MemberAccess* member) {return member->memberName();}
+
+    } getVarName;
+
+    return dispatch(getVarName, children.front());
 }
 
 }

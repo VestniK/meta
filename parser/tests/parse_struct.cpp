@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2016  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 
 #include "parser/actions.h"
 #include "parser/annotation.h"
+#include "parser/assigment.h"
 #include "parser/metaparser.h"
 #include "parser/struct.h"
 #include "parser/vardecl.h"
@@ -103,4 +104,31 @@ TEST(StructParsing, declareStructVar) {
     ASSERT_EQ(vars.size(), 3u);
     EXPECT_EQ(vars[2]->name(), "pt");
     EXPECT_EQ(vars[2]->typeName(), "Point");
+}
+
+TEST(StructParsing, memberAccess) {
+     const auto input = R"META(
+        package test;
+
+        struct Point {
+            int x = 0;
+            int y = 0;
+        }
+
+        void foo() {
+            Point pt;
+            pt.y = 5;
+            pt.x = pt.y + 7;
+        }
+    )META"s;
+    Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse(input));
+    auto ast = parser.ast();
+    auto assigments = ast->getChildren<Assigment>(infinitDepth);
+    ASSERT_EQ(assigments.size(), 2u);
+//    EXPECT_EQ(assigments[2]->, "pt");
+//    EXPECT_EQ(assigments[3]->typeName(), "Point");
 }

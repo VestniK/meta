@@ -105,7 +105,7 @@ TEST(MetaParser, varTest) {
 
     auto assigments = blocks.front()->getChildren<Assigment>(-1);
     ASSERT_EQ(assigments.size(), 1u);
-    ASSERT_EQ(assigments[0]->varName(), "z");
+    ASSERT_EQ(assigments[0]->targetVarName(), "z");
 }
 
 TEST(MetaParser, assignAsExpr) {
@@ -139,8 +139,8 @@ TEST(MetaParser, assignAsExpr) {
 
     auto assigments = blocks.front()->getChildren<Assigment>(-1);
     ASSERT_EQ(assigments.size(), 2u);
-    ASSERT_EQ(assigments[0]->varName(), "z");
-    ASSERT_EQ(assigments[1]->varName(), "y");
+    ASSERT_EQ(assigments[0]->targetVarName(), "z");
+    ASSERT_EQ(assigments[1]->targetVarName(), "y");
 }
 
 TEST(MetaParser, ifStatement) {

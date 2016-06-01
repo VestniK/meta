@@ -140,12 +140,12 @@ public:
 
     const typesystem::Type* assign(Assigment* node, const typesystem::Type* val) override
     {
-        if (node->declaration()->type() != val) // TODO: implicit type conversations here
+        if (node->targetDeclaration()->type() != val) // TODO: implicit type conversations here
             throw SemanticError(
                 node, "Attempt to assign value of type '%s' to a the variable '%s' of type '%s'",
-                val->name(), node->varName(), node->declaration()->type()->name()
+                val->name(), node->targetVarName(), node->targetDeclaration()->type()->name()
             );
-        return node->declaration()->type();
+        return node->targetDeclaration()->type();
     }
 
     const typesystem::Type* prefixOp(PrefixOp* node, const typesystem::Type* val) override

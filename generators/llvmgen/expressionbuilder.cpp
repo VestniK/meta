@@ -81,10 +81,10 @@ llvm::Value *ExpressionBuilder::operator() (Var *node, Context &ctx)
 
 llvm::Value *ExpressionBuilder::operator() (Assigment *node, Context &ctx)
 {
-    PRECONDITION(node->declaration());
-    PRECONDITION(!node->declaration()->is(VarDecl::argument));
-    PRECONDITION(ctx.varMap.count(node->declaration()) == 1);
-    auto it = ctx.varMap.find(node->declaration());
+    PRECONDITION(node->targetDeclaration());
+    PRECONDITION(!node->targetDeclaration()->is(VarDecl::argument));
+    PRECONDITION(ctx.varMap.count(node->targetDeclaration()) == 1);
+    auto it = ctx.varMap.find(node->targetDeclaration());
     llvm::Value *val = dispatch(*this, node->value(), ctx);
     ctx.builder.CreateStore(val, it->second);
     return val;

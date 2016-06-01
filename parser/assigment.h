@@ -28,14 +28,9 @@ class Assigment: public Visitable<Expression, Assigment> {
 public:
     Assigment(utils::array_view<StackFrame> reduction);
 
-    const utils::string_view &varName() const {return mVarName;}
-    VarDecl* declaration() {return mDeclaration;}
-    void setDeclaration(VarDecl* decl) {mDeclaration = decl;}
     Node* value();
-
-private:
-    utils::string_view mVarName;
-    VarDecl* mDeclaration;
+    VarDecl* targetDeclaration();
+    utils::string_view targetVarName();
 };
 
 }
