@@ -19,8 +19,7 @@
 
 #include "analysers/nodeexception.h"
 
-namespace meta {
-namespace analysers {
+namespace meta::analysers {
 
 NodeException::NodeException(Node *node, const std::string &msg):
     utils::Exception(), mMsg(msg), mTokens(node->tokens()), mSrc(node->sourcePath())
@@ -37,6 +36,5 @@ const char *NodeException::what() const noexcept
     return mMsg.c_str();
 }
 
-} // namespace analysers
-} // namespace meta
+} // namespace meta::analysers
 
