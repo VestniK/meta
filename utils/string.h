@@ -36,7 +36,7 @@ optional<IntType> number(const string_view& str, uint8_t base = 10) {
     IntType res = 0;
     for (char ch: str) {
         res = res*base;
-        if (ch >= '0' && ch <= '9')
+        if (ch >= '0' && ch <= '9' && ch - '0' < base)
             res += ch - '0';
         else if (ch >= 'a' && ch - 'a' + 10 < base)
             res += ch - 'a' + 10;
