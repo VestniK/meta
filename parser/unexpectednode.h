@@ -17,33 +17,23 @@
  */
 #pragma once
 
-#include "utils/exception.h"
+#include "utils/string.h"
 
-#include "parser/metalexer.h"
+#include "parser/nodeexception.h"
 
 namespace meta {
-class Node;
-namespace analysers {
 
-class NodeException: public utils::Exception
-{
+class UnexpectedNode: public NodeException {
 public:
-    ~NodeException();
+    UnexpectedNode(Node* node, const char* msg): NodeException(node) {
+        setMsg(msg);
+    }
 
-    virtual const char *what() const noexcept override;
-    const TokenSequence &tokens() const {return mTokens;}
-    const std::string &sourcePath() const {return mSrc;}
-
-protected:
-    NodeException(Node *node, const std::string &msg = {});
-    void setMsg(const std::string &val) {mMsg = val;}
-
-private:
-    std::string mMsg;
-    std::string mErrContext;
-    TokenSequence mTokens;
-    std::string mSrc;
+    template<typename... A>
+    UnexpectedNode(Node* node, const char* fmt, A&& ...a): NodeException(node) {
+        setMsg(utils::format(boost::format(fmt), std::forward<A>(a)...).str());
+    }
+    ~UnexpectedNode() = default;
 };
 
-} // namespace analysers
 } // namespace meta

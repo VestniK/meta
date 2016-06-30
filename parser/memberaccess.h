@@ -21,6 +21,7 @@
 #include "utils/contract.h"
 
 #include "parser/expression.h"
+#include "parser/unexpectednode.h"
 
 namespace meta {
 
@@ -37,7 +38,8 @@ public:
         PRECONDITION(reduction[2].symbol == Terminal::identifier);
 
         mAggregate = dynamic_cast<Expression*>(reduction[0].nodes.front());
-        assert(mAggregate != nullptr);
+        if (!mAggregate)
+            throw UnexpectedNode(reduction[0].nodes.front(), "Expression expected");
         mMemberName = reduction[2].tokens;
     }
 

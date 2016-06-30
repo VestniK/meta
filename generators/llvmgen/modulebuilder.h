@@ -25,8 +25,7 @@
 
 #include "parser/metaparser.h"
 #include "parser/metanodes.h"
-
-#include "analysers/unexpectednode.h"
+#include "parser/unexpectednode.h"
 
 #include "generators/llvmgen/environment.h"
 #include "generators/llvmgen/privateheadercheck.h"
@@ -44,7 +43,7 @@ enum class ExecStatus: bool
 struct StatementBuilder {
 
     ExecStatus operator() (Node *node, Context &) {
-        throw analysers::UnexpectedNode(node, "The node is not statement don't know how to compile it");
+        throw UnexpectedNode(node, "The node is not statement don't know how to compile it");
     }
 
     ExecStatus operator() (CodeBlock *node, Context &ctx);

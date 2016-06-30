@@ -1,6 +1,5 @@
 set(SRC
   metaprocessor.cpp
-  nodeexception.cpp
   reachabilitychecker.cpp
   resolver.cpp
   typechecker.cpp

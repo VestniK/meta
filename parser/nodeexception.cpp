@@ -17,9 +17,9 @@
  */
 #include "parser/metaparser.h"
 
-#include "analysers/nodeexception.h"
+#include "parser/nodeexception.h"
 
-namespace meta::analysers {
+namespace meta {
 
 NodeException::NodeException(Node *node, const std::string &msg):
     utils::Exception(), mMsg(msg), mTokens(node->tokens()), mSrc(node->sourcePath())
@@ -27,14 +27,10 @@ NodeException::NodeException(Node *node, const std::string &msg):
     mTokens.detach(mErrContext);
 }
 
-NodeException::~NodeException()
-{
-}
+NodeException::~NodeException() = default;
 
-const char *NodeException::what() const noexcept
-{
+const char* NodeException::what() const noexcept {
     return mMsg.c_str();
 }
 
 } // namespace meta::analysers
-

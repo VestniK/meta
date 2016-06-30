@@ -16,6 +16,7 @@ set(SRC
   import.cpp
   literal.cpp
   number.cpp
+  nodeexception.cpp
   prefixop.cpp
   return.cpp
   sourcefile.cpp
@@ -28,5 +29,6 @@ set(SRC
 
 lrstar_grammar(GRM_SRC meta CUSTOM_SKEL ${CMAKE_CURRENT_SOURCE_DIR}/skels)
 add_library(parser STATIC ${GRM_SRC} ${SRC})
+target_link_libraries(parser utils)
 
 add_subdirectory(tests)

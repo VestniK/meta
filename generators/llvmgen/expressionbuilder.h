@@ -22,8 +22,7 @@
 
 #include "parser/metanodes.h"
 #include "parser/metaparser.h"
-
-#include "analysers/unexpectednode.h"
+#include "parser/unexpectednode.h"
 
 namespace meta {
 namespace generators {
@@ -34,11 +33,11 @@ struct Context;
 
 struct ExpressionBuilder
 {
-    llvm::Value *operator() (Node *node, Context &) {
-        throw analysers::UnexpectedNode(node, "Can't evaluate llvm::Value for non expression node");
+    llvm::Value *operator() (Node*  node, Context &) {
+        throw UnexpectedNode(node, "Can't evaluate llvm::Value for non expression node");
     }
-    llvm::Value *operator() (Expression *node, Context &) {
-        throw analysers::UnexpectedNode(node, "Unknown expression type");
+    llvm::Value *operator() (Expression* node, Context &) {
+        throw UnexpectedNode(node, "Unknown expression type");
     }
 
     // Values

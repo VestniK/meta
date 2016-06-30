@@ -23,25 +23,19 @@
 
 #include "parser/metalexer.h"
 
-#include "analysers/nodeexception.h"
+#include "parser/nodeexception.h"
 
-namespace meta {
-namespace analysers {
+namespace meta::analysers {
 
-class SemanticError: public NodeException
-{
+class SemanticError: public NodeException {
 public:
-    SemanticError(Node* node, const char* msg): NodeException(node) {
-        setMsg(msg);
-    };
+    SemanticError(Node* node, const char* msg): NodeException(node, msg) {}
 
     template<typename... A>
-    SemanticError(Node* node, const char* fmt, A&& ...a): NodeException(node) {
-        setMsg(utils::format(boost::format(fmt), std::forward<A>(a)...).str());
-    };
+    SemanticError(Node* node, const char* fmt, A&& ...a):
+        NodeException(node, str((boost::format(fmt) % ... % std::forward<A>(a))))
+    {}
     ~SemanticError() = default;
 };
 
-} // namespace analysers
-} // namespace meta
-
+} // namespace meta::analysers

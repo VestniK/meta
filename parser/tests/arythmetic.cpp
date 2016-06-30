@@ -24,76 +24,79 @@
 
 #include <gtest/gtest.h>
 
-#include "parser/binaryop.h"
-#include "parser/number.h"
-#include "parser/prefixop.h"
-
-using namespace meta;
+#include "parser/metanodes.h"
+#include "parser/unexpectednode.h"
 
 using namespace std::literals;
 
-struct Operation
-{
+namespace meta::parser::tests {
+
+namespace {
+
+struct Operation {
     BinaryOp::Operation operation;
     int left, right;
 };
 
-class LoggingCalc: public Visitor
-{
+class LoggingCalc {
 public:
-    virtual void leave(Number *num)
-    {
-        mCalcStack.push_back(num->value());
-    }
+    const auto& calcSequence() const {return mCalcSequence;}
 
-    virtual void leave(BinaryOp *op)
-    {
-        assert(mCalcStack.size() >= 2);
-        mCalcSequence.push_back(Operation());
-        Operation &current = mCalcSequence.back();
-        current.operation = op->operation();
-        current.right = mCalcStack.back();
-        mCalcStack.pop_back();
-        current.left = mCalcStack.back();
-        switch (current.operation) {
-            case BinaryOp::add: mCalcStack.back() = current.left + current.right; break;
-            case BinaryOp::sub: mCalcStack.back() = current.left - current.right; break;
-            case BinaryOp::mul: mCalcStack.back() = current.left*current.right; break;
-            case BinaryOp::div: mCalcStack.back() = current.left/current.right; break;
-            default: assert(false);
+    int operator() (Node* node) {throw UnexpectedNode(node, "arythmetic expression required");}
+
+    int operator() (Number* num) {return num->value();}
+
+    int operator() (BinaryOp* op) {
+        const int lhs = dispatch(*this, op->left());
+        const int rhs = dispatch(*this, op->right());
+        mCalcSequence.push_back({op->operation(), lhs, rhs});
+        switch (op->operation()) {
+            case BinaryOp::add: return lhs + rhs;
+            case BinaryOp::sub: return lhs - rhs;
+            case BinaryOp::mul: return lhs*rhs;
+            case BinaryOp::div: return lhs/rhs;
+            default: break;
         }
+        throw UnexpectedNode(op, "arythmetic operation expected");
     }
 
-    virtual void leave(PrefixOp *op)
-    {
-        assert(mCalcStack.size() >= 1);
-        switch(op->operation()) {
-            case PrefixOp::negative: mCalcStack.back() = - mCalcStack.back(); break;
-            case PrefixOp::positive: mCalcStack.back() = + mCalcStack.back(); break;
-            default: assert(false);
+    int operator() (PrefixOp* op) {
+        const int operand = dispatch(*this, op->operand());
+        switch (op->operation()) {
+            case PrefixOp::negative: return -operand;
+            case PrefixOp::positive: return +operand;
+            default: break;
         }
-    }
-
-    const std::vector<Operation> &calcSequence() const {return mCalcSequence;}
-    int result() const
-    {
-        assert(mCalcStack.size() == 1);
-        return mCalcStack.back();
+        throw std::runtime_error("unexpected operation");
     }
 
 private:
-    std::vector<int> mCalcStack;
     std::vector<Operation> mCalcSequence;
 };
 
-TEST(Arythmetic, parenthesis)
-{
+template<typename Walkable>
+auto findExpressions(Walkable* walkable) {
+    std::vector<Expression*> res;
+    walk<Node, TopDown>(walkable, [&res](Node* node) {
+        auto* expr = dynamic_cast<Expression*>(node);
+        if (!expr)
+            return true; // continue tree traversal
+        res.push_back(expr);
+        return false; // Do not traverse children
+    });
+    return res;
+}
+
+}
+
+TEST(Arythmetic, parenthesis) {
     const auto input = "package test; int foo() {return 2*(11+5)/8;}"s;
     Parser parser;
     ASSERT_NO_THROW(parser.parse(input));
-    auto ast = parser.ast();
+    const auto expressions = findExpressions(parser.ast());
+    ASSERT_EQ(expressions.size(), 1u);
     LoggingCalc calc;
-    ast->walk(&calc);
+    const int calcRes = dispatch(calc, expressions[0]);
     ASSERT_EQ(calc.calcSequence().size(), 3u);
 
     ASSERT_EQ(calc.calcSequence()[0].operation, BinaryOp::add);
@@ -108,35 +111,31 @@ TEST(Arythmetic, parenthesis)
     ASSERT_EQ(calc.calcSequence()[2].left, 32);
     ASSERT_EQ(calc.calcSequence()[2].right, 8);
 
-    ASSERT_EQ(calc.result(), 4);
+    ASSERT_EQ(calcRes, 4);
 }
 
 namespace {
 
-struct TestData
-{
+struct TestData {
     const char *expression;
     int expectedResult;
 };
 
-class Arythmetic: public ::testing::TestWithParam<TestData>
-{
-public:
-};
+class Arythmetic: public ::testing::TestWithParam<TestData> {};
 
 }
 
-TEST_P(Arythmetic, calcTest)
-{
+TEST_P(Arythmetic, calcTest) {
     TestData data = GetParam();
     const std::string input = str(boost::format("package test; int foo() {return %s;}")%data.expression);
 
     Parser parser;
     ASSERT_NO_THROW(parser.parse(input));
-    auto ast = parser.ast();
+    const auto expressions = findExpressions(parser.ast());
+    ASSERT_EQ(expressions.size(), 1u);
     LoggingCalc calc;
-    ast->walk(&calc);
-    ASSERT_EQ(calc.result(), data.expectedResult);
+    const int calcRes = dispatch(calc, expressions[0]);
+    ASSERT_EQ(calcRes, data.expectedResult);
 }
 
 INSTANTIATE_TEST_CASE_P(PrefixOp, Arythmetic, ::testing::Values(
@@ -150,3 +149,5 @@ INSTANTIATE_TEST_CASE_P(PrefixOp, Arythmetic, ::testing::Values(
     TestData({"2*-3 + 4", -2}),
     TestData({"2*3 + -4", 2})
 ));
+
+} // namespace meta::parser::tests

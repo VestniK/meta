@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 20154  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2015  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,26 +17,30 @@
  */
 #pragma once
 
-#include "utils/string.h"
+#include "utils/exception.h"
 
-#include "analysers/nodeexception.h"
+#include "parser/metalexer.h"
 
 namespace meta {
-namespace analysers {
+class Node;
 
-class UnexpectedNode: public NodeException
-{
+class NodeException: public utils::Exception {
 public:
-    UnexpectedNode(Node* node, const char* msg): NodeException(node) {
-        setMsg(msg);
-    }
+    ~NodeException();
 
-    template<typename... A>
-    UnexpectedNode(Node* node, const char* fmt, A&& ...a): NodeException(node) {
-        setMsg(utils::format(boost::format(fmt), std::forward<A>(a)...).str());
-    }
-    ~UnexpectedNode() = default;
+    virtual const char *what() const noexcept override;
+    const TokenSequence &tokens() const {return mTokens;}
+    const std::string &sourcePath() const {return mSrc;}
+
+protected:
+    NodeException(Node *node, const std::string &msg = {});
+    void setMsg(const std::string &val) {mMsg = val;}
+
+private:
+    std::string mMsg;
+    std::string mErrContext;
+    TokenSequence mTokens;
+    std::string mSrc;
 };
 
-} // namespace analysers
 } // namespace meta

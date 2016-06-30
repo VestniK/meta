@@ -28,11 +28,11 @@
 
 #include "parser/actions.h"
 #include "parser/metaparser.h"
+#include "parser/nodeexception.h"
 
 #include "typesystem/typesstore.h"
 
 #include "analysers/metaprocessor.h"
-#include "analysers/nodeexception.h"
 #include "analysers/reachabilitychecker.h"
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
@@ -114,10 +114,10 @@ int main(int argc, char **argv) try {
         return EXIT_FAILURE;
     }
     return meta::main(opts) ? EXIT_SUCCESS : EXIT_FAILURE;
-} catch(const analysers::NodeException &err) {
+} catch(const NodeException& err) {
     std::cerr <<
         err.sourcePath() << ':' << err.tokens().begin()->line <<
-        ':' << err.tokens().begin()->column << ": " << err.what() <<
+        ':' << err.tokens().begin()->column << ": Internal compiler error: " << err.what() <<
         ":" << std::endl
     ;
     std::cerr << err.tokens().lineStr() << "..." << std::endl;
