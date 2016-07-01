@@ -20,21 +20,26 @@
 #include "utils/exception.h"
 
 #include "parser/metalexer.h"
+#include "parser/metaparser.h"
 
 namespace meta {
 class Node;
 
 class NodeException: public utils::Exception {
 public:
-    ~NodeException();
+    ~NodeException() = default;
 
-    virtual const char *what() const noexcept override;
+    const char *what() const noexcept override {return mMsg.c_str();}
     const TokenSequence &tokens() const {return mTokens;}
     const std::string &sourcePath() const {return mSrc;}
 
 protected:
-    NodeException(Node *node, const std::string &msg = {});
-    void setMsg(const std::string &val) {mMsg = val;}
+    NodeException(Node *node, const std::string &msg = {}):
+        utils::Exception(), mMsg(msg),
+        mTokens(node->tokens()), mSrc(node->sourcePath())
+    {
+        mTokens.detach(mErrContext);
+    }
 
 private:
     std::string mMsg;

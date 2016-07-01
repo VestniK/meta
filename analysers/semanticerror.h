@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include "utils/string.h"
+#include <boost/format.hpp>
 
 #include "parser/metalexer.h"
 

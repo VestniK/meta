@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <boost/format.hpp>
-
 #include "utils/types.h"
 
 namespace meta {
@@ -46,18 +44,6 @@ optional<IntType> number(const string_view& str, uint8_t base = 10) {
             return nullopt;
     }
     return res;
-}
-
-template<typename Head>
-inline
-boost::format format(boost::format&& fmt, Head&& h) {
-    return fmt%h;
-}
-
-template<typename Head, typename... Tail>
-inline
-boost::format format(boost::format&& fmt, Head&& h, Tail&& ...t) {
-    return format(std::move(fmt%h), std::forward<Tail>(t)...);
 }
 
 } // namespace utils

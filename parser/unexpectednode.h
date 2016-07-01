@@ -17,7 +17,7 @@
  */
 #pragma once
 
-#include "utils/string.h"
+#include <boost/format.hpp>
 
 #include "parser/nodeexception.h"
 
@@ -25,14 +25,14 @@ namespace meta {
 
 class UnexpectedNode: public NodeException {
 public:
-    UnexpectedNode(Node* node, const char* msg): NodeException(node) {
-        setMsg(msg);
-    }
+    UnexpectedNode(Node* node, const char* msg):
+        NodeException(node, msg)
+    {}
 
     template<typename... A>
-    UnexpectedNode(Node* node, const char* fmt, A&& ...a): NodeException(node) {
-        setMsg(utils::format(boost::format(fmt), std::forward<A>(a)...).str());
-    }
+    UnexpectedNode(Node* node, const char* fmt, A&&... a):
+        NodeException(node, str((boost::format(fmt) % ... % std::forward<A>(a))))
+    {}
     ~UnexpectedNode() = default;
 };
 

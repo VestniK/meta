@@ -16,7 +16,6 @@ set(SRC
   import.cpp
   literal.cpp
   number.cpp
-  nodeexception.cpp
   prefixop.cpp
   return.cpp
   sourcefile.cpp
