@@ -1,5 +1,4 @@
 set(SRC
-  type.cpp
   typesstore.cpp
 )
 

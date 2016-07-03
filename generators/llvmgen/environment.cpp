@@ -87,6 +87,8 @@ llvm::Type *Environment::getType(const typesystem::Type *type)
 
         case typesystem::Type::Auto: assert(false);
         case typesystem::Type::Void: return llvm::Type::getVoidTy(context);
+
+        case typesystem::Type::UserDefined: break; /// @todo
     }
     return nullptr;
 }

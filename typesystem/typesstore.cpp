@@ -20,17 +20,23 @@
 #include <experimental/string_view>
 
 #include "utils/contract.h"
+#include "utils/exception.h"
 
 #include "typesystem/type.h"
 #include "typesystem/typesstore.h"
 
-namespace meta {
-namespace typesystem {
+namespace meta::typesystem {
 
 namespace {
 
-class PrimitiveType: public Type
-{
+class InvalidTypeId: public utils::Exception {
+public:
+    InvalidTypeId() = default;
+
+    const char* what() const noexcept override {return "Invalid type id";}
+};
+
+class PrimitiveType: public Type {
 public:
     explicit PrimitiveType(Type::TypeId id): id(id) {}
 
@@ -38,16 +44,31 @@ public:
         utils::string_view res;
         POSTCONDITION(!res.empty());
         switch (id) {
-            case Auto: res = "auto"; break;
-            case Void: res = "void"; break;
-            case Int: res = "int"; break;
-            case Bool: res = "bool"; break;
-            case String: res = "string"; break;
+        case Auto: res = "auto"; break;
+        case Void: res = "void"; break;
+        case Int: res = "int"; break;
+        case Bool: res = "bool"; break;
+        case String: res = "string"; break;
+
+        case UserDefined: throw InvalidTypeId{}; /// @todo think of better enum for id member
         }
         return res;
     }
 
-    virtual TypeId typeId() const {return id;}
+    TypeId typeId() const override {return id;}
+
+    TypeProps properties() const override {
+        switch (id) {
+        case Void: return TypeProp::complete | TypeProp::primitive;
+        case Int: return TypeProp::complete | TypeProp::primitive | TypeProp::numeric;
+        case Bool: return TypeProp::complete | TypeProp::primitive | TypeProp::boolean;
+        case String: return TypeProp::complete | TypeProp::primitive;
+        case Auto: break;
+
+        case UserDefined: throw InvalidTypeId{}; /// @todo think of better enum for id member
+        }
+        return {};
+    }
 
 private:
     TypeId id;
@@ -55,33 +76,21 @@ private:
 
 } // anonymous namespace
 
-TypesStore::TypesStore()
-{
-    Type::TypeId primitives[] = {
-        Type::Auto, Type::Void, Type::Int, Type::Bool, Type::String
-    };
-    for (auto primitive : primitives) {
+TypesStore::TypesStore() {
+    for (auto primitive: {Type::Auto, Type::Void, Type::Int, Type::Bool, Type::String}) {
         auto type = new PrimitiveType(primitive);
         mTypes[type->name()] = std::unique_ptr<Type>(type);
     }
 }
 
-TypesStore::~TypesStore()
-{
-}
-
-Type* TypesStore::getByName(const utils::string_view& name) const
-{
+Type* TypesStore::getByName(utils::string_view name) const {
     auto it = mTypes.find(name);
     if (it == mTypes.end())
         return nullptr;
     return it->second.get();
 }
 
-Type *TypesStore::getPrimitive(Type::TypeId id) const
-{
-    if ((id & Type::primitive) == 0)
-        return nullptr;
+Type* TypesStore::getPrimitive(Type::TypeId id) const {
     for (const auto &pair : mTypes) {
         if (pair.second->typeId() == id)
             return pair.second.get();
@@ -89,12 +98,10 @@ Type *TypesStore::getPrimitive(Type::TypeId id) const
     return nullptr;
 }
 
-Type *TypesStore::getVoid() const
-{
+Type* TypesStore::getVoid() const {
     auto it = mTypes.find("void");
     assert(it != mTypes.end());
     return it->second.get();
 }
 
-} // namespace typesystem
-} // namespace meta
+} // namespace meta::typesystem

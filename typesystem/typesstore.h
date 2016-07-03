@@ -23,16 +23,14 @@
 
 #include "typesystem/type.h"
 
-namespace meta {
-namespace typesystem {
+namespace meta::typesystem {
 
-class TypesStore
-{
+class TypesStore {
 public:
     TypesStore();
-    ~TypesStore();
+    ~TypesStore() = default;
 
-    Type *getByName(const utils::string_view& name) const;
+    Type *getByName(utils::string_view name) const;
     Type *getPrimitive(Type::TypeId id) const;
     Type *getVoid() const;
 
@@ -40,5 +38,4 @@ private:
     std::map<utils::string_view, std::unique_ptr<Type>> mTypes;
 };
 
-} // namespace typesystem
-} // namespace meta
+} // namespace meta::typesystem

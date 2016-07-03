@@ -21,36 +21,47 @@
 #include <memory>
 #include <vector>
 
+#include "utils/bitmask.h"
 #include "utils/types.h"
 
-namespace meta {
-namespace typesystem {
+namespace meta::typesystem {
+
+enum class TypeProp {
+    complete,
+    numeric,
+    boolean,
+    primitive,
+    tuple,
+    sum,
+    array,
+    namedComponents
+};
+using TypeProps = utils::Bitmask<TypeProp>;
+constexpr
+TypeProps operator| (TypeProp lhs, TypeProp rhs) {
+    return TypeProps{lhs} | rhs;
+}
 
 class Type {
 public:
-    enum TypeClass {
-        numeric = (1 << 5),
-        boolean = (1 << 6),
-        primitive = (1 << 7)
-    };
-
     enum TypeId {
         // incomplete types
-        Auto = -1,
+        Auto,
 
         // Built in types
-        Void = 0,
-        Int = (1 | numeric | primitive),
-        Bool = (boolean | primitive),
-        String = primitive
+        Void,
+        Int,
+        Bool,
+        String,
+
+        UserDefined
     };
 
     virtual utils::string_view name() const = 0;
     virtual TypeId typeId() const = 0;
-    virtual bool is(TypeClass type) const;
+    virtual TypeProps properties() const = 0;
 
-    virtual ~Type() {}
+    virtual ~Type() = default;
 };
 
-} // namespace typesystem
-} // namespace meta
+} // namespace meta::typesystem

@@ -100,14 +100,14 @@ struct TypeEvaluator {
         switch (node->operation()) {
             case PrefixOp::positive:
             case PrefixOp::negative:
-                if (!operandType->is(typesystem::Type::numeric))
+                if (!(operandType->properties() & typesystem::TypeProp::numeric))
                     throw SemanticError(
                         node,
                         "Can't perform arythmetic operation on value of type '%s'", operandType->name()
                     );
                 break;
             case PrefixOp::boolnot:
-                if (!operandType->is(typesystem::Type::boolean))
+                if (!(operandType->properties() & typesystem::TypeProp::boolean))
                     throw SemanticError(
                         node,
                         "Can't perform boolean not operation on value of type '%s'", operandType->name()
@@ -128,7 +128,10 @@ struct TypeEvaluator {
             case BinaryOp::div:
             case BinaryOp::sub:
             case BinaryOp::mul:
-                if (!lhs->is(typesystem::Type::numeric) || !rhs->is(typesystem::Type::numeric))
+                if (
+                    !(lhs->properties() & typesystem::TypeProp::numeric) ||
+                    !(rhs->properties() & typesystem::TypeProp::numeric)
+                )
                     throw SemanticError(
                         node, "Can't perform arythmetic operation on values of types '%s' and '%s'",
                         lhs->name(), rhs->name()
@@ -148,14 +151,20 @@ struct TypeEvaluator {
             case BinaryOp::greatereq:
             case BinaryOp::less:
             case BinaryOp::lesseq:
-                if (!lhs->is(typesystem::Type::numeric) || !rhs->is(typesystem::Type::numeric))
+                if (
+                    !(lhs->properties() & typesystem::TypeProp::numeric) ||
+                    !(rhs->properties() & typesystem::TypeProp::numeric)
+                )
                     throw SemanticError(node, "Can't compare values of types '%s' and '%s'", lhs->name(), rhs->name());
                 node->setType(types.getPrimitive(typesystem::Type::Bool));
                 break;
 
             case BinaryOp::boolAnd:
             case BinaryOp::boolOr:
-                if (!lhs->is(typesystem::Type::boolean) || !rhs->is(typesystem::Type::boolean))
+                if (
+                    !(lhs->properties() & typesystem::TypeProp::boolean) ||
+                    !(rhs->properties() & typesystem::TypeProp::boolean)
+                )
                     throw SemanticError(
                         node, "Can't perform boolean operations on values of types '%s' and '%s'",
                         lhs->name(), rhs->name()
@@ -221,7 +230,7 @@ public:
 
     bool visit(If* node) override {
         Type condType = dispatch(TypeEvaluator{}, node->condition(), mTypes);
-        if (!condType->is(typesystem::Type::boolean))
+        if (!(condType->properties() & typesystem::TypeProp::boolean))
             throw SemanticError(node->condition(), "If statement can't work with condition of type '%s'", condType->name());
         if (node->thenBlock())
             node->thenBlock()->walk(this);
@@ -235,7 +244,7 @@ public:
             mTypes.getVoid():
             dispatch(TypeEvaluator{}, node->value(), mTypes)
         ;
-        if (mCurrFunc->type()->typeId() == typesystem::Type::Auto) {
+        if (!(mCurrFunc->type()->properties() & typesystem::TypeProp::complete)) {
             if (ret->typeId() == typesystem::Type::Auto)
                 throw SemanticError(node, "Can't return value of incomplete type");
             mCurrFunc->setType(ret);
