@@ -81,10 +81,12 @@ llvm::Value *ExpressionBuilder::operator() (Var *node, Context &ctx)
 
 llvm::Value *ExpressionBuilder::operator() (Assigment *node, Context &ctx)
 {
-    PRECONDITION(node->targetDeclaration());
-    PRECONDITION(!node->targetDeclaration()->is(VarDecl::argument));
-    PRECONDITION(ctx.varMap.count(node->targetDeclaration()) == 1);
-    auto it = ctx.varMap.find(node->targetDeclaration());
+    PRECONDITION(dynamic_cast<Var*>(node->target()));
+    PRECONDITION(dynamic_cast<Var*>(node->target())->declaration());
+    PRECONDITION(!dynamic_cast<Var*>(node->target())->declaration()->is(VarDecl::argument));
+    PRECONDITION(ctx.varMap.count(dynamic_cast<Var*>(node->target())->declaration()) == 1);
+    /// @todo add struct members assigment support
+    auto it = ctx.varMap.find(dynamic_cast<Var*>(node->target())->declaration());
     llvm::Value *val = dispatch(*this, node->value(), ctx);
     ctx.builder.CreateStore(val, it->second);
     return val;

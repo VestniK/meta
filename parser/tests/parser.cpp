@@ -38,6 +38,7 @@
 #include "parser/metaparser.h"
 #include "parser/strliteral.h"
 #include "parser/return.h"
+#include "parser/var.h"
 #include "parser/vardecl.h"
 
 using namespace meta;
@@ -105,7 +106,8 @@ TEST(MetaParser, varTest) {
 
     auto assigments = blocks.front()->getChildren<Assigment>(-1);
     ASSERT_EQ(assigments.size(), 1u);
-    ASSERT_EQ(assigments[0]->targetVarName(), "z");
+    ASSERT_NE(dynamic_cast<Var*>(assigments[0]->target()), nullptr);
+    ASSERT_EQ(dynamic_cast<Var*>(assigments[0]->target())->name(), "z");
 }
 
 TEST(MetaParser, assignAsExpr) {
@@ -139,8 +141,10 @@ TEST(MetaParser, assignAsExpr) {
 
     auto assigments = blocks.front()->getChildren<Assigment>(-1);
     ASSERT_EQ(assigments.size(), 2u);
-    ASSERT_EQ(assigments[0]->targetVarName(), "z");
-    ASSERT_EQ(assigments[1]->targetVarName(), "y");
+    ASSERT_NE(dynamic_cast<Var*>(assigments[0]->target()), nullptr);
+    ASSERT_EQ(dynamic_cast<Var*>(assigments[0]->target())->name(), "z");
+    ASSERT_NE(dynamic_cast<Var*>(assigments[1]->target()), nullptr);
+    ASSERT_EQ(dynamic_cast<Var*>(assigments[1]->target())->name(), "y");
 }
 
 TEST(MetaParser, ifStatement) {

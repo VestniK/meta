@@ -25,8 +25,7 @@
 
 namespace meta {
 
-class MemberAccess: public Visitable<Expression, MemberAccess>, public Typed
-{
+class MemberAccess: public Visitable<Expression, MemberAccess>, public Typed {
 public:
     MemberAccess(utils::array_view<StackFrame> reduction):
         Visitable<Expression, MemberAccess>(reduction)
@@ -37,8 +36,8 @@ public:
         PRECONDITION(reduction[2].nodes.size() == 0);
         PRECONDITION(reduction[2].symbol == Terminal::identifier);
 
-        mAggregate = dynamic_cast<Expression*>(reduction[0].nodes.front());
-        if (!mAggregate)
+        mParent = dynamic_cast<Expression*>(reduction[0].nodes.front());
+        if (!mParent)
             throw UnexpectedNode(reduction[0].nodes.front(), "Expression expected");
         mMemberName = reduction[2].tokens;
     }
@@ -50,9 +49,10 @@ public:
     void setMemberDecl(VarDecl* val) {mMemberDecl = val;}
 
     utils::string_view memberName() const {return mMemberName;}
+    Expression* parent() const {return mParent;}
 
 private:
-    Expression* mAggregate;
+    Expression* mParent;
     Struct* mTargetStruct = nullptr;
     VarDecl* mMemberDecl = nullptr;
     utils::string_view mMemberName;

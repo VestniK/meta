@@ -20,6 +20,7 @@
 
 #include "parser/assigment.h"
 #include "parser/metanodes.h"
+#include "parser/unexpectednode.h"
 
 namespace meta {
 
@@ -32,39 +33,14 @@ Assigment::Assigment(utils::array_view<StackFrame> reduction):
     PRECONDITION(reduction[2].nodes.size() == 1);
 }
 
-Node* Assigment::value() {
+Expression* Assigment::value() {
     PRECONDITION(children.size() == 2);
-    return children.back();
+    return dynamic_cast<Expression*>(children.back());
 }
 
-VarDecl* Assigment::targetDeclaration() {
+Expression* Assigment::target() {
     PRECONDITION(children.size() == 2);
-
-    struct {
-
-    VarDecl* operator() (Node*) {assert(false); return nullptr;} // TODO: throw UnexpectedNode here!!!
-
-    VarDecl* operator() (Var* var) {return var->declaration();}
-    VarDecl* operator() (MemberAccess* member) {return member->memberDecl();}
-
-    } getVarDecl;
-
-    return dispatch(getVarDecl, children.front());
-}
-
-utils::string_view Assigment::targetVarName() {
-    PRECONDITION(children.size() == 2);
-
-    struct {
-
-    utils::string_view operator() (Node*) {assert(false); return {};} // TODO: throw UnexpectedNode here!!!
-
-    utils::string_view operator() (Var* var) {return var->name();}
-    utils::string_view operator() (MemberAccess* member) {return member->memberName();}
-
-    } getVarName;
-
-    return dispatch(getVarName, children.front());
+    return dynamic_cast<Expression*>(children.front());
 }
 
 }

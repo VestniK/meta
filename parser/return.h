@@ -18,13 +18,23 @@
  */
 #pragma once
 
+#include "utils/contract.h"
+
 #include "parser/metaparser.h"
 
 namespace meta {
 
 class Return: public Visitable<Node, Return> {
 public:
-    Return(utils::array_view<StackFrame> reduction);
+    Return(utils::array_view<StackFrame> reduction):
+        Visitable<Node, Return>(reduction)
+    {
+        PRECONDITION(children.size() <= 1);
+    }
+
+    Node* value() {
+        return children.size() == 0 ? nullptr : children.front();
+    }
 };
 
 }

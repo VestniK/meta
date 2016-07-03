@@ -39,7 +39,7 @@ public:
     const utils::string_view& typeName() const {return mTypeName;}
 
     bool inited() const;
-    Node *initExpr();
+    Node* initExpr();
     bool is(Flags flag) const;
     void set(Flags flag, bool val = true);
 

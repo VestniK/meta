@@ -28,9 +28,8 @@ class Assigment: public Visitable<Expression, Assigment> {
 public:
     Assigment(utils::array_view<StackFrame> reduction);
 
-    Node* value();
-    VarDecl* targetDeclaration();
-    utils::string_view targetVarName();
+    Expression* value();
+    Expression* target();
 };
 
 }

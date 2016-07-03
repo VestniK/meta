@@ -25,6 +25,7 @@
 #include "parser/call.h"
 #include "parser/function.h"
 #include "parser/import.h"
+#include "parser/memberaccess.h"
 #include "parser/metaparser.h"
 #include "parser/sourcefile.h"
 #include "parser/var.h"
@@ -36,12 +37,9 @@
 namespace meta {
 namespace analysers {
 
-namespace
-{
+namespace {
 
-inline
-bool isChildPackage(const utils::string_view& subpkg, const utils::string_view& parentpkg)
-{
+bool isChildPackage(utils::string_view subpkg, utils::string_view parentpkg) {
     /// @todo rewrite using TokenSequence
     if (parentpkg.length() > subpkg.length())
         return false;
@@ -55,8 +53,7 @@ bool isChildPackage(const utils::string_view& subpkg, const utils::string_view& 
 
 }
 
-class ResolveVisitor: public Visitor
-{
+class ResolveVisitor: public Visitor {
 public:
     ResolveVisitor(Dictionary &dict): mGlobalDict(dict)
     {
@@ -160,10 +157,15 @@ public:
     }
 
     bool visit(Assigment *node) override {
-        auto decl = mVars.find(node->targetVarName());
-        ++decl->second.modifyCount;
-        if (decl->second.decl->is(VarDecl::argument))
-            throw SemanticError(node, "Attempt to modify function argument '%s'", node->targetVarName());
+        if (Var* var = dynamic_cast<Var*>(node->target())) {
+            auto decl = mVars.find(var->name());
+            ++decl->second.modifyCount;
+            if (decl->second.decl->is(VarDecl::argument))
+                throw SemanticError(node, "Attempt to modify function argument '%s'", var->name());
+        } else if (dynamic_cast<MemberAccess*>(node->target()))
+            throw UnexpectedNode(node->target(), "Assign value to struct member is not yet implemented");
+        else
+            throw UnexpectedNode(node->target(), "Incorrect assign target");
         return true;
     }
 
@@ -179,7 +181,6 @@ private:
         unsigned modifyCount;
         unsigned accessCount;
     };
-
 
     Dictionary& mGlobalDict;
     DeclarationsDict mCurrDecls;

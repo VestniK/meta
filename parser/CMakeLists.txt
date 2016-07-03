@@ -17,7 +17,6 @@ set(SRC
   literal.cpp
   number.cpp
   prefixop.cpp
-  return.cpp
   sourcefile.cpp
   strliteral.cpp
   struct.cpp

@@ -89,7 +89,12 @@ TEST_P(TypeCheker, typeCheck) {
     }
 
     std::vector<Typed*> exprs;
-    walk<Node, TopDown>(*ast, [&exprs](Node *node){auto typed = dynamic_cast<Typed*>(node); if (typed) exprs.push_back(typed); return true;});
+    walk<Node, TopDown>(*ast, [&exprs](Node *node){
+        auto typed = dynamic_cast<Typed*>(node);
+        if (typed)
+            exprs.push_back(typed);
+        return true;
+    });
     for (auto typed : exprs) {
         ASSERT_NE(typed->type(), nullptr) << "Type not set for node of type " << typeid(*typed).name();
         ASSERT_NE(typed->type()->typeId(), typesystem::Type::Auto) << "Type is incomplete for node of type " << typeid(*typed).name();
