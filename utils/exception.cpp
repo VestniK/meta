@@ -17,16 +17,17 @@
  */
 #include <memory>
 
+#include <cxxabi.h>
 #include <malloc.h>
 #include <execinfo.h>
 
 #include "utils/exception.h"
+#include "utils/types.h"
 
 namespace meta {
 namespace utils {
 
-Exception::Exception(): std::exception()
-{
+Exception::Exception(): std::exception() {
     constexpr size_t sizeinc = 128;
     constexpr size_t sizelimit = 1024;
     std::vector<void*> stacktrace(sizeinc);
@@ -40,8 +41,30 @@ Exception::Exception(): std::exception()
     std::unique_ptr<char*, decltype(&::free)> strings = {::backtrace_symbols(stacktrace.data(), traceSize), &::free};
     if (!strings)
         return;
-    for (int i = 0; i < traceSize; ++i)
-        mBacktrace.push_back(strings.get()[i]);
+    for (int i = 0; i < traceSize; ++i) {
+        string_view btLine = strings.get()[i];
+        const size_t fnameStart = btLine.find('(');
+        const size_t fnameEnd = btLine.rfind('+');
+        if (fnameStart == string_view::npos || fnameEnd == string_view::npos || fnameStart + 1 == fnameEnd) {
+            mBacktrace.push_back(std::string(btLine));
+            continue;
+        }
+        std::string fname = {btLine.begin() + fnameStart + 1, btLine.begin() + fnameEnd};
+        int status = 0;
+        std::unique_ptr<char, decltype(&::free)> strbuf = {
+            abi::__cxa_demangle(fname.c_str(), nullptr, nullptr, &status),
+            &::free
+        };
+        if (status != 0) {
+            mBacktrace.push_back(std::string(btLine));
+            continue;
+        }
+        std::string str = {btLine.begin(), btLine.begin() + fnameStart + 1};
+        str += strbuf.get();
+        str.append(btLine.begin() + fnameEnd, btLine.end());
+
+        mBacktrace.push_back(str);
+    }
 }
 
 } // namespace utils
