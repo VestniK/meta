@@ -64,9 +64,10 @@ llvm::Value *ExpressionBuilder::operator() (StrLiteral *node, Context &ctx)
 {
     return llvm::ConstantStruct::get(ctx.env.string,
         llvm::ConstantPointerNull::get(llvm::Type::getInt32PtrTy(ctx.env.context)), // no refcounter
-        llvm::ConstantDataArray::getString(ctx.env.context, llvm::StringRef(node->value().data(), node->value().size()), false), // data
+        ctx.builder.CreateGlobalStringPtr(llvm::StringRef{node->value().data(), node->value().size()}), // data
         llvm::ConstantInt::get(llvm::Type::getInt32Ty(ctx.env.context), node->value().size(), false), // size
-    nullptr);
+        nullptr
+    );
 }
 
 llvm::Value *ExpressionBuilder::operator() (Var *node, Context &ctx)
