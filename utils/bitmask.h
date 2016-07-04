@@ -37,7 +37,7 @@ public:
 
     constexpr
     Bitmask operator| (Bitmask rhs) const {
-        return Bitmask(mVal | rhs.val);
+        return Bitmask(mVal | rhs.mVal);
     }
     constexpr
     Bitmask operator| (E e) const {
@@ -46,7 +46,7 @@ public:
 
     constexpr
     Bitmask operator& (Bitmask rhs) const {
-        return Bitmask(mVal & rhs.val);
+        return Bitmask(mVal & rhs.mVal);
     }
     constexpr
     Bitmask operator& (E e) const {

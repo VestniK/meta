@@ -64,4 +64,9 @@ public:
     virtual ~Type() = default;
 };
 
+inline
+TypeProps operator& (const Type* t, TypeProp prop) {return t->properties() & prop;}
+inline
+TypeProps operator& (const Type* t, TypeProps props) {return t->properties() & props;}
+
 } // namespace meta::typesystem

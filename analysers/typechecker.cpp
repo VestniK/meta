@@ -100,14 +100,14 @@ struct TypeEvaluator {
         switch (node->operation()) {
             case PrefixOp::positive:
             case PrefixOp::negative:
-                if (!(operandType->properties() & typesystem::TypeProp::numeric))
+                if (!(operandType & typesystem::TypeProp::numeric))
                     throw SemanticError(
                         node,
                         "Can't perform arythmetic operation on value of type '%s'", operandType->name()
                     );
                 break;
             case PrefixOp::boolnot:
-                if (!(operandType->properties() & typesystem::TypeProp::boolean))
+                if (!(operandType & typesystem::TypeProp::boolean))
                     throw SemanticError(
                         node,
                         "Can't perform boolean not operation on value of type '%s'", operandType->name()
@@ -129,8 +129,8 @@ struct TypeEvaluator {
             case BinaryOp::sub:
             case BinaryOp::mul:
                 if (
-                    !(lhs->properties() & typesystem::TypeProp::numeric) ||
-                    !(rhs->properties() & typesystem::TypeProp::numeric)
+                    !(lhs & typesystem::TypeProp::numeric) ||
+                    !(rhs & typesystem::TypeProp::numeric)
                 )
                     throw SemanticError(
                         node, "Can't perform arythmetic operation on values of types '%s' and '%s'",
@@ -152,8 +152,8 @@ struct TypeEvaluator {
             case BinaryOp::less:
             case BinaryOp::lesseq:
                 if (
-                    !(lhs->properties() & typesystem::TypeProp::numeric) ||
-                    !(rhs->properties() & typesystem::TypeProp::numeric)
+                    !(lhs & typesystem::TypeProp::numeric) ||
+                    !(rhs & typesystem::TypeProp::numeric)
                 )
                     throw SemanticError(node, "Can't compare values of types '%s' and '%s'", lhs->name(), rhs->name());
                 node->setType(types.getPrimitive(typesystem::Type::Bool));
@@ -162,8 +162,8 @@ struct TypeEvaluator {
             case BinaryOp::boolAnd:
             case BinaryOp::boolOr:
                 if (
-                    !(lhs->properties() & typesystem::TypeProp::boolean) ||
-                    !(rhs->properties() & typesystem::TypeProp::boolean)
+                    !(lhs & typesystem::TypeProp::boolean) ||
+                    !(rhs & typesystem::TypeProp::boolean)
                 )
                     throw SemanticError(
                         node, "Can't perform boolean operations on values of types '%s' and '%s'",
@@ -230,7 +230,7 @@ public:
 
     bool visit(If* node) override {
         Type condType = dispatch(TypeEvaluator{}, node->condition(), mTypes);
-        if (!(condType->properties() & typesystem::TypeProp::boolean))
+        if (!(condType & typesystem::TypeProp::boolean))
             throw SemanticError(node->condition(), "If statement can't work with condition of type '%s'", condType->name());
         if (node->thenBlock())
             node->thenBlock()->walk(this);
@@ -244,7 +244,7 @@ public:
             mTypes.getVoid():
             dispatch(TypeEvaluator{}, node->value(), mTypes)
         ;
-        if (!(mCurrFunc->type()->properties() & typesystem::TypeProp::complete)) {
+        if (!(mCurrFunc->type() & typesystem::TypeProp::complete)) {
             if (ret->typeId() == typesystem::Type::Auto)
                 throw SemanticError(node, "Can't return value of incomplete type");
             mCurrFunc->setType(ret);
