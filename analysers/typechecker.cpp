@@ -61,7 +61,7 @@ struct TypeEvaluator {
     Type operator() (Var* node, Types&) {
         PRECONDITION(node->declaration() != nullptr);
         PRECONDITION(node->declaration()->type() != nullptr);
-        PRECONDITION(node->declaration()->type()->typeId() != typesystem::Type::Auto);
+        PRECONDITION(node->declaration()->type() & typesystem::TypeProp::complete);
 
         return node->declaration()->type();
     }
@@ -194,7 +194,7 @@ public:
     }
     void leave(Function* node) override {
         POSTCONDITION(node->type() != nullptr);
-        POSTCONDITION(node->type()->typeId() != typesystem::Type::Auto);
+        POSTCONDITION(node->type() & typesystem::TypeProp::complete);
 
         mCurrFunc = nullptr;
     }
@@ -206,19 +206,19 @@ public:
 
     bool visit(VarDecl* node) override {
         POSTCONDITION(node->type() != nullptr);
-        POSTCONDITION(node->type()->typeId() != typesystem::Type::Auto);
+        POSTCONDITION(node->type() & typesystem::TypeProp::complete);
 
         node->setType(mTypes.getByName(node->typeName()));
         if (node->type() == nullptr)
             throw SemanticError(node, "Variable '%s' has unknown type '%s'", node->name(), node->typeName());
         if (!node->inited()) {
-            if (node->type()->typeId() == typesystem::Type::Auto)
+            if (!(node->type() & typesystem::TypeProp::complete))
                 throw SemanticError(node, "Can't deduce variable '%s' type.", node->name());
             return false;
         }
 
         Type initExprType = dispatch(TypeEvaluator{}, node->initExpr(), mTypes);
-        if (node->type()->typeId() == typesystem::Type::Auto)
+        if (!(node->type() & typesystem::TypeProp::complete))
             node->setType(initExprType);
         else if (node->type() != initExprType)
             throw SemanticError(
@@ -245,7 +245,7 @@ public:
             dispatch(TypeEvaluator{}, node->value(), mTypes)
         ;
         if (!(mCurrFunc->type() & typesystem::TypeProp::complete)) {
-            if (ret->typeId() == typesystem::Type::Auto)
+            if (!(ret & typesystem::TypeProp::complete))
                 throw SemanticError(node, "Can't return value of incomplete type");
             mCurrFunc->setType(ret);
         }
