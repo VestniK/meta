@@ -53,21 +53,32 @@ llvm::Function *Environment::addFunction(Function *func)
 {
     const auto args = func->args();
     std::vector<llvm::Type *> argTypes;
+    auto rettype = getType(func->type());
+    assert(rettype != nullptr);
+    if (func->type() & typesystem::TypeProp::sret)
+        argTypes.push_back(rettype->getPointerTo());
     for (const auto arg : args) {
         assert(arg->type() != nullptr); // must be set during type integryty checks
         auto type = getType(arg->type());
         assert(type != nullptr); // all known types should be mapped to llvm types
         argTypes.push_back(type);
     }
-    auto rettype = getType(func->type());
-    assert(rettype != nullptr);
-    llvm::FunctionType *funcType = llvm::FunctionType::get(rettype, argTypes, false);
+    llvm::FunctionType *funcType = llvm::FunctionType::get(
+        (func->type() & typesystem::TypeProp::sret) ? llvm::Type::getVoidTy(context) : rettype,
+        argTypes, false
+    );
     const llvm::GlobalValue::LinkageTypes linkType = func->visibility() == Visibility::Export || func->visibility() == Visibility::Extern ?
         llvm::GlobalValue::ExternalLinkage :
         llvm::GlobalValue::PrivateLinkage
     ;
     llvm::Function *prototype = llvm::Function::Create(funcType, linkType, mangledName(func), module.get());
     llvm::Function::arg_iterator it = prototype->arg_begin();
+    if (func->type() & typesystem::TypeProp::sret) {
+        llvm::AttrBuilder attrBuilder;
+        attrBuilder.addAttribute(llvm::Attribute::StructRet);
+        it->addAttr(llvm::AttributeSet::get(context, 0, attrBuilder));
+        ++it;
+    }
     for (const auto arg : args) {
         it->setName(llvm::StringRef(arg->name().data(), arg->name().size()));
         assert(it != prototype->arg_end());
@@ -91,6 +102,11 @@ llvm::Type *Environment::getType(const typesystem::Type *type)
         case typesystem::Type::UserDefined: break; /// @todo
     }
     return nullptr;
+}
+
+llvm::AllocaInst *addLocalVar(llvm::Function* func, llvm::Type* type, const utils::string_view& name) {
+    llvm::IRBuilder<> builder(&(func->getEntryBlock()), func->getEntryBlock().begin());
+    return builder.CreateAlloca(type, 0, llvm::StringRef(name.data(), name.size()));
 }
 
 } // namespace llvmgen

@@ -24,8 +24,7 @@
 
 namespace meta {
 
-class StrLiteral: public Visitable<Expression, StrLiteral>, public Typed
-{
+class StrLiteral: public Visitable<Expression, StrLiteral> {
 public:
     StrLiteral(utils::array_view<StackFrame> reduction);
 

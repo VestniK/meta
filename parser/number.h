@@ -22,7 +22,7 @@
 
 namespace meta {
 
-class Number: public Visitable<Expression, Number>, public Typed {
+class Number: public Visitable<Expression, Number> {
 public:
     Number(utils::array_view<StackFrame> reduction);
 

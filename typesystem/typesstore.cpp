@@ -62,7 +62,7 @@ public:
         case Void: return TypeProp::complete | TypeProp::primitive;
         case Int: return TypeProp::complete | TypeProp::primitive | TypeProp::numeric;
         case Bool: return TypeProp::complete | TypeProp::primitive | TypeProp::boolean;
-        case String: return TypeProp::complete | TypeProp::primitive;
+        case String: return TypeProp::complete | TypeProp::primitive | TypeProp::sret;
         case Auto: break;
 
         case UserDefined: throw InvalidTypeId{}; /// @todo think of better enum for id member

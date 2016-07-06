@@ -22,8 +22,7 @@
 
 namespace meta {
 
-class PrefixOp: public Visitable<Expression, PrefixOp>, public Typed
-{
+class PrefixOp: public Visitable<Expression, PrefixOp> {
 public:
     PrefixOp(utils::array_view<StackFrame> reduction);
 

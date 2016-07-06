@@ -22,7 +22,7 @@
 
 namespace meta {
 
-class BinaryOp: public Visitable<Expression, BinaryOp>, public Typed {
+class BinaryOp: public Visitable<Expression, BinaryOp> {
 public:
     BinaryOp(utils::array_view<StackFrame> reduction);
 

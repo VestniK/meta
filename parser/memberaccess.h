@@ -25,7 +25,7 @@
 
 namespace meta {
 
-class MemberAccess: public Visitable<Expression, MemberAccess>, public Typed {
+class MemberAccess: public Visitable<Expression, MemberAccess> {
 public:
     MemberAccess(utils::array_view<StackFrame> reduction):
         Visitable<Expression, MemberAccess>(reduction)

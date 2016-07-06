@@ -19,6 +19,16 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/types.h"
+
+using namespace meta;
+
+struct MString {
+    uint32_t* usecount;
+    const char* data;
+    uint32_t size;
+};
+
 // Functions from *.meta files
 extern "C" {
 
@@ -51,6 +61,9 @@ int test_imports_impl_fooExport(int x);
 int test_ccall_caller(int x);
 void test_ccall_setModifiedGlobal(int x);
 
+// Strings test
+MString test_strings_helloLength(bool cond, MString fallback);
+
 }
 
 // Functions exported to the *.meta tests files
@@ -65,6 +78,10 @@ int global = 0;
 void test_ccall_setGlobal(int x)
 {
     global = x;
+}
+
+int test_strings_length(MString str) {
+    return static_cast<int>(str.size);
 }
 
 }
@@ -267,4 +284,12 @@ TEST(BuilderTests, ccall)
         test_ccall_setModifiedGlobal(x);
         ASSERT_EQ(global, x < 0 ? -x : 2*x) << "x: " << x;
     }
+}
+
+TEST(BuilderTest, strings) {
+    MString res = test_strings_helloLength(true, MString{nullptr, "qwe", 3});
+    EXPECT_EQ(utils::string_view(res.data, res.size), utils::string_view("Hello"));
+
+    res = test_strings_helloLength(false, MString{nullptr, "qwe", 3});
+    EXPECT_EQ(utils::string_view(res.data, res.size), utils::string_view("qwe"));
 }

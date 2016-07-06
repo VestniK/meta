@@ -62,8 +62,9 @@ struct TypeEvaluator {
         PRECONDITION(node->declaration() != nullptr);
         PRECONDITION(node->declaration()->type() != nullptr);
         PRECONDITION(node->declaration()->type() & typesystem::TypeProp::complete);
+        node->setType(node->declaration()->type());
 
-        return node->declaration()->type();
+        return node->type();
     }
 
     Type operator() (Assigment* node, Types& types) {
@@ -73,7 +74,9 @@ struct TypeEvaluator {
             Type operator() (Node* node, Type) {throw UnexpectedNode(node, "Variable or access to Memeber required");}
 
             Type operator() (Var* node, Type valType) {
-                if (node->declaration()->type() != valType)
+                if (!node->type())
+                    node->setType(node->declaration()->type());
+                if (node->type() != valType)
                     throw SemanticError(
                         node, "Attempt to assign value of type '%s' to a the variable '%s' of type '%s'",
                         valType->name(), node->declaration()->name(), node->declaration()->type()->name()
@@ -92,7 +95,9 @@ struct TypeEvaluator {
                 return node->memberDecl()->type();
             }
         } getAssignType;
-        return dispatch(getAssignType, node->target(), valueType);
+        Type targetType = dispatch(getAssignType, node->target(), valueType);
+	node->setType(targetType);
+	return node->type();
     }
 
     Type operator() (PrefixOp* node, Types& types) {
@@ -278,7 +283,8 @@ Type TypeEvaluator::operator() (Call* node, Types &types) {
                 node->function()->name(), i, argtype->name(), argdecls[i]->type()->name()
             );
     }
-    return node->function()->type();
+    node->setType(node->function()->type());
+    return node->type();
 }
 
 void checkTypes(AST *ast, typesystem::TypesStore &types) {

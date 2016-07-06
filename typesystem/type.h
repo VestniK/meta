@@ -34,7 +34,8 @@ enum class TypeProp {
     tuple,
     sum,
     array,
-    namedComponents
+    namedComponents,
+    sret
 };
 using TypeProps = utils::Bitmask<TypeProp>;
 constexpr

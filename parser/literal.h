@@ -22,8 +22,7 @@
 
 namespace meta {
 
-class Literal: public Visitable<Expression, Literal>, public Typed
-{
+class Literal: public Visitable<Expression, Literal> {
 public:
     Literal(utils::array_view<StackFrame> reduction);
 

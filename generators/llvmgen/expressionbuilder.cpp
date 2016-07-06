@@ -29,18 +29,23 @@ namespace meta {
 namespace generators {
 namespace llvmgen {
 
-llvm::Value *ExpressionBuilder::operator() (Call *node, Context &ctx)
-{
+llvm::Value* ExpressionBuilder::operator() (Call *node, Context &ctx) {
     llvm::Function *func = ctx.env.module->getFunction(mangledName(node->function()));
     if (!func) {
         assert(node->function() != nullptr);
         func = ctx.env.addFunction(node->function());
     }
     std::vector<llvm::Value*> args;
+    llvm::Value* sret = nullptr;
+    if (func->arg_begin()->hasStructRetAttr()) {
+        sret = addLocalVar(ctx.builder.GetInsertBlock()->getParent(), ctx.env.getType(node->function()->type()), {});
+        args.push_back(sret);
+    }
     for (auto argNode: node->args())
         args.push_back(dispatch(*this, argNode, ctx));
     assert(func->arg_size() == args.size());
-    return ctx.builder.CreateCall(func, args);
+    llvm::Value* callRes = ctx.builder.CreateCall(func, args);
+    return sret ? ctx.builder.CreateLoad(sret) : callRes;
 }
 
 llvm::Value *ExpressionBuilder::operator() (Number *node, Context &ctx)

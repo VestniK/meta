@@ -55,6 +55,8 @@ bool ModuleBuilder::visit(Function *node)
         return false;
 
     llvm::Function::arg_iterator it = func->arg_begin();
+    if (it->hasStructRetAttr())
+        ++it;
     for (const auto arg : node->args()) {
         mCtx.varMap[arg] = &(*it);
         assert(it != func->arg_end());
@@ -72,14 +74,6 @@ bool ModuleBuilder::visit(Function *node)
         throw analysers::SemanticError(node, "Non-void function ends without return");
     mCtx.builder.CreateRetVoid(); // Void function with implicit return.
     return false;
-}
-
-namespace {
-inline llvm::AllocaInst *addLocalVar(llvm::Function *func, llvm::Type *type, const utils::string_view& name)
-{
-    llvm::IRBuilder<> builder(&(func->getEntryBlock()), func->getEntryBlock().begin());
-    return builder.CreateAlloca(type, 0, llvm::StringRef(name.data(), name.size()));
-}
 }
 
 ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx)
@@ -100,14 +94,20 @@ ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx)
 
 ExecStatus StatementBuilder::operator() (Return *node, Context &ctx)
 {
-    PRECONDITION(node->getChildren<Node>().empty() || node->getChildren<Node>().size() == 1);
-    auto children = node->getChildren<Node>();
-    if (children.empty()) {
+    auto value = node->value();
+    if (!value) {
         ctx.builder.CreateRetVoid();
         return ExecStatus::stop;
     }
-    ExpressionBuilder evaluator;
-    ctx.builder.CreateRet(dispatch(evaluator, children.front(), ctx));
+    auto retval = dispatch(ExpressionBuilder{}, value, ctx);
+    auto* typedNode = dynamic_cast<Typed*>(value);
+    if (typedNode->type() & typesystem::TypeProp::sret) {
+        llvm::Argument& sretArg = *ctx.builder.GetInsertBlock()->getParent()->arg_begin();
+        assert(sretArg.hasStructRetAttr());
+        ctx.builder.CreateStore(retval, &sretArg);
+        ctx.builder.CreateRetVoid();
+    } else
+        ctx.builder.CreateRet(retval);
     return ExecStatus::stop;
 }
 

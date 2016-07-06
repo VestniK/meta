@@ -23,7 +23,7 @@
 
 namespace meta {
 
-class Expression: public Node {
+class Expression: public Node, public Typed {
 public:
 protected:
     Expression(utils::array_view<StackFrame> reduction): Node(reduction) {}

@@ -23,6 +23,8 @@
 
 #include <llvm/IR/IRBuilder.h>
 
+#include "utils/types.h"
+
 #include "generators/llvmgen/privateheadercheck.h"
 
 namespace llvm {
@@ -68,6 +70,8 @@ struct Context
     std::map<VarDecl *, llvm::Value *> varMap;
     llvm::IRBuilder<> builder;
 };
+
+llvm::AllocaInst* addLocalVar(llvm::Function* func, llvm::Type* type, const utils::string_view& name);
 
 } // namespace llvmgen
 } // namespace generators
