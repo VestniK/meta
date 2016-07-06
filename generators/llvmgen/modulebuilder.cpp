@@ -18,15 +18,18 @@
  */
 #include <cassert>
 #include <cstdio>
+#include <sstream>
 #include <stdexcept>
 #include <system_error>
 #include <vector>
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
+#include <llvm/IR/Verifier.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/raw_os_ostream.h>
 
 #include "utils/contract.h"
 
@@ -163,8 +166,23 @@ ExecStatus StatementBuilder::operator() (ExprStatement *node, Context &ctx)
     return ExecStatus::cont;
 }
 
-void ModuleBuilder::save(const std::string &path)
-{
+class IRVerificationError: public utils::Exception {
+public:
+    template<typename T>
+    IRVerificationError(T&& t): utils::Exception(), mMsg(std::forward<T>(t)) {}
+    const char* what() const noexcept override {return mMsg.c_str();}
+
+private:
+    std::string mMsg;
+};
+
+void ModuleBuilder::save(const std::string &path) {
+    // verify module IR correctness
+    std::ostringstream oss;
+    llvm::raw_os_ostream llvmOss(oss);
+    if (llvm::verifyModule(*mCtx.env.module, &llvmOss))
+        throw IRVerificationError{oss.str()};
+    // Write IR
     std::error_code errCode;
     llvm::raw_fd_ostream out(path.c_str(), errCode, llvm::sys::fs::F_None);
     llvm::WriteBitcodeToFile(mCtx.env.module.get(), out);
