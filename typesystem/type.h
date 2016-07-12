@@ -28,6 +28,7 @@ namespace meta::typesystem {
 
 enum class TypeProp {
     complete,
+    voidtype,
     numeric,
     boolean,
     primitive,

@@ -39,7 +39,7 @@ struct TypeEvaluator {
     Type operator() (Node* node, Types&) {throw UnexpectedNode(node, "Can't evaluate type");}
 
     Type operator() (Number* node, Types& types) {
-        node->setType(types.getPrimitive(typesystem::Type::Int));
+        node->setType(types.get(typesystem::BuiltinType::Int));
         return node->type();
     }
 
@@ -47,14 +47,14 @@ struct TypeEvaluator {
         switch (node->value()) {
         case Literal::trueVal:
         case Literal::falseVal:
-            node->setType(types.getPrimitive(typesystem::Type::Bool));
+            node->setType(types.get(typesystem::BuiltinType::Bool));
         break;
         }
         return node->type();
     }
 
     Type operator() (StrLiteral* node, Types& types) {
-        node->setType(types.getPrimitive(typesystem::Type::String));
+        node->setType(types.get(typesystem::BuiltinType::String));
         return node->type();
     }
 
@@ -150,7 +150,7 @@ struct TypeEvaluator {
             case BinaryOp::noteq:
                 if (lhs != rhs)
                     throw SemanticError(node, "Can't compare values of types '%s' and '%s'", lhs->name(), rhs->name());
-                node->setType(types.getPrimitive(typesystem::Type::Bool));
+                node->setType(types.get(typesystem::BuiltinType::Bool));
                 break;
             case BinaryOp::greater:
             case BinaryOp::greatereq:
@@ -161,7 +161,7 @@ struct TypeEvaluator {
                     !(rhs & typesystem::TypeProp::numeric)
                 )
                     throw SemanticError(node, "Can't compare values of types '%s' and '%s'", lhs->name(), rhs->name());
-                node->setType(types.getPrimitive(typesystem::Type::Bool));
+                node->setType(types.get(typesystem::BuiltinType::Bool));
                 break;
 
             case BinaryOp::boolAnd:
@@ -174,7 +174,7 @@ struct TypeEvaluator {
                         node, "Can't perform boolean operations on values of types '%s' and '%s'",
                         lhs->name(), rhs->name()
                     );
-                node->setType(types.getPrimitive(typesystem::Type::Bool));
+                node->setType(types.get(typesystem::BuiltinType::Bool));
                 break;
         }
         return node->type();
@@ -191,7 +191,7 @@ public:
     bool visit(Function* node) override {
         if (node->type() != nullptr)
             return false;
-        node->setType(mTypes.getByName(node->retType()));
+        node->setType(mTypes.get(node->retType()));
         if (node->type() == nullptr)
             throw SemanticError(node, "Function '%s' returns unknown type '%s'", node->name(), node->retType());
         mCurrFunc = node;
@@ -213,7 +213,7 @@ public:
         POSTCONDITION(node->type() != nullptr);
         POSTCONDITION(node->type() & typesystem::TypeProp::complete);
 
-        node->setType(mTypes.getByName(node->typeName()));
+        node->setType(mTypes.get(node->typeName()));
         if (node->type() == nullptr)
             throw SemanticError(node, "Variable '%s' has unknown type '%s'", node->name(), node->typeName());
         if (!node->inited()) {
@@ -246,7 +246,7 @@ public:
 
     bool visit(meta::Return* node) override {
         Type ret = node->value() == nullptr ?
-            mTypes.getVoid():
+            mTypes.get(typesystem::BuiltinType::Void):
             dispatch(TypeEvaluator{}, node->value(), mTypes)
         ;
         if (!(mCurrFunc->type() & typesystem::TypeProp::complete)) {

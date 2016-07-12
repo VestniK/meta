@@ -70,7 +70,7 @@ bool ModuleBuilder::visit(Function *node)
     const ExecStatus status = statementBuilder(node->body(), mCtx);
     if (status == ExecStatus::stop) // Function body ends with terminating instruction
         return false;
-    if (node->type()->typeId() != typesystem::Type::Void)
+    if (!(node->type() & typesystem::TypeProp::voidtype))
         throw analysers::SemanticError(node, "Non-void function ends without return");
     mCtx.builder.CreateRetVoid(); // Void function with implicit return.
     return false;

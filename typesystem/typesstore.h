@@ -25,16 +25,24 @@
 
 namespace meta::typesystem {
 
+namespace BuiltinType {
+
+constexpr static utils::string_view Int = "int"sv;
+constexpr static utils::string_view Bool = "bool"sv;
+constexpr static utils::string_view String = "string"sv;
+constexpr static utils::string_view Void = "void"sv;
+
+};
+
 class TypesStore {
 public:
-    TypesStore();
+    TypesStore(TypesStore* parent = nullptr);
     ~TypesStore() = default;
 
-    Type *getByName(utils::string_view name) const;
-    Type *getPrimitive(Type::TypeId id) const;
-    Type *getVoid() const;
+    Type *get(utils::string_view name) const;
 
 private:
+    TypesStore* mParent = nullptr;
     std::map<utils::string_view, std::unique_ptr<Type>> mTypes;
 };
 

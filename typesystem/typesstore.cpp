@@ -59,7 +59,7 @@ public:
 
     TypeProps properties() const override {
         switch (id) {
-        case Void: return TypeProp::complete | TypeProp::primitive;
+        case Void: return TypeProp::complete | TypeProp::primitive | TypeProp::voidtype;
         case Int: return TypeProp::complete | TypeProp::primitive | TypeProp::numeric;
         case Bool: return TypeProp::complete | TypeProp::primitive | TypeProp::boolean;
         case String: return TypeProp::complete | TypeProp::primitive | TypeProp::sret;
@@ -76,31 +76,17 @@ private:
 
 } // anonymous namespace
 
-TypesStore::TypesStore() {
+TypesStore::TypesStore(TypesStore* parent): mParent(parent) {
     for (auto primitive: {Type::Auto, Type::Void, Type::Int, Type::Bool, Type::String}) {
         auto type = new PrimitiveType(primitive);
         mTypes[type->name()] = std::unique_ptr<Type>(type);
     }
 }
 
-Type* TypesStore::getByName(utils::string_view name) const {
-    auto it = mTypes.find(name);
+Type* TypesStore::get(utils::string_view name) const {
+    const auto it = mTypes.find(name);
     if (it == mTypes.end())
-        return nullptr;
-    return it->second.get();
-}
-
-Type* TypesStore::getPrimitive(Type::TypeId id) const {
-    for (const auto &pair : mTypes) {
-        if (pair.second->typeId() == id)
-            return pair.second.get();
-    }
-    return nullptr;
-}
-
-Type* TypesStore::getVoid() const {
-    auto it = mTypes.find("void");
-    assert(it != mTypes.end());
+        return mParent ? mParent->get(name) : nullptr;
     return it->second.get();
 }
 
