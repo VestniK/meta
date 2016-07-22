@@ -130,27 +130,15 @@ void AST::walk(Visitor *visitor, int depth)
 const size_t Parser::stackIncrementStep = 1024;
 
 Parser::Parser():
-@numb_tact?;...
-    tokenActions(nullptr),
-@@
-@numb_pact?;...
-    parseActions(nullptr),
-@@
-@numb_nact?;...
-    nodeActions(nullptr),
-@@
     stackTop(0),
     stateNum(0)
 {
     stack.resize(stackIncrementStep);
 }
 
-Parser::~Parser()
-{
-}
+Parser::~Parser() = default;
 
-void Parser::parse(const std::string& input)
-{
+void Parser::parse(const utils::fs::path &location, utils::string_view input) {
     lexer.start(input.data());
     stateNum = 0;
     stackTop = 0;
@@ -176,25 +164,25 @@ void Parser::parse(const std::string& input)
 @@
                 stateNum = Tm[Tr[stateNum] + Tc[termSymb]]; // Get next state from terminal transition matrix.
                 while (stateNum <= 0) // While shift-reduce actions.
-                    reduce(-stateNum);
+                    reduce(location, -stateNum);
                 break;
             }
             int prodRule = Rr[stateNum] > 0 ? Rr[stateNum] : Rm[Rc[termSymb] - Rr[stateNum]];
             if (prodRule > 0) {
-                reduce(prodRule);
+                reduce(location, prodRule);
                 while (stateNum <= 0) // While shift-reduce actions.
-                    reduce(-stateNum);
+                    reduce(location, -stateNum);
                 continue;
             }
             if (stateNum == acceptState) {
-                reduce(0); // last reduction when accept state reached.
+                reduce(location, 0); // last reduction when accept state reached.
 @numb_node?;...
                 roots().insert(roots().begin(), stack[stackTop].nodes.begin(), stack[stackTop].nodes.end());
 @@
                 return;
             }
             throw SyntaxError(
-                src, input,
+                location, input,
                 utils::array_view<StackFrame>(stack.data() + 1, stackTop > 0 ? stackTop - 1 : 0),
                 stateNum, lexer.currentToken()
             );
@@ -202,7 +190,7 @@ void Parser::parse(const std::string& input)
     }
 }
 
-void Parser::reduce(int prodRule)
+void Parser::reduce(const utils::fs::path &location, int prodRule)
 {
     // Perform reduce related actions
     const size_t oldTop = stackTop;
@@ -226,7 +214,7 @@ void Parser::reduce(int prodRule)
     }
 @numb_node?;...
     switch (nodeNumber[prodRule]) {
-        @node_name.1|case %d: addNode(new %s(utils::array_view<StackFrame>(&stack[stackTop], prodLen[prodRule]+1)))\; break\;||\n        |;
+        @node_name.1|case %d: addNode(new %s(utils::array_view<StackFrame>(&stack[stackTop], prodLen[prodRule]+1)))->setSourceLocation(location)\; break\;||\n        |;
         default:
             for (int i = 1; i < prodLen[prodRule]+1; ++i)
                 stack[stackTop].nodes.insert(stack[stackTop].nodes.end(), stack[stackTop + i].nodes.begin(), stack[stackTop + i].nodes.end());
@@ -253,11 +241,10 @@ void Parser::reduce(int prodRule)
 }
 
 @numb_node?;...
-void Parser::addNode(Node* node)
-{
-    node->setSourcePath(src);
+Node* Parser::addNode(Node* node) {
     nodes.push_back(std::unique_ptr<Node>(node));
     stack[stackTop].nodes.assign(1, node);
+    return node;
 }
 
 @@

@@ -92,7 +92,7 @@ auto findExpressions(Walkable* walkable) {
 TEST(Arythmetic, parenthesis) {
     const auto input = "package test; int foo() {return 2*(11+5)/8;}"s;
     Parser parser;
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     const auto expressions = findExpressions(parser.ast());
     ASSERT_EQ(expressions.size(), 1u);
     LoggingCalc calc;
@@ -130,7 +130,7 @@ TEST_P(Arythmetic, calcTest) {
     const std::string input = str(boost::format("package test; int foo() {return %s;}")%data.expression);
 
     Parser parser;
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     const auto expressions = findExpressions(parser.ast());
     ASSERT_EQ(expressions.size(), 1u);
     LoggingCalc calc;

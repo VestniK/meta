@@ -59,7 +59,7 @@ TEST(FunctionParsing, funcDeclarationsAndVisibilities)
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 5u);
@@ -97,7 +97,7 @@ TEST(FunctionParsing, zeroParamFunc) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 1u);
@@ -112,7 +112,7 @@ TEST(FunctionParsing, oneParamFunc) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 1u);
@@ -130,7 +130,7 @@ TEST(FunctionParsing, twoParamFunc) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 1u);
@@ -150,7 +150,7 @@ TEST(FunctionParsing, twoFunc) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 2u);
@@ -176,7 +176,7 @@ TEST(FunctionParsing, funcCall) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 2u);
@@ -202,7 +202,7 @@ TEST(FunctionParsing, funcRetType) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 2u);

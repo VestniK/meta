@@ -69,7 +69,7 @@ TEST_P(TypeCheker, typeCheck) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(param.src));
+    ASSERT_NO_THROW(parser.parse("test.meta", param.src));
     auto ast = parser.ast();
     ASSERT_NO_THROW(resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;
@@ -194,7 +194,7 @@ TEST_P(TypeChekerErrors, typeErrors) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     ASSERT_NO_THROW(resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;

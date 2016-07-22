@@ -58,10 +58,8 @@ TEST_P(Resolver, resolveErrors) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    parser.setSourcePath("lib.meta");
-    ASSERT_NO_THROW(parser.parse(lib));
-    parser.setSourcePath("test.meta");
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("lib.meta", lib));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     try {
         resolve(ast, act.dictionary());

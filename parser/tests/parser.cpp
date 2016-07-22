@@ -51,7 +51,7 @@ TEST(MetaParser, imports) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto imports = ast->getChildren<Import>(-1);
     ASSERT_EQ(imports.size(), 2u);
@@ -69,7 +69,7 @@ TEST(MetaParser, emptyPackage) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 0u);
@@ -90,7 +90,7 @@ TEST(MetaParser, varTest) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto blocks = ast->getChildren<CodeBlock>(-1);
     ASSERT_EQ(blocks.size(), 1u);
@@ -125,7 +125,7 @@ TEST(MetaParser, assignAsExpr) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto blocks = ast->getChildren<CodeBlock>(-1);
     ASSERT_EQ(blocks.size(), 1u);
@@ -162,7 +162,7 @@ TEST(MetaParser, ifStatement) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -193,7 +193,7 @@ TEST(MetaParser, ifWithEmptyStatement) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -223,7 +223,7 @@ TEST(MetaParser, ifElseStatement) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -259,7 +259,7 @@ TEST(MetaParser, ifElseEmptyStatement) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -292,7 +292,7 @@ TEST(MetaParser, ifElseBothEmptyStatements) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -323,7 +323,7 @@ TEST(MetaParser, ifBlockStatement) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -360,7 +360,7 @@ TEST(MetaParser, ifElseBlockStatement) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -387,10 +387,8 @@ TEST(MetaParser, multipleFiles) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    parser.setSourcePath("src1");
-    ASSERT_NO_THROW(parser.parse(src1));
-    parser.setSourcePath("src2");
-    ASSERT_NO_THROW(parser.parse(src2));
+    ASSERT_NO_THROW(parser.parse("src1", src1));
+    ASSERT_NO_THROW(parser.parse("src2", src2));
 
     auto ast = parser.ast();
     Function *foo = nullptr;
@@ -403,9 +401,9 @@ TEST(MetaParser, multipleFiles) {
         return false;
     });
     ASSERT_NE(foo, nullptr);
-    ASSERT_EQ(foo->sourcePath(), "src1");
+    ASSERT_EQ(foo->sourceLocation(), "src1");
     ASSERT_NE(bar, nullptr);
-    ASSERT_EQ(bar->sourcePath(), "src2");
+    ASSERT_EQ(bar->sourceLocation(), "src2");
 }
 
 namespace {
@@ -433,7 +431,7 @@ TEST(Parser, stringLiteral) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
 
     auto strs = parser.ast()->getChildren<StrLiteral>(-1);
     ASSERT_EQ(strs.size(), 2u);
@@ -462,7 +460,7 @@ TEST_P(MetaParser, binaryOp) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto binops = ast->getChildren<BinaryOp>(-1);
     ASSERT_EQ(binops.size(), 1u);

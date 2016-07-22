@@ -44,7 +44,7 @@ TEST(StructParsing, simpleStruct) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto structs = ast->getChildren<Struct>();
     ASSERT_EQ(structs.size(), 1u);
@@ -68,7 +68,7 @@ TEST(StructParsing, defaultValsOnMembers) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto structs = ast->getChildren<Struct>();
     ASSERT_EQ(structs.size(), 1u);
@@ -98,7 +98,7 @@ TEST(StructParsing, declareStructVar) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto vars = ast->getChildren<VarDecl>(infinitDepth);
     ASSERT_EQ(vars.size(), 3u);
@@ -125,7 +125,7 @@ TEST(StructParsing, memberAccess) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto assigments = ast->getChildren<Assigment>(infinitDepth);
     ASSERT_EQ(assigments.size(), 2u);

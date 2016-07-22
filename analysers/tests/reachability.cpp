@@ -43,7 +43,7 @@ TEST_P(Reachability, resolveErrors) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     try {
         checkReachability(ast);

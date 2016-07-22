@@ -146,8 +146,7 @@ bool main(const Options &opts) try {
     parser.setNodeActions(&act);
     for (const auto& src: opts.sources) {
         input.emplace_back(utils::readAll(src));
-        parser.setSourcePath(src);
-        parser.parse(input.back());
+        parser.parse(src, input.back());
     }
     auto ast = parser.ast();
     // analyse

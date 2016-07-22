@@ -44,8 +44,7 @@ TEST(MetaProcessor, attribute)
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    parser.setSourcePath("test.meta");
-    ASSERT_NO_THROW(parser.parse(input));
+    ASSERT_NO_THROW(parser.parse("test.meta",input));
     auto ast = parser.ast();
     ASSERT_NO_THROW(processMeta(ast));
     auto functions = ast->getChildren<Function>(-1);

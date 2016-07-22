@@ -18,6 +18,7 @@
  */
 #include <algorithm>
 #include <cassert>
+#include <functional>
 #include <iterator>
 #include <type_traits>
 
@@ -35,7 +36,7 @@ Function::Function(utils::array_view<StackFrame> reduction):
     const bool hasAnnotations = reduction.size() == 8;
     if (hasAnnotations) {
         for (auto annotataion : reduction[0].nodes)
-            invoke<Annotation>(&Annotation::setTarget, annotataion, this);
+            std::invoke(&Annotation::setTarget, dynamic_cast<Annotation&>(*annotataion), this);
     }
     const size_t visibilityPos = (hasAnnotations ? 1 : 0);
     const size_t typePos = visibilityPos + 1;
@@ -47,7 +48,7 @@ Function::Function(utils::array_view<StackFrame> reduction):
     mRetType = reduction[typePos].tokens;
     mName = reduction[namePos].tokens;
     for (auto arg : reduction[argsPos].nodes)
-        invoke<VarDecl>(&VarDecl::set, arg, VarDecl::argument, true);
+        std::invoke(&VarDecl::set, dynamic_cast<VarDecl&>(*arg), VarDecl::argument, true);
 }
 
 std::vector<VarDecl*> Function::args()
@@ -74,7 +75,9 @@ void Function::set(Function::Attribute attr, bool val)
 }
 
 const Declaration::AttributesMap Function::attrMap = {
-    {"entrypoint", [](Declaration *decl) {invoke<Function>(&Function::set, decl, entrypoint, true);}}
+    {"entrypoint", [](Declaration *decl) {
+        std::invoke(&Function::set, dynamic_cast<Function&>(*decl), entrypoint, true);
+    }}
 };
 
 } // namespace meta

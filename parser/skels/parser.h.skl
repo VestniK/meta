@@ -193,8 +193,8 @@ public:
     }
 
     const TokenSequence &tokens() const {return srcTokens;}
-    const std::string &sourcePath() const {return src;}
-    void setSourcePath(const std::string &val) {src = val;}
+    const utils::fs::path &sourceLocation() const {return mLocation;}
+    void setSourceLocation(const utils::fs::path &val) {mLocation = val;}
 
     /// Returns type index of the nearest VisitableNode base class of a real node
     virtual std::type_index getVisitableType() = 0;
@@ -208,7 +208,7 @@ protected:
 
 private:
     TokenSequence srcTokens;
-    std::string src;
+    utils::fs::path mLocation;
 };
 
 template<typename Func, typename... Args>
@@ -270,51 +270,48 @@ public:
     Parser();
     ~Parser();
 
-    void setSourcePath(const std::string &val) {src = val;}
-
 @numb_tact?;...
-    void setTokenActions(TokenActions *actions) {tokenActions = actions;}
+    void setTokenActions(TokenActions* actions) {tokenActions = actions;}
 @@
 @numb_pact?;...
-    void setParseActions(ParseActions *actions) {parseActions = actions;}
+    void setParseActions(ParseActions* actions) {parseActions = actions;}
 @@
 @numb_nact?;...
-    void setNodeActions(NodeActions *actions) {nodeActions = actions;}
+    void setNodeActions(NodeActions* actions) {nodeActions = actions;}
 @@
-    void parse(const std::string& input);
-    void parse(std::string&& input) = delete;
+    void parse(const utils::fs::path& location, utils::string_view input);
+    void parse(const utils::fs::path& location, std::string&& input) = delete;
 
 @numb_node?;...
-    AST *ast() {return this;}
+    AST* ast() {return this;}
 @@
 
 // Internal methods
 private:
-    void reduce(int prodRule);
+    void reduce(const utils::fs::path& location, int prodRule);
 
 @numb_node?;...
-    void addNode(Node *node);
-    virtual std::vector<Node *> &roots() override {return mRoots;}
+    Node* addNode(Node* node);
+    virtual std::vector<Node*> &roots() override {return mRoots;}
 @@
 
 // Class data
 private:
     Lexer lexer;
-    std::string src;
 @numb_tact?;...
-    TokenActions *tokenActions;
+    TokenActions* tokenActions = nullptr;
 @@
 @numb_pact?;...
-    ParseActions *parseActions;
+    ParseActions* parseActions = nullptr;
 @@
 @numb_nact?;...
-    NodeActions *nodeActions;
+    NodeActions* nodeActions = nullptr;
 @@
     std::vector<StackFrame> stack;
     size_t stackTop;
 @numb_node?;...
-    std::vector<Node *> mRoots;
-    std::vector< std::unique_ptr<Node> > nodes;
+    std::vector<Node*> mRoots;
+    std::vector<std::unique_ptr<Node>> nodes;
 @@
     static const size_t stackIncrementStep;
     int stateNum;

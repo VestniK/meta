@@ -36,7 +36,7 @@ public:
 protected:
     NodeException(Node *node, const std::string &msg = {}):
         utils::Exception(), mMsg(msg),
-        mTokens(node->tokens()), mSrc(node->sourcePath())
+        mTokens(node->tokens()), mSrc(node->sourceLocation())
     {
         mTokens.detach(mErrContext);
     }
