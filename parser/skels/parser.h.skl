@@ -8,8 +8,9 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <stdexcept>
+#include <functional>
 #include <memory>
+#include <stdexcept>
 #include <type_traits>
 #include <typeindex>
 #include <typeinfo>
@@ -89,7 +90,7 @@ private:
 
 class Visitor {
 public:
-    virtual ~Visitor() {}
+    virtual ~Visitor() = default;
 
     // return true to travers children or false to skip them
     virtual bool visit(Node*) {return true;}
@@ -98,7 +99,7 @@ public:
     @node_name.1|virtual void leave(%s*)\;||\n    |;
 
 protected:
-    Visitor() {}
+    Visitor() = default;
 };
 
 enum WalkDirection {
@@ -110,7 +111,7 @@ enum WalkDirection {
 
 constexpr int infinitDepth = -1;
 
-namespace internals {
+namespace detail {
 
 template<typename Func, class NodeSubclass, WalkDirection dir> class FuncVisitor;
 
@@ -119,7 +120,9 @@ class FuncVisitor<Func, NodeSubclass, TopDown>: public Visitor {
 public:
     FuncVisitor(Func &&func): func(std::forward<Func>(func)) {}
 
-    virtual bool visit(NodeSubclass *node) override {return std::forward<Func>(func)(node);}
+    virtual bool visit(NodeSubclass* node) override {
+        return std::forward<Func>(func)(node);
+    }
 private:
     Func &&func;
 };
@@ -134,19 +137,19 @@ private:
     Func &&func;
 };
 
-} // namespace internals
+} // namespace detail
 
 template<class NodeSubclass, WalkDirection dir, typename Walkable, typename Func>
 inline
 void walk(Walkable &walkable, Func &&func, int depth = infinitDepth) {
-    internals::FuncVisitor<Func, NodeSubclass, dir> visitor(std::forward<Func>(func));
+    detail::FuncVisitor<Func, NodeSubclass, dir> visitor(std::forward<Func>(func));
     walkable.walk(&visitor, depth);
 }
 
 template<class NodeSubclass, WalkDirection dir, typename Walkable, typename Func>
 inline
 void walk(Walkable *walkable, Func &&func, int depth = infinitDepth) {
-    internals::FuncVisitor<Func, NodeSubclass, dir> visitor(std::forward<Func>(func));
+    detail::FuncVisitor<Func, NodeSubclass, dir> visitor(std::forward<Func>(func));
     walkable->walk(&visitor, depth);
 }
 
@@ -160,7 +163,9 @@ public:
     std::vector<T*> getChildren(int depth = 1)
     {
         std::vector<T*> res;
-        @grm_name;::walk<T, TopDown>(*this, [&res](T* node) {res.push_back(node); return true;}, depth);
+        @grm_name;::walk<T, TopDown>(*this, [&res](T* node) {
+            res.push_back(node); return true;
+        }, depth);
         return res;
     }
 
@@ -215,54 +220,14 @@ auto dispatch(Func&& func, Node* node, Args&&... args) {
     return std::forward<Func>(func)(node, std::forward<Args>(args)...);
 }
 
-namespace internals {
-
-// simplified C++17 std::invoke to handle f(node, args...) and node->f(args...) cases properly
-template<bool memberFunc, typename NodeSubclass, typename Func, typename... Args> struct invoker;
-
-template<typename NodeSubclass, typename Func, typename... Args>
-struct invoker<false, NodeSubclass, Func, Args...> {
-    inline static auto invoke(Func &&func, NodeSubclass *node, Args&&... args) {
-        return std::forward<Func>(func)(node, std::forward<Args>(args)...);
-    }
-};
-
-template<typename NodeSubclass, typename Func, typename... Args>
-struct invoker<true, NodeSubclass, Func, Args...> {
-    inline static auto invoke(Func func, NodeSubclass *node, Args&&... args) {
-        return (node->*func)(std::forward<Args>(args)...);
-    }
-};
-
-} // namespace internals
-
-template<typename NodeSubclass, typename Func, typename... Args>
-inline
-auto invoke(Func &&func, Node *node, Args&&... args) {
-    typedef typename std::result_of<Func&&(NodeSubclass*, Args&&...)>::type Ret;
-    struct {
-        inline Ret operator() (Node *, Args&&...) {
-            throw std::invalid_argument("Attempt to invoke function on incorrect node type");
-        }
-        inline Ret operator() (NodeSubclass *node, Args&&...args) {
-            return internals::invoker<
-                std::is_member_function_pointer<Func>::value,
-                NodeSubclass, Func, Args...
-            >::invoke(std::forward<Func>(func), node, std::forward<Args>(args)...);
-        }
-        Func &&func;
-    } dispatchable = {std::forward<Func>(func)};
-    return dispatch(dispatchable, node, std::forward<Args>(args)...);
-}
-
 template<typename Base, typename Impl>
 class Visitable: public Base {
-    virtual std::type_index getVisitableType() override {return std::type_index(typeid(Impl));}
+    std::type_index getVisitableType() override {return std::type_index(typeid(Impl));}
 protected:
     Visitable(utils::array_view<StackFrame> reduction): Base(reduction) {}
 
-    virtual bool accept(Visitor* visitor) override {return visitor->visit(static_cast<Impl*>(this));}
-    virtual void seeOff(Visitor* visitor) override {visitor->leave(static_cast<Impl*>(this));}
+    bool accept(Visitor* visitor) override {return visitor->visit(static_cast<Impl*>(this));}
+    void seeOff(Visitor* visitor) override {visitor->leave(static_cast<Impl*>(this));}
 };
 @numb_nact?;...
 
@@ -295,12 +260,11 @@ public:
 @@
 
 @numb_node?;...
-class Parser: private AST
+class Parser: private AST {
 @@
 @numb_node!;...
-class Parser
+class Parser {
 @@
-{
 public:
     // Parser methods
     Parser();

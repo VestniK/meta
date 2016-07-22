@@ -144,7 +144,7 @@ bool main(const Options &opts) try {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    for (const auto &src: opts.sources) {
+    for (const auto& src: opts.sources) {
         input.emplace_back(utils::readAll(src));
         parser.setSourcePath(src);
         parser.parse(input.back());

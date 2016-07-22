@@ -96,8 +96,8 @@ struct TypeEvaluator {
             }
         } getAssignType;
         Type targetType = dispatch(getAssignType, node->target(), valueType);
-	node->setType(targetType);
-	return node->type();
+        node->setType(targetType);
+        return node->type();
     }
 
     Type operator() (PrefixOp* node, Types& types) {
