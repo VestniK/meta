@@ -35,7 +35,7 @@ namespace generators {
 namespace llvmgen {
 
 Environment::Environment(const std::string& moduleName):
-    context(llvm::getGlobalContext()),
+    context(),
     module(new llvm::Module(moduleName, context)),
     string(llvm::StructType::get(
         llvm::Type::getInt32PtrTy(context), // control block pointer used by meta-rt only

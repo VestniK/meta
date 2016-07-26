@@ -59,7 +59,7 @@ struct Environment
     llvm::Function *addFunction(Function *func);
     llvm::Type *getType(const typesystem::Type *type);
 
-    llvm::LLVMContext &context;
+    llvm::LLVMContext context;
     std::unique_ptr<llvm::Module> module;
     llvm::StructType *string;
 };
