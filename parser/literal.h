@@ -32,6 +32,11 @@ public:
     };
     Value value() const {return mVal;}
 
+    void walk(Visitor* visitor, int depth) override {
+        accept(visitor);
+        seeOff(visitor);
+    }
+
 private:
     Value mVal;
 };

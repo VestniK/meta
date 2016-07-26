@@ -22,15 +22,23 @@
 
 namespace meta {
 
-class SourceFile: public Visitable<Node, SourceFile>
-{
+class SourceFile: public Visitable<Node, SourceFile> {
 public:
     SourceFile(utils::array_view<StackFrame> reduction);
 
     void setPackage(const utils::string_view& val) {mPackage = val;}
     const utils::string_view& package() const {return mPackage;}
 
+    void walk(Visitor* visitor, int depth) override {
+        if (this->accept(visitor) && depth != 0) {
+            for (auto child: mChildren)
+                child->walk(visitor, depth - 1);
+        }
+        this->seeOff(visitor);
+    }
+
 private:
+    std::vector<Node::Ptr<Node>> mChildren;
     utils::string_view mPackage;
 };
 

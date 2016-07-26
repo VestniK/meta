@@ -153,7 +153,7 @@ public:
     Node(const Node&) = delete;
     const Node& operator= (const Node&) = delete;
 
-    void walk(Visitor* visitor, int depth = infinitDepth);
+    virtual void walk(Visitor* visitor, int depth = infinitDepth) = 0;
 
     template<class T>
     std::vector<T*> getChildren(int depth = 1)
@@ -269,6 +269,25 @@ public:
         operator bool () const noexcept {return mPtr != nullptr;}
         bool operator! () const noexcept {return mPtr == nullptr;}
 
+        // Compariosion
+        bool operator== (std::nullptr_t) const noexcept {return mPtr == nullptr;}
+        bool operator!= (std::nullptr_t) const noexcept {return mPtr != nullptr;}
+
+        bool operator== (T* rhs) const noexcept {return mPtr == rhs;}
+        bool operator!= (T* rhs) const noexcept {return mPtr != rhs;}
+
+        bool operator== (Ptr rhs) const noexcept {return mPtr == rhs.Ptr;}
+        bool operator!= (Ptr rhs) const noexcept {return mPtr != rhs.Ptr;}
+
+        template<typename U>
+        bool operator== (Ptr<U> rhs) const noexcept {
+            return static_cast<Node*>(mPtr) == static_cast<Node*>(rhs.mPtr);
+        }
+        template<typename U>
+        bool operator!= (Ptr<U> rhs) const noexcept {
+            return static_cast<Node*>(mPtr) != static_cast<Node*>(rhs.mPtr);
+        }
+
     private:
         static void addref(Node* ptr) noexcept {
             if (!ptr)
@@ -290,9 +309,6 @@ public:
 protected:
     virtual bool accept(Visitor *visitor) = 0;
     virtual void seeOff(Visitor *visitor) = 0;
-
-protected:
-    std::vector<Node::Ptr<Node>> children;
 
 private:
     TokenSequence mSrcTokens;

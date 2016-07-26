@@ -35,7 +35,16 @@ public:
     void setTarget(Declaration* val) {mTarget = val;}
     Declaration* target() {return mTarget;}
 
+    void walk(Visitor* visitor, int depth) override {
+        if (this->accept(visitor) && depth != 0) {
+            for (auto child: mChildren)
+                child->walk(visitor, depth - 1);
+        }
+        this->seeOff(visitor);
+    }
+
 private:
+    std::vector<Node::Ptr<Node>> mChildren;
     utils::string_view mName;
     Declaration* mTarget;
 };

@@ -18,16 +18,25 @@
  */
 #pragma once
 
+#include "parser/expression.h"
 #include "parser/metaparser.h"
 
 namespace meta {
 
-class ExprStatement: public Visitable<Node, ExprStatement>
-{
+class ExprStatement: public Visitable<Node, ExprStatement> {
 public:
     ExprStatement(utils::array_view<StackFrame> reduction);
 
-    Node* expression();
+    void walk(Visitor* visitor, int depth) override {
+        if (accept(visitor) && depth != 0)
+            mExpression->walk(visitor, depth - 1);
+        seeOff(visitor);
+    }
+
+    Expression* expression() {return mExpression;}
+
+private:
+    Node::Ptr<Expression> mExpression;
 };
 
 } // namespace meta

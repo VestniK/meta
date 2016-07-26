@@ -27,6 +27,7 @@ namespace meta {
 
 Call::Call(utils::array_view<StackFrame> reduction):
     Visitable<Expression, Call>(reduction),
+    mChildren(getNodes(reduction)),
     mFunction(nullptr)
 {
     PRECONDITION(reduction.size() == 4);
@@ -37,11 +38,11 @@ void Call::setFunction(Function* func) {
     mFunction = func;
     // use default args if needed and possible
     auto declaredArgs = func->args();
-    for (size_t pos = children.size(); pos < declaredArgs.size(); ++pos) {
+    for (size_t pos = mChildren.size(); pos < declaredArgs.size(); ++pos) {
         auto defaultVal = declaredArgs[pos]->initExpr();
         if (!defaultVal)
             break;
-        children.push_back(defaultVal);
+        mChildren.push_back(defaultVal);
     }
 }
 

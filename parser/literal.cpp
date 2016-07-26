@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 #include "utils/contract.h"
 
 #include "typesystem/typesstore.h"
@@ -29,6 +28,7 @@ Literal::Literal(utils::array_view<StackFrame> reduction): Visitable<Expression,
 {
     PRECONDITION(reduction.size() == 1);
     PRECONDITION(reduction[0].symbol > 0); // symbol is terminal
+    PRECONDITION(reduction[0].nodes.empty());
 
     switch (reduction[0].symbol) {
         case meta::trueVal: mVal = trueVal; break;

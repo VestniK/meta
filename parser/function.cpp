@@ -29,7 +29,8 @@
 namespace meta {
 
 Function::Function(utils::array_view<StackFrame> reduction):
-    Visitable<Declaration, Function>(reduction)
+    Visitable<Declaration, Function>(reduction),
+    mChildren(getNodes(reduction))
 {
     PRECONDITION(reduction.size() == 7 || reduction.size() == 8); // with or without annotations
 
@@ -56,12 +57,11 @@ std::vector<VarDecl*> Function::args()
     return getChildren<VarDecl>();
 }
 
-CodeBlock *Function::body()
-{
-    auto res = std::find_if(children.rbegin(), children.rend(), [](Node *node) {
+CodeBlock* Function::body() {
+    auto res = std::find_if(mChildren.rbegin(), mChildren.rend(), [](Node *node) {
         return node->getVisitableType() == std::type_index(typeid(CodeBlock));
     });
-    return res == children.rend() ? nullptr : static_cast<CodeBlock*>(res->get());
+    return res == mChildren.rend() ? nullptr : static_cast<CodeBlock*>(res->get());
 }
 
 bool Function::is(Function::Attribute attr) const

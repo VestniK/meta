@@ -28,7 +28,8 @@ namespace meta {
 class MemberAccess: public Visitable<Expression, MemberAccess> {
 public:
     MemberAccess(utils::array_view<StackFrame> reduction):
-        Visitable<Expression, MemberAccess>(reduction)
+        Visitable<Expression, MemberAccess>(reduction),
+        mChildren(getNodes(reduction))
     {
         PRECONDITION(reduction.size() == 3);
         PRECONDITION(static_cast<utils::string_view>(reduction[1].tokens) == ".");
@@ -51,7 +52,16 @@ public:
     utils::string_view memberName() const {return mMemberName;}
     Expression* parent() const {return mParent;}
 
+    void walk(Visitor* visitor, int depth) override {
+        if (this->accept(visitor) && depth != 0) {
+            for (auto child: mChildren)
+                child->walk(visitor, depth - 1);
+        }
+        this->seeOff(visitor);
+    }
+
 private:
+    std::vector<Node::Ptr<Node>> mChildren;
     Expression* mParent;
     Struct* mTargetStruct = nullptr;
     VarDecl* mMemberDecl = nullptr;

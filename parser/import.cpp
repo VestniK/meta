@@ -22,7 +22,9 @@
 
 namespace meta {
 
-Import::Import(utils::array_view<StackFrame> reduction): Visitable<Node, Import>(reduction)
+Import::Import(utils::array_view<StackFrame> reduction):
+    Visitable<Node, Import>(reduction),
+    mChildren(getNodes(reduction))
 {
     PRECONDITION(reduction.size() == 3 || reduction.size() == 5);
 

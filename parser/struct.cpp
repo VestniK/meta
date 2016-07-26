@@ -23,7 +23,8 @@
 namespace meta {
 
 Struct::Struct(utils::array_view<StackFrame> reduction):
-    Visitable<Declaration, Struct>(reduction)
+    Visitable<Declaration, Struct>(reduction),
+    mChildren(getNodes(reduction))
 {
     auto it = std::find_if(reduction.begin(), reduction.end(), [](const StackFrame& frame) {
         return frame.symbol == Terminal::structKeyword;

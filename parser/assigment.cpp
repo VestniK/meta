@@ -25,7 +25,8 @@
 namespace meta {
 
 Assigment::Assigment(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, Assigment>(reduction)
+    Visitable<Expression, Assigment>(reduction),
+    mChildren(getNodes(reduction))
 {
     PRECONDITION(reduction.size() == 3);
     PRECONDITION(reduction[0].nodes.size() == 1);
@@ -34,13 +35,13 @@ Assigment::Assigment(utils::array_view<StackFrame> reduction):
 }
 
 Expression* Assigment::value() {
-    PRECONDITION(children.size() == 2);
-    return dynamic_cast<Expression*>(children.back().get());
+    PRECONDITION(mChildren.size() == 2);
+    return dynamic_cast<Expression*>(mChildren.back().get());
 }
 
 Expression* Assigment::target() {
-    PRECONDITION(children.size() == 2);
-    return dynamic_cast<Expression*>(children.front().get());
+    PRECONDITION(mChildren.size() == 2);
+    return dynamic_cast<Expression*>(mChildren.front().get());
 }
 
 }

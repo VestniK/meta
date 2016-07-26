@@ -24,7 +24,8 @@
 namespace meta {
 
 StrLiteral::StrLiteral(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, StrLiteral>(reduction)
+    Visitable<Expression, StrLiteral>(reduction),
+    mChildren(getNodes(reduction))
 {
     PRECONDITION(reduction.size() == 1);
     PRECONDITION(reduction[0].symbol == strLiteral);

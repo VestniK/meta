@@ -23,7 +23,9 @@
 
 namespace meta {
 
-If::If(utils::array_view<StackFrame> reduction): Visitable<Node, If>(reduction)
+If::If(utils::array_view<StackFrame> reduction):
+    Visitable<Node, If>(reduction),
+    mChildren(getNodes(reduction))
 {
     PRECONDITION(reduction.size() == 6);
 
@@ -39,10 +41,10 @@ If::If(utils::array_view<StackFrame> reduction): Visitable<Node, If>(reduction)
     }
 }
 
-Node *If::condition()
+Node* If::condition()
 {
-    assert(!children.empty());
-    return children[0];
+    assert(!mChildren.empty());
+    return mChildren[0];
 }
 
 } // namespace meta

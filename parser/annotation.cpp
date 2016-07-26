@@ -24,7 +24,8 @@
 namespace meta {
 
 Annotation::Annotation(utils::array_view<StackFrame> reduction):
-    Visitable<Node, Annotation>(reduction)
+    Visitable<Node, Annotation>(reduction),
+    mChildren(getNodes(reduction))
 {
     PRECONDITION(reduction.size() == 1);
     PRECONDITION(reduction[0].tokens.begin() != reduction[0].tokens.end());

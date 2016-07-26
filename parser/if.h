@@ -31,7 +31,16 @@ public:
     Node *thenBlock() {return mThen;}
     Node *elseBlock() {return mElse;}
 
+    void walk(Visitor* visitor, int depth) override {
+        if (this->accept(visitor) && depth != 0) {
+            for (auto child: mChildren)
+                child->walk(visitor, depth - 1);
+        }
+        this->seeOff(visitor);
+    }
+
 private:
+    std::vector<Node::Ptr<Node>> mChildren;
     Node *mThen = nullptr;
     Node *mElse = nullptr;
 };

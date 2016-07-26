@@ -22,12 +22,18 @@
 
 namespace meta {
 
-BinaryOp::BinaryOp(utils::array_view<StackFrame> reduction): Visitable<Expression, BinaryOp>(reduction)
+BinaryOp::BinaryOp(utils::array_view<StackFrame> reduction):
+    Visitable<Expression, BinaryOp>(reduction)
 {
     PRECONDITION(reduction.size() == 3);
     PRECONDITION(reduction[0].nodes.size() == 1);
     PRECONDITION(reduction[1].symbol > 0);
+    PRECONDITION(reduction[1].nodes.empty());
     PRECONDITION(reduction[2].nodes.size() == 1);
+    POSTCONDITION(mLhs != nullptr);
+    POSTCONDITION(mRhs != nullptr);
+    mLhs = dynamic_cast<Expression*>(reduction[0].nodes.front().get());
+    mRhs = dynamic_cast<Expression*>(reduction[2].nodes.front().get());
     switch (reduction[1].symbol) {
         case addOp: mOp = add; break;
         case subOp: mOp = sub; break;
@@ -46,18 +52,6 @@ BinaryOp::BinaryOp(utils::array_view<StackFrame> reduction): Visitable<Expressio
 
         default: assert(false);
     }
-}
-
-Node *BinaryOp::left()
-{
-    PRECONDITION(children.size() == 2);
-    return children[0];
-}
-
-Node *BinaryOp::right()
-{
-    PRECONDITION(children.size() == 2);
-    return children[1];
 }
 
 } // namespace meta

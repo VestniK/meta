@@ -26,8 +26,8 @@ class BinaryOp: public Visitable<Expression, BinaryOp> {
 public:
     BinaryOp(utils::array_view<StackFrame> reduction);
 
-    Node* left();
-    Node* right();
+    Expression* left() {return mLhs;}
+    Expression* right() {return mRhs;}
 
     enum Operation {
         // Arythmetic
@@ -39,8 +39,18 @@ public:
     };
     Operation operation() const {return mOp;}
 
+    void walk(Visitor* visitor, int depth) override {
+        if (accept(visitor) && depth != 0) {
+            mLhs->walk(visitor, depth - 1);
+            mRhs->walk(visitor, depth - 1);
+        }
+        this->seeOff(visitor);
+    }
+
 private:
     Operation mOp;
+    Node::Ptr<Expression> mLhs;
+    Node::Ptr<Expression> mRhs;
 };
 
 } // namespace meta

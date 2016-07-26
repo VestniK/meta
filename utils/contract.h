@@ -55,6 +55,11 @@ private:
 #define CONCAT_3_(a, b) a##b
 #define CONCAT_2_(a, b) CONCAT_3_(a, b)
 #define CONCAT(a, b) CONCAT_2_(a, b)
-#define POSTCONDITION(cond) PostCondRunner CONCAT(postcond, __LINE__) ([&](){return (cond);}, __PRETTY_FUNCTION__, #cond)
+#define POSTCONDITION(cond) \
+    PostCondRunner CONCAT(postcond, __LINE__) ( \
+        [&](){return static_cast<bool>(cond);}, \
+        __PRETTY_FUNCTION__, \
+        #cond \
+    )
 
 #endif // NDEBUG

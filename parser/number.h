@@ -28,6 +28,11 @@ public:
 
     int value() const {return mValue;}
 
+    void walk(Visitor* visitor, int) override {
+        accept(visitor);
+        seeOff(visitor);
+    }
+
 private:
     int mValue;
 };

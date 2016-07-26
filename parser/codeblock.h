@@ -29,6 +29,17 @@ public:
 
     void add(Node* statement);
     const std::vector<Node::Ptr<Node>>& statements() const;
+
+    void walk(Visitor* visitor, int depth) override {
+        if (this->accept(visitor) && depth != 0) {
+            for (auto child: mChildren)
+                child->walk(visitor, depth - 1);
+        }
+        this->seeOff(visitor);
+    }
+
+private:
+    std::vector<Node::Ptr<Node>> mChildren;
 };
 
 } // namespace meta

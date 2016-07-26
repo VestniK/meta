@@ -32,9 +32,18 @@ public:
     Function *function() const {return mFunction;}
     void setFunction(Function *func);
 
-    const std::vector<Node::Ptr<Node>>& args() const {return children;}
+    const std::vector<Node::Ptr<Node>>& args() const {return mChildren;}
+
+    void walk(Visitor* visitor, int depth) override {
+        if (this->accept(visitor) && depth != 0) {
+            for (auto child: mChildren)
+                child->walk(visitor, depth - 1);
+        }
+        this->seeOff(visitor);
+    }
 
 private:
+    std::vector<Node::Ptr<Node>> mChildren;
     utils::string_view mFunctionName;
     Function* mFunction;
 };

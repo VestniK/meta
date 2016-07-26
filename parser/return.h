@@ -29,12 +29,26 @@ public:
     Return(utils::array_view<StackFrame> reduction):
         Visitable<Node, Return>(reduction)
     {
-        PRECONDITION(children.size() <= 1);
+        PRECONDITION(reduction.size() == 3);
+        PRECONDITION(reduction[1].nodes.size() <= 1);
+        POSTCONDITION(reduction[1].nodes.empty() || mRetVal != nullptr);
+        if (reduction[1].nodes.empty())
+            return;
+        mRetVal = dynamic_cast<Expression*>(reduction[1].nodes[0].get());
     }
 
-    Node* value() {
-        return children.size() == 0 ? nullptr : children.front();
+    Expression* value() {
+        return mRetVal;
     }
+
+    void walk(Visitor* visitor, int depth) override {
+        if (accept(visitor) && depth != 0 && mRetVal)
+            mRetVal->walk(visitor, depth - 1);
+        seeOff(visitor);
+    }
+
+private:
+    Node::Ptr<Expression> mRetVal;
 };
 
 }

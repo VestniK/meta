@@ -22,17 +22,18 @@
 namespace meta {
 
 CodeBlock::CodeBlock(utils::array_view<StackFrame> reduction):
-    Visitable<Node, CodeBlock>(reduction)
+    Visitable<Node, CodeBlock>(reduction),
+    mChildren(getNodes(reduction))
 {
 }
 
 void CodeBlock::add(Node* statement) {
     /// @todo allow to add statements only, not arbitrary node
-    children.push_back(statement);
+    mChildren.emplace_back(statement);
 }
 
 const std::vector<Node::Ptr<Node>>& CodeBlock::statements() const {
-    return children;
+    return mChildren;
 }
 
 } // namespace meta

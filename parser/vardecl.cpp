@@ -25,6 +25,7 @@ namespace meta {
 
 VarDecl::VarDecl(utils::array_view<StackFrame> reduction):
     Visitable<Node, VarDecl>(reduction),
+    mChildren(getNodes(reduction)),
     mFlags(0)
 {
     PRECONDITION(reduction.size() == 3);
@@ -44,12 +45,12 @@ void VarDecl::set(VarDecl::Flags flag, bool val)
 
 bool VarDecl::inited() const
 {
-    return !children.empty();
+    return !mChildren.empty();
 }
 
 Node *VarDecl::initExpr()
 {
-    return children.empty() ? nullptr : children.front();
+    return mChildren.empty() ? nullptr : mChildren.front();
 }
 
 }

@@ -28,11 +28,9 @@ ExprStatement::ExprStatement(utils::array_view<StackFrame> reduction):
     PRECONDITION(reduction.size() == 2);
     PRECONDITION(reduction[0].nodes.size() == 1);
     PRECONDITION(reduction[1].nodes.empty());
-}
+    POSTCONDITION(mExpression != nullptr);
 
-Node* ExprStatement::expression() {
-    PRECONDITION(children.size() == 1);
-    return children[0];
+    mExpression = dynamic_cast<Expression*>(reduction[0].nodes[0].get());
 }
 
 } // namespace meta

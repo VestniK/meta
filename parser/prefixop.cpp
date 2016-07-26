@@ -23,7 +23,8 @@
 namespace meta {
 
 PrefixOp::PrefixOp(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, PrefixOp>(reduction)
+    Visitable<Expression, PrefixOp>(reduction),
+    mChildren(getNodes(reduction))
 {
     PRECONDITION(reduction.size() == 2);
     PRECONDITION(reduction[0].symbol > 0); // symbol is terminal
@@ -38,8 +39,8 @@ PrefixOp::PrefixOp(utils::array_view<StackFrame> reduction):
 
 Node *PrefixOp::operand()
 {
-    PRECONDITION(children.size() == 1);
-    return children[0];
+    PRECONDITION(mChildren.size() == 1);
+    return mChildren[0];
 }
 
 } // namespace meta
