@@ -107,6 +107,16 @@ int main(int argc, char **argv) try {
             std::cout << "0.0.0" << std::endl; /// TODO: extract version from git tags
             return EXIT_SUCCESS;
         }
+        if (opts.output.empty())  {
+            std::cerr << "Error: output is not specified" << std::endl;
+            std::cerr << "Ussage: " << argv[0] << " [options] -o OUTPUT SRC_FILE..." << std::endl;
+            return EXIT_FAILURE;
+        }
+        if (opts.sources.empty()) {
+            std::cerr << "Error: no source files specified" << std::endl;
+            std::cerr << "Ussage: " << argv[0] << " [options] -o OUTPUT SRC_FILE..." << std::endl;
+            return EXIT_FAILURE;
+        }
     } catch(std::exception &err) {
         std::cerr << "Error: " << err.what() << std::endl;
         std::cerr << "Ussage: " << argv[0] << " [options] -o OUTPUT SRC_FILE..." << std::endl;
