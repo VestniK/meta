@@ -36,7 +36,7 @@ public:
         PRECONDITION(reduction[2].nodes.size() == 0);
         PRECONDITION(reduction[2].symbol == Terminal::identifier);
 
-        mParent = dynamic_cast<Expression*>(reduction[0].nodes.front());
+        mParent = dynamic_cast<Expression*>(reduction[0].nodes.front().get());
         if (!mParent)
             throw UnexpectedNode(reduction[0].nodes.front(), "Expression expected");
         mMemberName = reduction[2].tokens;

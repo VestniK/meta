@@ -9,7 +9,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
-#include <memory>
 #include <stdexcept>
 #include <type_traits>
 #include <typeindex>
@@ -146,26 +145,6 @@ void walk(Walkable *walkable, Func &&func, int depth = infinitDepth) {
     walkable->walk(&visitor, depth);
 }
 
-class AST {
-public:
-    virtual ~AST() {}
-
-    void walk(Visitor *visitor, int depth = infinitDepth);
-
-    template<class T>
-    std::vector<T*> getChildren(int depth = 1)
-    {
-        std::vector<T*> res;
-        @grm_name;::walk<T, TopDown>(*this, [&res](T* node) {
-            res.push_back(node); return true;
-        }, depth);
-        return res;
-    }
-
-private:
-    virtual std::vector<Node*> &roots() = 0;
-};
-
 class Node {
 public:
     Node(utils::array_view<StackFrame> reduction);
@@ -188,7 +167,7 @@ public:
         return res;
     }
 
-    const TokenSequence &tokens() const {return srcTokens;}
+    const TokenSequence &tokens() const {return mSrcTokens;}
     const utils::fs::path &sourceLocation() const {return mLocation;}
     void setSourceLocation(const utils::fs::path &val) {mLocation = val;}
 
@@ -316,9 +295,32 @@ protected:
     std::vector<Node::Ptr<Node>> children;
 
 private:
-    TokenSequence srcTokens;
+    TokenSequence mSrcTokens;
     utils::fs::path mLocation;
     size_t mRefcount = 0;
+};
+
+TokenSequence getTokens(utils::array_view<StackFrame> reduction);
+std::vector<Node::Ptr<Node>> getNodes(utils::array_view<StackFrame> reduction);
+
+class AST {
+public:
+    virtual ~AST() {}
+
+    void walk(Visitor *visitor, int depth = infinitDepth);
+
+    template<class T>
+    std::vector<T*> getChildren(int depth = 1)
+    {
+        std::vector<T*> res;
+        @grm_name;::walk<T, TopDown>(*this, [&res](T* node) {
+            res.push_back(node); return true;
+        }, depth);
+        return res;
+    }
+
+private:
+    virtual std::vector<Node::Ptr<Node>> &roots() = 0;
 };
 
 template<typename Func, typename... Args>
@@ -375,7 +377,7 @@ struct StackFrame {
     int symbol; // Symbol stacked, terminal (positive) or nonterminal (negative).
     TokenSequence tokens;
 @numb_node?;...
-    std::vector<Node*> nodes;
+    std::vector<Node::Ptr<Node>> nodes;
 @@
 };
 
@@ -412,7 +414,7 @@ private:
 
 @numb_node?;...
     Node* addNode(Node* node);
-    std::vector<Node*>& roots() override {return mRoots;}
+    std::vector<Node::Ptr<Node>>& roots() override {return mRoots;}
 @@
 
 // Class data
@@ -430,8 +432,7 @@ private:
     std::vector<StackFrame> stack;
     size_t stackTop;
 @numb_node?;...
-    std::vector<Node*> mRoots;
-    std::vector<Node::Ptr<Node>> nodes;
+    std::vector<Node::Ptr<Node>> mRoots;
 @@
     static const size_t stackIncrementStep;
     int stateNum;

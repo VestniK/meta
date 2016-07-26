@@ -102,11 +102,25 @@ const size_t SyntaxError::termsCount = @numb_term.d;;
 @@
 @numb_node?;...
 
-Node::Node(utils::array_view<StackFrame> reduction) {
-    for (const auto& frame: reduction) {
-        std::copy(frame.nodes.begin(), frame.nodes.end(), std::back_inserter(children));
-        srcTokens.join(frame.tokens);
-    }
+TokenSequence getTokens(utils::array_view<StackFrame> reduction) {
+    TokenSequence res;
+    for (const auto& frame: reduction)
+        res.join(frame.tokens);
+    return res;
+}
+
+/// \todo remove this function with the necessity to have it
+std::vector<Node::Ptr<Node>> getNodes(utils::array_view<StackFrame> reduction) {
+    std::vector<Node::Ptr<Node>> res;
+    for (const auto& frame: reduction)
+        std::copy(frame.nodes.begin(), frame.nodes.end(), std::back_inserter(res));
+    return res;
+}
+
+Node::Node(utils::array_view<StackFrame> reduction):
+    children(getNodes(reduction)),
+    mSrcTokens(getTokens(reduction))
+{
 }
 
 void Node::walk(Visitor* visitor, int depth) {
@@ -223,7 +237,7 @@ void Parser::reduce(const utils::fs::path &location, int prodRule)
 @numb_nact?;...
     if (nodeActions) {
         switch (nodeActionNumber[prodRule]) {
-            @nact_func.1|case %d: nodeActions->on%s(dynamic_cast<%s*>(stack[stackTop].nodes.front()))\; break\;||\n            |;
+            @nact_func.1|case %d: nodeActions->on%s(dynamic_cast<%s*>(stack[stackTop].nodes.front().get()))\; break\;||\n            |;
         }
     }
 @@
@@ -242,8 +256,7 @@ void Parser::reduce(const utils::fs::path &location, int prodRule)
 
 @numb_node?;...
 Node* Parser::addNode(Node* node) {
-    nodes.emplace_back(node);
-    stack[stackTop].nodes.assign(1, node);
+    stack[stackTop].nodes = {node};
     return node;
 }
 
