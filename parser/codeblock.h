@@ -28,7 +28,7 @@ public:
     CodeBlock(utils::array_view<StackFrame> reduction);
 
     void add(Node* statement);
-    const std::vector<Node*>& statements() const;
+    const std::vector<Node::Ptr<Node>>& statements() const;
 };
 
 } // namespace meta

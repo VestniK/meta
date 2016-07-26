@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "utils/types.h"
+#include "utils/contract.h"
 
 #include "@grm_name;lexer.h"
 
@@ -36,15 +37,7 @@ class Node;
 @node_name.1|class %s\;||\n|;
 @@
 
-// Parser state which is stored in the stack
-struct StackFrame {
-    int state;
-    int symbol; // Symbol stacked, terminal (positive) or nonterminal (negative).
-    TokenSequence tokens;
-@numb_node?;...
-    std::vector<Node*> nodes;
-@@
-};
+struct StackFrame;
 
 class SyntaxError: public std::exception {
 public:
@@ -176,7 +169,10 @@ private:
 class Node {
 public:
     Node(utils::array_view<StackFrame> reduction);
-    virtual ~Node() {}
+    virtual ~Node() = default;
+
+    Node(const Node&) = delete;
+    const Node& operator= (const Node&) = delete;
 
     void walk(Visitor* visitor, int depth = infinitDepth);
 
@@ -199,16 +195,130 @@ public:
     /// Returns type index of the nearest VisitableNode base class of a real node
     virtual std::type_index getVisitableType() = 0;
 
+    template<typename T>
+    class Ptr {
+        static_assert(std::is_base_of<Node, T>::value);
+    public:
+        Ptr(T* ptr = nullptr) noexcept : mPtr(ptr) {
+            POSTCONDITION(!mPtr || static_cast<Node*>(mPtr)->mRefcount != 0);
+            addref(mPtr);
+        }
+        ~Ptr() {
+            deref(mPtr);
+        }
+
+        // Copy
+        Ptr(const Ptr& rhs): mPtr(rhs.mPtr) {
+            POSTCONDITION(!mPtr || static_cast<Node*>(mPtr)->mRefcount > 1);
+            addref(mPtr);
+        }
+        const Ptr& operator= (const Ptr& rhs) noexcept {
+            PRECONDITION(static_cast<Node*>(mPtr) != static_cast<Node*>(rhs));
+            POSTCONDITION(!mPtr || static_cast<Node*>(mPtr)->mRefcount > 1);
+            deref(mPtr);
+            mPtr = rhs.mPtr;
+            addref(mPtr);
+            return *this;
+        }
+        template<typename U>
+        Ptr(const Ptr<U>& rhs) noexcept : mPtr(rhs.mPtr) {
+            POSTCONDITION(!mPtr || static_cast<Node*>(mPtr)->mRefcount > 1);
+            static_assert(std::is_base_of<T, U>::value);
+            addref(mPtr);
+        }
+        template<typename U>
+        const Ptr& operator= (const Ptr<U>& rhs) noexcept {
+            PRECONDITION(static_cast<Node*>(mPtr) != static_cast<Node*>(rhs));
+            POSTCONDITION(!mPtr || static_cast<Node*>(mPtr)->mRefcount > 1);
+            static_assert(std::is_base_of<T, U>::value);
+            deref(mPtr);
+            mPtr = rhs.mPtr;
+            addref(mPtr);
+            return *this;
+        }
+        const Ptr& operator= (T* rhs) noexcept {
+            PRECONDITION(static_cast<Node*>(mPtr) != static_cast<Node*>(rhs));
+            POSTCONDITION(!mPtr || static_cast<Node*>(mPtr)->mRefcount != 0);
+            deref(mPtr);
+            mPtr = rhs;
+            addref(mPtr);
+            return *this;
+        }
+
+        // Move
+        Ptr(Ptr&& rhs) noexcept : mPtr(rhs.mPtr) {
+            POSTCONDITION(!mPtr || static_cast<Node*>(mPtr)->mRefcount != 0);
+            rhs.mPtr = nullptr;
+        }
+        Ptr& operator= (Ptr&& rhs) noexcept {
+            PRECONDITION(static_cast<Node*>(mPtr) != static_cast<Node*>(rhs));
+            POSTCONDITION(!mPtr || static_cast<Node*>(mPtr)->mRefcount != 0);
+            deref(mPtr);
+            mPtr = rhs.mPtr;
+            rhs.mPtr = nullptr;
+            return *this;
+        }
+        template<typename U>
+        Ptr(Ptr<U>&& rhs) noexcept : mPtr(rhs.mPtr) {
+            POSTCONDITION(!mPtr || static_cast<Node*>(mPtr)->mRefcount != 0);
+            static_assert(std::is_base_of<T, U>::value);
+            rhs.mPtr = nullptr;
+        }
+        template<typename U>
+        Ptr& operator= (Ptr<U>&& rhs) noexcept {
+            PRECONDITION(static_cast<Node*>(mPtr) != static_cast<Node*>(rhs));
+            POSTCONDITION(!mPtr || static_cast<Node*>(mPtr)->mRefcount != 0);
+            static_assert(std::is_base_of<T, U>::value);
+            deref(mPtr);
+            mPtr = rhs.mPtr;
+            rhs.mPtr = nullptr;
+            return *this;
+        }
+
+        // Get pointer
+        T* get() const noexcept {return mPtr;}
+        template<typename U>
+        operator U* () const noexcept {
+            static_assert(std::is_base_of<T, U>::value);
+            return mPtr;
+        }
+        T& operator* () const noexcept {return *mPtr;}
+        T* operator-> () const noexcept {return mPtr;}
+
+        // Emptiness check
+        explicit
+        operator bool () const noexcept {return mPtr != nullptr;}
+        bool operator! () const noexcept {return mPtr == nullptr;}
+
+    private:
+        static void addref(Node* ptr) noexcept {
+            if (!ptr)
+                return;
+            ++(ptr->mRefcount);
+        }
+        static void deref(Node* ptr) noexcept {
+            PRECONDITION(!ptr || ptr->mRefcount != 0);
+            if (!ptr)
+                return;
+            if (--(ptr->mRefcount) == 0)
+                delete ptr;
+        }
+
+    private:
+        T* mPtr = nullptr;
+    };
+
 protected:
     virtual bool accept(Visitor *visitor) = 0;
     virtual void seeOff(Visitor *visitor) = 0;
 
 protected:
-    std::vector<Node*> children;
+    std::vector<Node::Ptr<Node>> children;
 
 private:
     TokenSequence srcTokens;
     utils::fs::path mLocation;
+    size_t mRefcount = 0;
 };
 
 template<typename Func, typename... Args>
@@ -259,6 +369,16 @@ public:
 };
 @@
 
+// Parser state which is stored in the stack
+struct StackFrame {
+    int state;
+    int symbol; // Symbol stacked, terminal (positive) or nonterminal (negative).
+    TokenSequence tokens;
+@numb_node?;...
+    std::vector<Node*> nodes;
+@@
+};
+
 @numb_node?;...
 class Parser: private AST {
 @@
@@ -292,7 +412,7 @@ private:
 
 @numb_node?;...
     Node* addNode(Node* node);
-    virtual std::vector<Node*> &roots() override {return mRoots;}
+    std::vector<Node*>& roots() override {return mRoots;}
 @@
 
 // Class data
@@ -311,7 +431,7 @@ private:
     size_t stackTop;
 @numb_node?;...
     std::vector<Node*> mRoots;
-    std::vector<std::unique_ptr<Node>> nodes;
+    std::vector<Node::Ptr<Node>> nodes;
 @@
     static const size_t stackIncrementStep;
     int stateNum;

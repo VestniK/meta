@@ -32,7 +32,7 @@ public:
     Function *function() const {return mFunction;}
     void setFunction(Function *func);
 
-    const std::vector<Node*>& args() const {return children;}
+    const std::vector<Node::Ptr<Node>>& args() const {return children;}
 
 private:
     utils::string_view mFunctionName;

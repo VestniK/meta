@@ -35,12 +35,12 @@ Assigment::Assigment(utils::array_view<StackFrame> reduction):
 
 Expression* Assigment::value() {
     PRECONDITION(children.size() == 2);
-    return dynamic_cast<Expression*>(children.back());
+    return dynamic_cast<Expression*>(children.back().get());
 }
 
 Expression* Assigment::target() {
     PRECONDITION(children.size() == 2);
-    return dynamic_cast<Expression*>(children.front());
+    return dynamic_cast<Expression*>(children.front().get());
 }
 
 }

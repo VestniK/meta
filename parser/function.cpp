@@ -61,7 +61,7 @@ CodeBlock *Function::body()
     auto res = std::find_if(children.rbegin(), children.rend(), [](Node *node) {
         return node->getVisitableType() == std::type_index(typeid(CodeBlock));
     });
-    return res == children.rend() ? nullptr : static_cast<CodeBlock*>(*res);
+    return res == children.rend() ? nullptr : static_cast<CodeBlock*>(res->get());
 }
 
 bool Function::is(Function::Attribute attr) const

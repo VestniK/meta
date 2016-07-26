@@ -242,7 +242,7 @@ void Parser::reduce(const utils::fs::path &location, int prodRule)
 
 @numb_node?;...
 Node* Parser::addNode(Node* node) {
-    nodes.push_back(std::unique_ptr<Node>(node));
+    nodes.emplace_back(node);
     stack[stackTop].nodes.assign(1, node);
     return node;
 }
