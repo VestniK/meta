@@ -22,8 +22,7 @@
 
 namespace meta {
 
-class CodeBlock: public Visitable<Node, CodeBlock>
-{
+class CodeBlock: public Visitable<Node, CodeBlock> {
 public:
     CodeBlock(utils::array_view<StackFrame> reduction);
 
@@ -31,11 +30,11 @@ public:
     const std::vector<Node::Ptr<Node>>& statements() const;
 
     void walk(Visitor* visitor, int depth) override {
-        if (this->accept(visitor) && depth != 0) {
+        if (accept(visitor) && depth != 0) {
             for (auto child: mChildren)
                 child->walk(visitor, depth - 1);
         }
-        this->seeOff(visitor);
+        seeOff(visitor);
     }
 
 private:

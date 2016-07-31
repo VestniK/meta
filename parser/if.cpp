@@ -24,27 +24,25 @@
 namespace meta {
 
 If::If(utils::array_view<StackFrame> reduction):
-    Visitable<Node, If>(reduction),
-    mChildren(getNodes(reduction))
+    Visitable<Node, If>(reduction)
 {
+    constexpr size_t condPos = 2;
+    constexpr size_t thenPos = 4;
+    constexpr size_t elsePos = 5;
+    // {'if', '(', [2]<Expr>, ')', [4]<Sttmnt>, opt{'else', [5]<Sttmnt>}}
     PRECONDITION(reduction.size() == 6);
+    PRECONDITION(reduction[condPos].nodes.size() == 1);
+    PRECONDITION(reduction[thenPos].nodes.size() <= 1);
+    PRECONDITION(reduction[elsePos].nodes.size() <= 1);
+    POSTCONDITION(mConditon != nullptr);
+    POSTCONDITION(mThen != nullptr || reduction[thenPos].nodes.empty());
+    POSTCONDITION(mElse != nullptr || reduction[elsePos].nodes.empty());
 
-    const size_t thenStatementPos = 4;
-    const size_t elseStatementPos = 5;
-    if (!reduction[thenStatementPos].nodes.empty()) {
-        assert(reduction[thenStatementPos].nodes.size() == 1);
-        mThen = reduction[thenStatementPos].nodes[0];
-    }
-    if (!reduction[elseStatementPos].nodes.empty()) {
-        assert(reduction[elseStatementPos].nodes.size() == 1);
-        mElse = reduction[elseStatementPos].nodes[0];
-    }
-}
-
-Node* If::condition()
-{
-    assert(!mChildren.empty());
-    return mChildren[0];
+    mConditon = dynamic_cast<Expression*>(reduction[condPos].nodes[0].get());
+    if (!reduction[thenPos].nodes.empty())
+        mThen = reduction[thenPos].nodes[0];
+    if (!reduction[elsePos].nodes.empty())
+        mElse = reduction[elsePos].nodes[0];
 }
 
 } // namespace meta

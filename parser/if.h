@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "parser/expression.h"
 #include "parser/metaparser.h"
 
 namespace meta {
@@ -27,22 +28,25 @@ class If: public Visitable<Node, If>
 public:
     If(utils::array_view<StackFrame> reduction);
 
-    Node *condition();
-    Node *thenBlock() {return mThen;}
-    Node *elseBlock() {return mElse;}
+    Expression* condition() {return mConditon;}
+    Node* thenBlock() {return mThen;}
+    Node* elseBlock() {return mElse;}
 
     void walk(Visitor* visitor, int depth) override {
-        if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
+        if (accept(visitor) && depth != 0) {
+            mConditon->walk(visitor, depth - 1);
+            if (mThen)
+                mThen->walk(visitor, depth - 1);
+            if (mElse)
+                mElse->walk(visitor, depth - 1);
         }
-        this->seeOff(visitor);
+        seeOff(visitor);
     }
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
-    Node *mThen = nullptr;
-    Node *mElse = nullptr;
+    Node::Ptr<Expression> mConditon;
+    Node::Ptr<Node> mThen;
+    Node::Ptr<Node> mElse;
 };
 
 } // namespace meta

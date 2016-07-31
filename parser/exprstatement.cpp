@@ -25,6 +25,7 @@ namespace meta {
 ExprStatement::ExprStatement(utils::array_view<StackFrame> reduction):
     Visitable<Node, ExprStatement>(reduction)
 {
+    // {<Expr>, ';'}
     PRECONDITION(reduction.size() == 2);
     PRECONDITION(reduction[0].nodes.size() == 1);
     PRECONDITION(reduction[1].nodes.empty());
