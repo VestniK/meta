@@ -5,7 +5,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(SRC
   actions.cpp
-  assigment.cpp
   binaryop.cpp
   call.cpp
   codeblock.cpp

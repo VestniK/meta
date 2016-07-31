@@ -19,6 +19,7 @@
 #pragma once
 
 #include "utils/types.h"
+#include "utils/contract.h"
 
 #include "parser/expression.h"
 
@@ -26,21 +27,35 @@ namespace meta {
 
 class Assigment: public Visitable<Expression, Assigment> {
 public:
-    Assigment(utils::array_view<StackFrame> reduction);
+    Assigment(utils::array_view<StackFrame> reduction):
+        Visitable<Expression, Assigment>(reduction)
+    {
+        PRECONDITION(reduction.size() == 3);
+        PRECONDITION(reduction[0].nodes.size() == 1);
+        PRECONDITION(reduction[1].nodes.empty());
+        PRECONDITION(reduction[2].nodes.size() == 1);
 
-    void walk(Visitor* visitor, int depth) override {
-        if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
-        }
-        this->seeOff(visitor);
+        POSTCONDITION(mTarget != nullptr);
+        POSTCONDITION(mValue != nullptr);
+
+        mTarget = dynamic_cast<Expression*>(reduction[0].nodes[0].get());
+        mValue = dynamic_cast<Expression*>(reduction[2].nodes[0].get());
     }
 
-    Expression* value();
-    Expression* target();
+    void walk(Visitor* visitor, int depth) override {
+        if (accept(visitor) && depth != 0) {
+            mTarget->walk(visitor, depth - 1);
+            mValue->walk(visitor, depth - 1);
+        }
+        seeOff(visitor);
+    }
+
+    Expression* value() {return mValue;}
+    Expression* target() {return mTarget;}
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
+    Node::Ptr<Expression> mTarget;
+    Node::Ptr<Expression> mValue;
 };
 
 }
