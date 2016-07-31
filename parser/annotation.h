@@ -28,23 +28,31 @@ class Declaration;
 
 class Annotation: public Visitable<Node, Annotation> {
 public:
-    Annotation(utils::array_view<StackFrame> reduction);
+    Annotation(utils::array_view<StackFrame> reduction):
+        Visitable<Node, Annotation>(reduction)
+    {
+        PRECONDITION(reduction.size() == 1);
+        PRECONDITION(reduction[0].tokens.begin() != reduction[0].tokens.end());
+        PRECONDITION(reduction[0].tokens.begin()->termNum == annotation);
+        PRECONDITION(countNodes(reduction) == 0);
+
+        Token token = *(reduction[0].tokens.begin());
+        ++token.start; // skip '@' character in the beggining of annotation
+        mName = token;
+    }
 
     const utils::string_view& name() const {return mName;}
 
     void setTarget(Declaration* val) {mTarget = val;}
     Declaration* target() {return mTarget;}
 
-    void walk(Visitor* visitor, int depth) override {
-        if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
-        }
-        this->seeOff(visitor);
+    void walk(Visitor* visitor, int) override {
+        accept(visitor);
+        // Annotation have no children yet
+        seeOff(visitor);
     }
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
     utils::string_view mName;
     Declaration* mTarget;
 };

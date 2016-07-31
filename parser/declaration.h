@@ -25,10 +25,9 @@
 
 namespace meta {
 
-class Declaration: public Node
-{
+class Declaration: public Node {
 public:
-    using AttributesMap = std::map<std::string, std::function<void(Declaration *)>>;
+    using AttributesMap = std::map<std::string, std::function<void(Declaration*)>>;
     virtual const AttributesMap &attributes() const = 0;
 
 protected:

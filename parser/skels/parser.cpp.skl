@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cstring>
 #include <cstdio>
+#include <numeric>
 #include <sstream>
 
 #include "@grm_name;parser.h"
@@ -107,6 +108,12 @@ TokenSequence getTokens(utils::array_view<StackFrame> reduction) {
     for (const auto& frame: reduction)
         res.join(frame.tokens);
     return res;
+}
+
+size_t countNodes(utils::array_view<StackFrame> reduction) {
+    return std::accumulate(reduction.begin(), reduction.end(), 0u, [](size_t count, const StackFrame& frame) {
+        return count + frame.nodes.size();
+    });
 }
 
 /// \todo remove this function with the necessity to have it

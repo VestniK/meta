@@ -317,6 +317,7 @@ private:
 };
 
 TokenSequence getTokens(utils::array_view<StackFrame> reduction);
+size_t countNodes(utils::array_view<StackFrame> reduction);
 std::vector<Node::Ptr<Node>> getNodes(utils::array_view<StackFrame> reduction);
 
 class AST {
