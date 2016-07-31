@@ -43,6 +43,16 @@ public:
     Bitmask operator| (E e) const {
         return Bitmask(mVal | mask(e));
     }
+    constexpr
+    Bitmask& operator|= (Bitmask rhs) {
+        mVal |= rhs.mVal;
+        return *this;
+    }
+    constexpr
+    Bitmask& operator| (E e) {
+        mVal |= mask(e);
+        return *this;
+    }
 
     constexpr
     Bitmask operator& (Bitmask rhs) const {

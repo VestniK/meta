@@ -30,10 +30,10 @@ BinaryOp::BinaryOp(utils::array_view<StackFrame> reduction):
     PRECONDITION(reduction[1].symbol > 0);
     PRECONDITION(reduction[1].nodes.empty());
     PRECONDITION(reduction[2].nodes.size() == 1);
-    POSTCONDITION(mLhs != nullptr);
-    POSTCONDITION(mRhs != nullptr);
-    mLhs = dynamic_cast<Expression*>(reduction[0].nodes.front().get());
-    mRhs = dynamic_cast<Expression*>(reduction[2].nodes.front().get());
+    POSTCONDITION(mLeft != nullptr);
+    POSTCONDITION(mRight != nullptr);
+    mLeft = dynamic_cast<Expression*>(reduction[0].nodes.front().get());
+    mRight = dynamic_cast<Expression*>(reduction[2].nodes.front().get());
     switch (reduction[1].symbol) {
         case addOp: mOp = add; break;
         case subOp: mOp = sub; break;

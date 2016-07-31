@@ -28,24 +28,24 @@ class Call: public Visitable<Expression, Call> {
 public:
     Call(utils::array_view<StackFrame> reduction);
 
-    const utils::string_view &functionName() const {return mFunctionName;}
-    Function *function() const {return mFunction;}
-    void setFunction(Function *func);
+    utils::string_view functionName() const {return mFunctionName;}
+    Function* function() const {return mFunction;}
+    void setFunction(Function* func);
 
-    const std::vector<Node::Ptr<Node>>& args() const {return mChildren;}
+    const std::vector<Node::Ptr<Expression>>& args() const {return mArgs;}
 
     void walk(Visitor* visitor, int depth) override {
-        if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
+        if (accept(visitor) && depth != 0) {
+            for (auto arg: mArgs)
+                arg->walk(visitor, depth - 1);
         }
-        this->seeOff(visitor);
+        seeOff(visitor);
     }
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
+    std::vector<Node::Ptr<Expression>> mArgs;
     utils::string_view mFunctionName;
-    Function* mFunction;
+    Function* mFunction = nullptr;
 };
 
 } // namespace meta

@@ -81,7 +81,7 @@ bool ReachabilityChecker::visit(CodeBlock *node)
 
 bool ReachabilityChecker::visit(VarDecl *node)
 {
-    if (node->is(VarDecl::argument))
+    if (node->flags() & VarFlags::argument)
         return false;
     checkReturn(node);
     return false;

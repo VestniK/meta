@@ -258,7 +258,7 @@ public:
         T* get() const noexcept {return mPtr;}
         template<typename U>
         operator U* () const noexcept {
-            static_assert(std::is_base_of<T, U>::value);
+            static_assert(std::is_base_of<U, T>::value);
             return mPtr;
         }
         T& operator* () const noexcept {return *mPtr;}

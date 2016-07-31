@@ -48,8 +48,10 @@ Function::Function(utils::array_view<StackFrame> reduction):
         mVisibility = fromToken(*visTokenIt);
     mRetType = reduction[typePos].tokens;
     mName = reduction[namePos].tokens;
-    for (auto arg : reduction[argsPos].nodes)
-        std::invoke(&VarDecl::set, dynamic_cast<VarDecl&>(*arg), VarDecl::argument, true);
+    for (auto argNode : reduction[argsPos].nodes) {
+        auto& arg = dynamic_cast<VarDecl&>(*argNode);
+        arg.flags() |= VarFlags::argument;
+    }
 }
 
 std::vector<VarDecl*> Function::args()

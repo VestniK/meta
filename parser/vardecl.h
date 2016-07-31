@@ -18,43 +18,44 @@
  */
 #pragma once
 
-#include <experimental/string_view>
+#include "utils/types.h"
+#include "utils/bitmask.h"
 
+#include "parser/expression.h"
 #include "parser/metaparser.h"
 #include "parser/typed.h"
 
 namespace meta {
 
+enum class VarFlags {
+    argument
+};
+
 class VarDecl: public Visitable<Node, VarDecl>, public Typed {
 public:
     VarDecl(utils::array_view<StackFrame> reduction);
-
-    enum Flags
-    {
-        argument = (1<<0)
-    };
 
     const utils::string_view& name() const {return mName;}
 
     const utils::string_view& typeName() const {return mTypeName;}
 
-    bool inited() const;
-    Node* initExpr();
-    bool is(Flags flag) const;
-    void set(Flags flag, bool val = true);
+    bool inited() const {return mInitExpr != nullptr;}
+    Expression* initExpr() const {return mInitExpr;}
+    auto flags() const {return mFlags;}
+    auto& flags() {return mFlags;}
 
     void walk(Visitor* visitor, int depth) override {
-        if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
+        if (accept(visitor) && depth != 0) {
+            if (mInitExpr)
+                mInitExpr->walk(visitor, depth - 1);
         }
-        this->seeOff(visitor);
+        seeOff(visitor);
     }
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
+    Node::Ptr<Expression> mInitExpr;
     utils::string_view mName, mTypeName;
-    int mFlags;
+    utils::Bitmask<VarFlags> mFlags;
 };
 
 }

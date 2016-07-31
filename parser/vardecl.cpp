@@ -24,33 +24,17 @@
 namespace meta {
 
 VarDecl::VarDecl(utils::array_view<StackFrame> reduction):
-    Visitable<Node, VarDecl>(reduction),
-    mChildren(getNodes(reduction)),
-    mFlags(0)
+    Visitable<Node, VarDecl>(reduction)
 {
+    // {<type>, <name>, opt{'=', 'Expr'}}
     PRECONDITION(reduction.size() == 3);
+    PRECONDITION(countNodes(reduction) == reduction[2].nodes.size());
+    PRECONDITION(reduction[2].nodes.size() <= 1);
+    POSTCONDITION(reduction[2].nodes.empty() || mInitExpr != nullptr);
     mTypeName = reduction[0].tokens;
     mName = reduction[1].tokens;
-}
-
-bool VarDecl::is(VarDecl::Flags flag) const
-{
-    return (mFlags & flag) != 0;
-}
-
-void VarDecl::set(VarDecl::Flags flag, bool val)
-{
-    mFlags = val ? (mFlags | flag) : (mFlags & ~flag);
-}
-
-bool VarDecl::inited() const
-{
-    return !mChildren.empty();
-}
-
-Node *VarDecl::initExpr()
-{
-    return mChildren.empty() ? nullptr : mChildren.front();
+    if (!reduction[2].nodes.empty())
+        mInitExpr = dynamic_cast<Expression*>(reduction[2].nodes[0].get());
 }
 
 }

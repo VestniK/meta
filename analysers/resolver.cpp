@@ -160,7 +160,7 @@ public:
         if (Var* var = dynamic_cast<Var*>(node->target())) {
             auto decl = mVars.find(var->name());
             ++decl->second.modifyCount;
-            if (decl->second.decl->is(VarDecl::argument))
+            if (decl->second.decl->flags() & VarFlags::argument)
                 throw SemanticError(node, "Attempt to modify function argument '%s'", var->name());
         } else if (dynamic_cast<MemberAccess*>(node->target()))
             throw UnexpectedNode(node->target(), "Assign value to struct member is not yet implemented");
@@ -173,7 +173,7 @@ private:
     struct VarSrc {
         VarSrc(VarDecl *decl = nullptr):
             decl(decl),
-            modifyCount(decl && (decl->inited() || decl->is(VarDecl::argument)) ? 1 : 0),
+            modifyCount(decl && (decl->inited() || (decl->flags() & VarFlags::argument)) ? 1 : 0),
             accessCount(0)
         {}
 

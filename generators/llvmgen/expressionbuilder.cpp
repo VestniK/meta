@@ -82,14 +82,14 @@ llvm::Value *ExpressionBuilder::operator() (Var *node, Context &ctx)
     PRECONDITION(ctx.varMap.count(node->declaration()) == 1);
     auto it = ctx.varMap.find(node->declaration());
 
-    return node->declaration()->is(VarDecl::argument) ? it->second : ctx.builder.CreateLoad(it->second);
+    return (node->declaration()->flags() & VarFlags::argument) ? it->second : ctx.builder.CreateLoad(it->second);
 }
 
 llvm::Value *ExpressionBuilder::operator() (Assigment *node, Context &ctx)
 {
     PRECONDITION(dynamic_cast<Var*>(node->target()));
     PRECONDITION(dynamic_cast<Var*>(node->target())->declaration());
-    PRECONDITION(!dynamic_cast<Var*>(node->target())->declaration()->is(VarDecl::argument));
+    PRECONDITION(!(dynamic_cast<Var*>(node->target())->declaration()->flags() & VarFlags::argument));
     PRECONDITION(ctx.varMap.count(dynamic_cast<Var*>(node->target())->declaration()) == 1);
     /// @todo add struct members assigment support
     auto it = ctx.varMap.find(dynamic_cast<Var*>(node->target())->declaration());

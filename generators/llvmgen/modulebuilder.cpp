@@ -78,7 +78,7 @@ bool ModuleBuilder::visit(Function *node)
 
 ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx)
 {
-    PRECONDITION(!node->is(VarDecl::argument));
+    PRECONDITION(!(node->flags() & VarFlags::argument));
     // types integrity should be checked by analyzers
     PRECONDITION(ctx.env.getType(node->type()) != nullptr);
     auto type = ctx.env.getType(node->type());

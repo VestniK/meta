@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include <algorithm>
 
 #include "utils/contract.h"
 
@@ -26,23 +27,34 @@
 namespace meta {
 
 Call::Call(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, Call>(reduction),
-    mChildren(getNodes(reduction)),
-    mFunction(nullptr)
+    Visitable<Expression, Call>(reduction)
 {
+    // {<name>, '(', <ArgList>, ')'}
+    // Все дочерние ноды это исключительно аргументы
     PRECONDITION(reduction.size() == 4);
+    PRECONDITION(reduction[2].nodes.size() == countNodes(reduction));
+    POSTCONDITION(mArgs.size() == reduction[2].nodes.size());
+    POSTCONDITION(std::count(mArgs.begin(), mArgs.end(), nullptr) == 0);
     mFunctionName = reduction[0].tokens;
+    mArgs.reserve(reduction[2].nodes.size());
+    std::transform(
+        reduction[2].nodes.begin(), reduction[2].nodes.end(),
+        std::back_inserter(mArgs),
+        [](Node* node) {return dynamic_cast<Expression*>(node);}
+    );
 }
 
 void Call::setFunction(Function* func) {
+    PRECONDITION(mFunction == nullptr);
+    PRECONDITION(func != nullptr);
     mFunction = func;
     // use default args if needed and possible
-    auto declaredArgs = func->args();
-    for (size_t pos = mChildren.size(); pos < declaredArgs.size(); ++pos) {
+    auto&& declaredArgs = func->args();
+    for (size_t pos = mArgs.size(); pos < declaredArgs.size(); ++pos) {
         auto defaultVal = declaredArgs[pos]->initExpr();
         if (!defaultVal)
             break;
-        mChildren.push_back(defaultVal);
+        mArgs.push_back(defaultVal);
     }
 }
 
