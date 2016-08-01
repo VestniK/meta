@@ -62,7 +62,7 @@ public:
     virtual bool visit(SourceFile *node) override
     {
         mCurrDecls.clear();
-        mCurrDecls = mGlobalDict[node->package()];
+        mCurrDecls = mGlobalDict[node->package()].functions;
         mCurrSrcPackage = node->package();
         return true;
     }
@@ -72,8 +72,8 @@ public:
         if (node->targetPackage() == mCurrSrcPackage)
             return;
         for (
-            auto it = mGlobalDict[node->targetPackage()].lower_bound(node->target());
-            it != mGlobalDict[node->targetPackage()].upper_bound(node->target());
+            auto it = mGlobalDict[node->targetPackage()].functions.lower_bound(node->target());
+            it != mGlobalDict[node->targetPackage()].functions.upper_bound(node->target());
             ++it
         ) {
             Function *func = it->second;
@@ -183,7 +183,7 @@ private:
     };
 
     Dictionary& mGlobalDict;
-    DeclarationsDict mCurrDecls;
+    FunctionsDict mCurrDecls;
     utils::string_view mCurrSrcPackage;
     std::map<utils::string_view, VarSrc> mVars;
 };

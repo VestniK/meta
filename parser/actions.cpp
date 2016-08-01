@@ -23,21 +23,19 @@
 
 namespace meta {
 
-void Actions::changeVisibility(utils::array_view<StackFrame> reduction)
-{
+void Actions::changeVisibility(utils::array_view<StackFrame> reduction) {
     PRECONDITION(reduction.size() == 2);
     PRECONDITION(reduction[0].tokens.begin() != reduction[0].tokens.end());
     const auto token = *(reduction[0].tokens.begin());
     mDefaultVisibility = fromToken(token);
 }
 
-void Actions::onFunction(Function* node)
-{
+void Actions::onFunction(Function* node) {
     PRECONDITION(!mCurrentPackage.empty());
     node->setPackage(mCurrentPackage);
     if (node->visibility() == Visibility::Default)
         node->setVisibility(mDefaultVisibility);
-    mDictionary[mCurrentPackage].emplace(node->name(), node);
+    mDictionary[mCurrentPackage].functions.emplace(node->name(), node);
 }
 
 void Actions::onSourceFile(SourceFile* node) {
@@ -50,6 +48,7 @@ void Actions::onStruct(Struct* node) {
     node->setPackage(mCurrentPackage);
     if (node->visibility() == Visibility::Default)
         node->setVisibility(mDefaultVisibility);
+    mDictionary[mCurrentPackage].structs.emplace(node->name(), node);
 }
 
 

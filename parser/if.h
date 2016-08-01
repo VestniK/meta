@@ -23,8 +23,7 @@
 
 namespace meta {
 
-class If: public Visitable<Node, If>
-{
+class If: public Visitable<Node, If> {
 public:
     If(utils::array_view<StackFrame> reduction);
 

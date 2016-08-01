@@ -25,8 +25,16 @@
 namespace meta {
 
 class Function;
+class Struct;
 
-using DeclarationsDict = std::multimap<utils::string_view, Function*>;
-using Dictionary = std::map<utils::string_view, DeclarationsDict>;
+using FunctionsDict = std::multimap<utils::string_view, Function*>;
+using StructsDict = std::map<utils::string_view, Struct*>;
+
+struct PackageDict {
+    FunctionsDict functions;
+    StructsDict structs;
+};
+
+using Dictionary = std::map<utils::string_view, PackageDict>;
 
 } // namespace meta
