@@ -23,23 +23,23 @@
 namespace meta {
 
 Import::Import(utils::array_view<StackFrame> reduction):
-    Visitable<Node, Import>(reduction),
-    mChildren(getNodes(reduction))
+    Visitable<Node, Import>(reduction)
 {
+    // {'import', <qname>, ';'} OR {'import', <qname>, 'as' <identifier>, ';'}
     PRECONDITION(reduction.size() == 3 || reduction.size() == 5);
+    PRECONDITION(countNodes(reduction) == 0);
 
-    Token target;
-    TokenSequence package;
-    for (auto token : reduction[1].tokens) {
-        if (token.termNum != identifier)
-            continue;
-        package.setLast(target);
-        target = token;
-    }
-    mName = mTarget = target;
-    mPackage = package;
+    utils::string_view target = reduction[1].tokens;
+    const size_t splitpos = target.rfind('.');
+    mPackage = target.substr(0, splitpos);
+    mTarget = splitpos != utils::string_view::npos ?
+        target.substr(splitpos + 1):
+        utils::string_view{}
+    ;
     if (reduction.size() == 5)
         mName = reduction[3].tokens;
+    else
+        mName = mTarget;
 }
 
 } // namespace meta
