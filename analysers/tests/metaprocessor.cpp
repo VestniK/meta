@@ -50,8 +50,8 @@ TEST(MetaProcessor, attribute)
     auto functions = ast->getChildren<Function>(-1);
     ASSERT_EQ(functions.size(), 2u);
     ASSERT_EQ(functions[0]->name(), "foo");
-    ASSERT_TRUE(functions[0]->is(Function::entrypoint));
+    ASSERT_TRUE(functions[0]->flags() & FuncFlags::entrypoint);
 
     ASSERT_EQ(functions[1]->name(), "bar");
-    ASSERT_FALSE(functions[1]->is(Function::entrypoint));
+    ASSERT_FALSE(functions[1]->flags() & FuncFlags::entrypoint);
 }

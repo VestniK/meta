@@ -19,23 +19,26 @@
 #pragma once
 
 #include "utils/types.h"
+#include "utils/bitmask.h"
 
+#include "parser/annotation.h"
+#include "parser/codeblock.h"
 #include "parser/declaration.h"
 #include "parser/metaparser.h"
 #include "parser/typed.h"
+#include "parser/vardecl.h"
 #include "parser/visibility.h"
 
 namespace meta {
 
-class Function: public Visitable<Declaration, Function>, public Typed
-{
+enum class FuncFlags {
+    entrypoint
+};
+
+class Function: public Visitable<Declaration, Function>, public Typed {
 public:
     Function(utils::array_view<StackFrame> reduction);
-
-    enum Attribute {
-        invalid = 0,
-        entrypoint = (1<<0)
-    };
+    ~Function();
 
     const Declaration::AttributesMap &attributes() const override {return attrMap;}
 
@@ -46,31 +49,37 @@ public:
     void setMangledName(const utils::string_view &val) {mMangledName = val;}
     void setMangledName(std::nullptr_t) {mMangledName = utils::nullopt;}
     const utils::optional<utils::string_view>& mangledName() const {return mMangledName;}
-    std::vector<VarDecl*> args();
-    CodeBlock *body();
+    const auto& args() const {return mArgs;}
+    CodeBlock* body() {return mBody;}
 
     Visibility visibility() const {return mVisibility;}
     void setVisibility(Visibility val) {mVisibility = val;}
 
-    void set(Attribute attr, bool val = true);
-    bool is(Attribute attr) const;
+    const auto& flags() const {return mFlags;}
+    auto& flags() {return mFlags;}
 
     void walk(Visitor* visitor, int depth = infinitDepth) override {
-        if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
+        if (accept(visitor) && depth != 0) {
+            for (auto& ann: mAnnotations)
+                ann->walk(visitor, depth - 1);
+            for (auto& arg: mArgs)
+                arg->walk(visitor, depth - 1);
+            if (mBody)
+                mBody->walk(visitor, depth - 1);
         }
-        this->seeOff(visitor);
+        seeOff(visitor);
     }
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
+    std::vector<Node::Ptr<Annotation>> mAnnotations;
+    std::vector<Node::Ptr<VarDecl>> mArgs;
+    Node::Ptr<CodeBlock> mBody;
     utils::string_view mPackage;
     utils::string_view mName;
     utils::string_view mRetType;
     utils::optional<utils::string_view> mMangledName;
     Visibility mVisibility = Visibility::Default;
-    int mAttributes = 0;
+    utils::Bitmask<FuncFlags> mFlags;
 
     static const Declaration::AttributesMap attrMap;
 };

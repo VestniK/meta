@@ -5,9 +5,10 @@
 
 namespace meta {
 
-Visibility fromToken(const Token &token)
-{
-    switch (token.termNum) {
+Visibility fromToken(const Token &token) {return fromTerm(token.termNum);}
+
+Visibility fromTerm(int term) {
+    switch (term) {
         case Extern: return Visibility::Extern;
         case Export: return Visibility::Export;
         case Public: return Visibility::Public;
@@ -15,7 +16,7 @@ Visibility fromToken(const Token &token)
         case Private: return Visibility::Private;
         default: break;
     }
-    assert(false && "unexpected token for visibility name");
+    assert(false && "unexpected term for visibility name");
     return Visibility::Default;
 }
 

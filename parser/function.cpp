@@ -29,56 +29,48 @@
 namespace meta {
 
 Function::Function(utils::array_view<StackFrame> reduction):
-    Visitable<Declaration, Function>(reduction),
-    mChildren(getNodes(reduction))
+    Visitable<Declaration, Function>(reduction)
 {
+    // 7: {opt{<visibility>}, <rettype>, <name>, '(', <arglist>, ')', opt{<body>}}
+    // 8: {<annotations>, opt{<visibility>}, <rettype>, <name>, '(', <arglist>, ')', opt{<body>}}
     PRECONDITION(reduction.size() == 7 || reduction.size() == 8); // with or without annotations
-
-    const bool hasAnnotations = reduction.size() == 8;
-    if (hasAnnotations) {
-        for (auto annotataion : reduction[0].nodes)
-            std::invoke(&Annotation::setTarget, dynamic_cast<Annotation&>(*annotataion), this);
+    PRECONDITION(reduction[reduction.size() - 1].nodes.size() <= 1); // only one or no function body
+    POSTCONDITION(mBody != nullptr || reduction[reduction.size() - 1].nodes.empty());
+    POSTCONDITION(countNodes(reduction) == mAnnotations.size() + mArgs.size() + (mBody ? 1 : 0));
+    utils::array_view<StackFrame> funcReduction = reduction;
+    if (reduction.size() == 8) {
+        for (auto& node: reduction[0].nodes) {
+            auto& annotation = dynamic_cast<Annotation&>(*node);
+            annotation.setTarget(this);
+            mAnnotations.push_back(&annotation);
+        }
+        funcReduction = {reduction.data() + 1, reduction.size() - 1};
     }
-    const size_t visibilityPos = (hasAnnotations ? 1 : 0);
-    const size_t typePos = visibilityPos + 1;
-    const size_t namePos = typePos + 1;
-    const size_t argsPos = namePos + 2;
-    auto visTokenIt = reduction[visibilityPos].tokens.begin();
-    if (visTokenIt != reduction[visibilityPos].tokens.end())
-        mVisibility = fromToken(*visTokenIt);
-    mRetType = reduction[typePos].tokens;
-    mName = reduction[namePos].tokens;
-    for (auto argNode : reduction[argsPos].nodes) {
+    constexpr size_t visibilityPos = 0;
+    constexpr size_t typePos = visibilityPos + 1;
+    constexpr size_t namePos = typePos + 1;
+    constexpr size_t argsPos = namePos + 2;
+    constexpr size_t bodyPos = argsPos + 2;
+    if (!funcReduction[visibilityPos].tokens.empty()) {
+        const Token visTok = *funcReduction[visibilityPos].tokens.begin();
+        mVisibility = fromToken(visTok);
+    }
+    mRetType = funcReduction[typePos].tokens;
+    mName = funcReduction[namePos].tokens;
+    for (auto argNode : funcReduction[argsPos].nodes) {
         auto& arg = dynamic_cast<VarDecl&>(*argNode);
         arg.flags() |= VarFlags::argument;
+        mArgs.emplace_back(&arg);
     }
+    if (!funcReduction[bodyPos].nodes.empty())
+        mBody = &(dynamic_cast<CodeBlock&>(*funcReduction[bodyPos].nodes[0]));
 }
 
-std::vector<VarDecl*> Function::args()
-{
-    return getChildren<VarDecl>();
-}
-
-CodeBlock* Function::body() {
-    auto res = std::find_if(mChildren.rbegin(), mChildren.rend(), [](Node *node) {
-        return node->getVisitableType() == std::type_index(typeid(CodeBlock));
-    });
-    return res == mChildren.rend() ? nullptr : static_cast<CodeBlock*>(res->get());
-}
-
-bool Function::is(Function::Attribute attr) const
-{
-    return (mAttributes & attr) != 0;
-}
-
-void Function::set(Function::Attribute attr, bool val)
-{
-    mAttributes = val ? (mAttributes | attr) : (mAttributes & ~attr);
-}
+Function::~Function() = default;
 
 const Declaration::AttributesMap Function::attrMap = {
     {"entrypoint", [](Declaration *decl) {
-        std::invoke(&Function::set, dynamic_cast<Function&>(*decl), entrypoint, true);
+        dynamic_cast<Function&>(*decl).flags() |= FuncFlags::entrypoint;
     }}
 };
 

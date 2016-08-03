@@ -31,6 +31,8 @@ enum class Visibility {
     Private
 };
 
+Visibility fromTerm(int term);
+
 /**
  * @brief Converst visibility token into Visibility value
  *

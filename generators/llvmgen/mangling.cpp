@@ -30,7 +30,7 @@ namespace generators {
 namespace llvmgen {
 
 std::string mangledName(Function* func) {
-    if (func->is(Function::entrypoint))
+    if (func->flags() & FuncFlags::entrypoint)
         return "main";
     if (func->mangledName() != utils::nullopt)
         return static_cast<std::string>(*func->mangledName());
