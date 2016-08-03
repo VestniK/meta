@@ -33,7 +33,7 @@ public:
     const utils::string_view &targetPackage() const {return mPackage;}
     const utils::string_view &target() const {return mTarget;}
 
-    void walk(Visitor* visitor, int depth) override {
+    void walk(Visitor* visitor, int) override {
         accept(visitor);
         seeOff(visitor);
     }

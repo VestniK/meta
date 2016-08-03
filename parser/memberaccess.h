@@ -28,18 +28,17 @@ namespace meta {
 class MemberAccess: public Visitable<Expression, MemberAccess> {
 public:
     MemberAccess(utils::array_view<StackFrame> reduction):
-        Visitable<Expression, MemberAccess>(reduction),
-        mChildren(getNodes(reduction))
+        Visitable<Expression, MemberAccess>(reduction)
     {
+        // {<aggregate>, '.', <member>}
         PRECONDITION(reduction.size() == 3);
         PRECONDITION(static_cast<utils::string_view>(reduction[1].tokens) == ".");
         PRECONDITION(reduction[0].nodes.size() == 1);
         PRECONDITION(reduction[2].nodes.size() == 0);
         PRECONDITION(reduction[2].symbol == Terminal::identifier);
+        POSTCONDITION(mParent != nullptr);
 
-        mParent = dynamic_cast<Expression*>(reduction[0].nodes.front().get());
-        if (!mParent)
-            throw UnexpectedNode(reduction[0].nodes.front(), "Expression expected");
+        mParent = dynamic_cast<Expression*>(reduction[0].nodes[0].get());
         mMemberName = reduction[2].tokens;
     }
 
@@ -54,15 +53,13 @@ public:
 
     void walk(Visitor* visitor, int depth) override {
         if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
+            mParent->walk(visitor, depth - 1);
         }
         this->seeOff(visitor);
     }
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
-    Expression* mParent;
+    Node::Ptr<Expression> mParent;
     Struct* mTargetStruct = nullptr;
     VarDecl* mMemberDecl = nullptr;
     utils::string_view mMemberName;

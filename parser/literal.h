@@ -32,7 +32,7 @@ public:
     };
     Value value() const {return mVal;}
 
-    void walk(Visitor* visitor, int depth) override {
+    void walk(Visitor* visitor, int) override {
         accept(visitor);
         seeOff(visitor);
     }
