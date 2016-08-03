@@ -30,16 +30,14 @@ public:
         Visitable<Node, Return>(reduction)
     {
         PRECONDITION(reduction.size() == 3);
-        PRECONDITION(reduction[1].nodes.size() <= 1);
+        PRECONDITION(countNodes(reduction) <= 1);
         POSTCONDITION(reduction[1].nodes.empty() || mRetVal != nullptr);
         if (reduction[1].nodes.empty())
             return;
         mRetVal = dynamic_cast<Expression*>(reduction[1].nodes[0].get());
     }
 
-    Expression* value() {
-        return mRetVal;
-    }
+    Expression* value() {return mRetVal;}
 
     void walk(Visitor* visitor, int depth) override {
         if (accept(visitor) && depth != 0 && mRetVal)

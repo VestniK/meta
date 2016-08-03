@@ -33,15 +33,11 @@ public:
     void setDeclaration(VarDecl* decl) {mDeclaration = decl;}
 
     void walk(Visitor* visitor, int depth) override {
-        if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
-        }
-        this->seeOff(visitor);
+        accept(visitor);
+        seeOff(visitor);
     }
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
     utils::string_view mName;
     VarDecl* mDeclaration;
 };

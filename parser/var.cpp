@@ -24,10 +24,10 @@
 namespace meta {
 
 Var::Var(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, Var>(reduction),
-    mChildren(getNodes(reduction))
+    Visitable<Expression, Var>(reduction)
 {
     PRECONDITION(reduction.size() == 1);
+    PRECONDITION(countNodes(reduction) == 0);
     mName = reduction[0].tokens;
 }
 

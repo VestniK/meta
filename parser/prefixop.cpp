@@ -23,24 +23,19 @@
 namespace meta {
 
 PrefixOp::PrefixOp(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, PrefixOp>(reduction),
-    mChildren(getNodes(reduction))
+    Visitable<Expression, PrefixOp>(reduction)
 {
     PRECONDITION(reduction.size() == 2);
     PRECONDITION(reduction[0].symbol > 0); // symbol is terminal
     PRECONDITION(reduction[1].nodes.size() == 1);
+    POSTCONDITION(mOperand != nullptr);
     switch (reduction[0].symbol) {
         case subOp: mOperation = negative; break;
         case addOp: mOperation = positive; break;
         case notOp: mOperation = boolnot; break;
         default: assert(false);
     }
-}
-
-Node *PrefixOp::operand()
-{
-    PRECONDITION(mChildren.size() == 1);
-    return mChildren[0];
+    mOperand = dynamic_cast<Expression*>(reduction[1].nodes[0].get());
 }
 
 } // namespace meta

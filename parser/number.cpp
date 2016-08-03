@@ -31,10 +31,7 @@ Number::Number(utils::array_view<StackFrame> reduction):
     Visitable<Expression, Number>(reduction)
 {
     PRECONDITION(reduction.size() == 1);
-    PRECONDITION(std::count_if(
-        reduction.begin(), reduction.end(),
-        [](const StackFrame& frame) {return !frame.nodes.empty();}
-    ) == 0);
+    PRECONDITION(countNodes(reduction) == 0);
     mValue = *utils::number<int>(reduction[0].tokens);
 }
 

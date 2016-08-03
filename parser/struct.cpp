@@ -23,17 +23,26 @@
 namespace meta {
 
 Struct::Struct(utils::array_view<StackFrame> reduction):
-    Visitable<Declaration, Struct>(reduction),
-    mChildren(getNodes(reduction))
+    Visitable<Declaration, Struct>(reduction)
 {
-    auto it = std::find_if(reduction.begin(), reduction.end(), [](const StackFrame& frame) {
-        return frame.symbol == Terminal::structKeyword;
-    });
-    assert(it != reduction.end());
-    ++it;
-    assert(it != reduction.end());
-    assert(it->symbol == Terminal::identifier);
-    mName = it->tokens;
+    // 6: {opt{<visibility>}, 'struct', <name>, '{', <memberslist>, '}'}
+    // 7: {<annotations>, opt{<visibility>}, 'struct', <name>, '{', <memberslist>, '}'}
+    PRECONDITION(reduction.size() == 6 || reduction.size() == 7);
+    POSTCONDITION(countNodes(reduction) == mAnnotations.size() + mMembers.size());
+    utils::array_view<StackFrame> structReduction = reduction;
+    if (reduction.size() == 7) {
+        for (auto& node: reduction[0].nodes) {
+            auto& ann = dynamic_cast<Annotation&>(*node);
+            ann.setTarget(this);
+            mAnnotations.emplace_back(&ann);
+        }
+        structReduction = {reduction.data() + 1, reduction.size() - 1};
+    }
+    mName = structReduction[2].tokens;
+    for (auto& node: structReduction[4].nodes) {
+        auto& member = dynamic_cast<VarDecl&>(*node);
+        mMembers.emplace_back(&member);
+    }
 }
 
 const Declaration::AttributesMap Struct::attrMap = {};

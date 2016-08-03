@@ -20,8 +20,10 @@
 
 #include "utils/types.h"
 
+#include "parser/annotation.h"
 #include "parser/declaration.h"
 #include "parser/metaparser.h"
+#include "parser/vardecl.h"
 #include "parser/visibility.h"
 
 namespace meta {
@@ -33,6 +35,7 @@ public:
     const Declaration::AttributesMap& attributes() const override {return attrMap;}
 
     utils::string_view name() const {return mName;}
+    const auto& members() const {return mMembers;}
 
     utils::string_view package() const {return mPackage;}
     void setPackage(utils::string_view pkg) {mPackage = pkg;}
@@ -41,15 +44,18 @@ public:
     void setVisibility(Visibility val) {mVisibility = val;}
 
     void walk(Visitor* visitor, int depth) override {
-        if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
+        if (accept(visitor) && depth != 0) {
+            for (auto& ann: mAnnotations)
+                ann->walk(visitor, depth - 1);
+            for (auto& member: mMembers)
+                member->walk(visitor, depth - 1);
         }
-        this->seeOff(visitor);
+        seeOff(visitor);
     }
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
+    std::vector<Node::Ptr<Annotation>> mAnnotations;
+    std::vector<Node::Ptr<VarDecl>> mMembers;
     utils::string_view mName;
     utils::string_view mPackage;
     Visibility mVisibility = Visibility::Default;

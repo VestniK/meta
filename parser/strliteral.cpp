@@ -24,11 +24,11 @@
 namespace meta {
 
 StrLiteral::StrLiteral(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, StrLiteral>(reduction),
-    mChildren(getNodes(reduction))
+    Visitable<Expression, StrLiteral>(reduction)
 {
     PRECONDITION(reduction.size() == 1);
     PRECONDITION(reduction[0].symbol == strLiteral);
+    PRECONDITION(countNodes(reduction) == 0);
     auto token = *reduction[0].tokens.begin();
     bool escape = false;
     for (const char *cur = token.start + 1; cur < token.end - 1; ++cur) {

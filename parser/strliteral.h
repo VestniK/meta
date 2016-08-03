@@ -30,16 +30,12 @@ public:
 
     const std::vector<char> &value() const {return mVal;}
 
-    void walk(Visitor* visitor, int depth) override {
-        if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
-        }
-        this->seeOff(visitor);
+    void walk(Visitor* visitor, int) override {
+        accept(visitor);
+        seeOff(visitor);
     }
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
     std::vector<char> mVal;
 };
 

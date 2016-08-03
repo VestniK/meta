@@ -34,18 +34,16 @@ public:
     };
     Operation operation() const {return mOperation;}
 
-    Node *operand();
+    Expression* operand() {return mOperand;}
 
     void walk(Visitor* visitor, int depth) override {
-        if (this->accept(visitor) && depth != 0) {
-            for (auto child: mChildren)
-                child->walk(visitor, depth - 1);
-        }
-        this->seeOff(visitor);
+        if (accept(visitor) && depth != 0)
+            mOperand->walk(visitor, depth - 1);
+        seeOff(visitor);
     }
 
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
+    Node::Ptr<Expression> mOperand;
     Operation mOperation;
 };
 
