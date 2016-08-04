@@ -55,6 +55,38 @@ TEST(StructParsing, simpleStruct) {
     EXPECT_EQ(members[1]->name(), "y");
 }
 
+TEST(StructParsing, annotatedStruct) {
+     const auto input = R"META(
+        package test;
+
+        @foo
+        @bar
+        struct Point {
+            int x;
+            int y;
+        }
+    )META"s;
+    Parser parser;
+    Actions act;
+    parser.setParseActions(&act);
+    parser.setNodeActions(&act);
+    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    auto ast = parser.ast();
+    auto structs = ast->getChildren<Struct>();
+    ASSERT_EQ(structs.size(), 1u);
+    EXPECT_EQ(structs[0]->name(), "Point");
+    auto members = structs[0]->getChildren<VarDecl>();
+    ASSERT_EQ(members.size(), 2u);
+    EXPECT_EQ(members[0]->name(), "x");
+    EXPECT_EQ(members[1]->name(), "y");
+    auto annotations = structs[0]->getChildren<Annotation>();
+    ASSERT_EQ(annotations.size(), 2u);
+    EXPECT_EQ(annotations[0]->name(), "foo");
+    EXPECT_EQ(annotations[0]->target(), structs[0]);
+    EXPECT_EQ(annotations[1]->name(), "bar");
+    EXPECT_EQ(annotations[1]->target(), structs[0]);
+}
+
 TEST(StructParsing, defaultValsOnMembers) {
      const auto input = R"META(
         package test;
