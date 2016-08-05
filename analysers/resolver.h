@@ -24,7 +24,13 @@ class AST;
 
 namespace analysers {
 
-void resolve(AST *ast, Dictionary &dict);
+inline namespace v1 {
+void resolve(AST* ast, Dictionary& dict);
+}
+
+namespace v2 {
+void resolve(AST* ast, Dictionary& dict);
+}
 
 } // namespace analysers
 } // namespace meta

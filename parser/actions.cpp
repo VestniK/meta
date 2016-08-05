@@ -35,6 +35,7 @@ void Actions::onFunction(Function* node) {
     node->setPackage(mCurrentPackage);
     if (node->visibility() == Visibility::Default)
         node->setVisibility(mDefaultVisibility);
+    /// @todo check and throw SemanticError if there is a struct with the same name in the same package
     mDictionary[mCurrentPackage].functions.emplace(node->name(), node);
 }
 
@@ -48,6 +49,7 @@ void Actions::onStruct(Struct* node) {
     node->setPackage(mCurrentPackage);
     if (node->visibility() == Visibility::Default)
         node->setVisibility(mDefaultVisibility);
+    /// @todo check and throw SemanticError if there is a function with the same name in the same package
     mDictionary[mCurrentPackage].structs.emplace(node->name(), node);
 }
 

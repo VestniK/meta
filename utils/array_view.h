@@ -28,13 +28,17 @@ namespace utils {
 template<typename T, size_t N>
 using array_t = T[N];
 
+template<typename T, size_t N>
+constexpr
+size_t array_size(const utils::array_t<T, N>&) {return N;}
+
 template<typename T>
 class array_view {
 public:
     array_view() = default;
     array_view(const T* data, size_t size): mData(data), mSize(size) {}
     template<size_t N>
-    array_view(array_t<const T, N> arr): mData(arr), mSize(N) {}
+    array_view(const array_t<const T, N>& arr): mData(arr), mSize(N) {}
 
     const T* data() const {return mData;}
     size_t size() const {return mSize;}

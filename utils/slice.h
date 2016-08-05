@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2016  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,28 +18,27 @@
  */
 #pragma once
 
-#include "utils/types.h"
+#include <map>
 
-#include "parser/expression.h"
+namespace meta::utils {
 
-namespace meta {
+template<typename Iter>
+struct Slice {
+    Iter begin_it;
+    Iter end_it;
 
-class Var: public Visitable<Expression, Var> {
-public:
-    Var(utils::array_view<StackFrame> reduction);
-
-    const utils::string_view& name() const {return mName;}
-    VarDecl* declaration() {return mDeclaration;}
-    void setDeclaration(VarDecl* decl) {mDeclaration = decl;}
-
-    void walk(Visitor* visitor, int) override {
-        accept(visitor);
-        seeOff(visitor);
-    }
-
-private:
-    utils::string_view mName;
-    VarDecl* mDeclaration;
+    Iter begin() const {return begin_it;}
+    Iter end() const {return end_it;}
+    bool empty() const {return !(begin_it != end_it);}
 };
 
-}
+template<typename Iter>
+auto slice(Iter b, Iter e) {return Slice<Iter>{b, e};}
+
+template<typename Iter>
+auto slice(Iter b) {Slice<Iter> res{b, b}; ++res.end_it; return res;}
+
+template<typename Iter>
+auto slice(std::pair<Iter, Iter> range) {return Slice<Iter>{range.first, range.second};}
+
+} // namespace meta::utils
