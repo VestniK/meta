@@ -21,26 +21,28 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/types.h"
+
 #include "parser/metalexer.h"
 
 using namespace meta;
 
 TEST(Lexer, separated) {
-    const char *input = "testIdentifier1;testIdentifier2,test.qname";
+    const char* input = "testIdentifier1;testIdentifier2,test.qname";
     meta::Lexer lexer;
     lexer.start(input);
     lexer.next();
-    ASSERT_EQ(std::string(lexer.currentToken().start, lexer.currentToken().end - lexer.currentToken().start), std::string("testIdentifier1"));
+    EXPECT_EQ(static_cast<utils::string_view>(lexer.currentToken()), "testIdentifier1"sv);
     lexer.next();
-    ASSERT_EQ(std::string(lexer.currentToken().start, lexer.currentToken().end - lexer.currentToken().start), std::string(";"));
+    EXPECT_EQ(static_cast<utils::string_view>(lexer.currentToken()), ";"sv);
     lexer.next();
-    ASSERT_EQ(std::string(lexer.currentToken().start, lexer.currentToken().end - lexer.currentToken().start), std::string("testIdentifier2"));
+    EXPECT_EQ(static_cast<utils::string_view>(lexer.currentToken()), "testIdentifier2"sv);
     lexer.next();
-    ASSERT_EQ(std::string(lexer.currentToken().start, lexer.currentToken().end - lexer.currentToken().start), std::string(","));
+    EXPECT_EQ(static_cast<utils::string_view>(lexer.currentToken()), ","sv);
     lexer.next();
-    ASSERT_EQ(std::string(lexer.currentToken().start, lexer.currentToken().end - lexer.currentToken().start), std::string("test"));
+    EXPECT_EQ(static_cast<utils::string_view>(lexer.currentToken()), "test"sv);
     lexer.next();
-    ASSERT_EQ(std::string(lexer.currentToken().start, lexer.currentToken().end - lexer.currentToken().start), std::string("."));
+    ASSERT_EQ(static_cast<utils::string_view>(lexer.currentToken()), "."sv);
     lexer.next();
-    ASSERT_EQ(std::string(lexer.currentToken().start, lexer.currentToken().end - lexer.currentToken().start), std::string("qname"));
+    ASSERT_EQ(static_cast<utils::string_view>(lexer.currentToken()), "qname"sv);
 }

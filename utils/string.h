@@ -30,7 +30,7 @@ namespace utils {
  * @todo handle automatic base detection for 0x prefix and b suffix
  */
 template<typename IntType>
-optional<IntType> number(const string_view& str, uint8_t base = 10) {
+optional<IntType> number(string_view str, uint8_t base = 10) {
     IntType res = 0;
     for (char ch: str) {
         res = res*base;
@@ -44,6 +44,13 @@ optional<IntType> number(const string_view& str, uint8_t base = 10) {
             return nullopt;
     }
     return res;
+}
+
+inline
+bool starts_with(string_view str, string_view prefix) {
+    if (prefix.size() > str.size())
+        return false;
+    return str.substr(0, prefix.size()) == prefix;
 }
 
 } // namespace utils

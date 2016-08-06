@@ -19,10 +19,10 @@
 
 #include <gtest/gtest.h>
 
-#include "parser/actions.h"
 #include "parser/function.h"
 #include "parser/metaparser.h"
 
+#include "analysers/actions.h"
 #include "analysers/metaprocessor.h"
 
 using namespace meta;

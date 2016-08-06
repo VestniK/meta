@@ -24,7 +24,6 @@
 
 #include <gtest/gtest.h>
 
-#include "parser/actions.h"
 #include "parser/binaryop.h"
 #include "parser/metaparser.h"
 
@@ -50,9 +49,6 @@ TEST_P(Priority, priority)
     const auto &param = GetParam();
     const std::string input = str(boost::format("package test; int foo() {return %s;}")%param.expr);
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     std::vector<BinaryOp::Operation> opSequence;

@@ -1,6 +1,6 @@
 /*
  * Meta language compiler
- * Copyright (C) 2014  Sergey Vidyuk <sir.vestnik@gmail.com>
+ * Copyright (C) 2016  Sergey Vidyuk <sir.vestnik@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,33 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
 #pragma once
 
-#include <iosfwd>
+#include <gtest/gtest.h>
 
-namespace meta {
+namespace meta::utils {
 
-struct Token;
+#define ASSERT_PARSE(parser, srcPath, input) \
+    try { \
+        parser.parse(srcPath, input); \
+    } catch (const SyntaxError& err) { \
+        FAIL() << \
+            err.sourcePath() << ':' << err.token().line << ':' << \
+            err.token().column << ": " << err.what() << ":\n" << \
+            err.line() << "\nExpected one of the following terms:\n" << \
+            err.expected() << "Parser stack dump:\n" << err.parserStack(); \
+    }
 
-enum class Visibility {
-    Default,
-    Extern,
-    Export,
-    Public,
-    Protected,
-    Private
-};
-
-Visibility fromTerm(int term);
-
-/**
- * @brief Converst visibility token into Visibility value
- *
- * @note It's caller responsibility to ensure that token passed is token representing
- * visibility.
- */
-Visibility fromToken(const Token &token);
-
-std::ostream& operator<< (std::ostream& out, Visibility val);
-
-} // namespace meta
+} // namespace meta::utils

@@ -21,11 +21,11 @@
 
 #include <gtest/gtest.h>
 
+#include "parser/metaparser.h"
+
+#include "analysers/actions.h"
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
-
-#include "parser/actions.h"
-#include "parser/metaparser.h"
 
 using namespace meta;
 using namespace meta::analysers;

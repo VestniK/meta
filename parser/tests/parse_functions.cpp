@@ -20,7 +20,6 @@
 
 #include <gtest/gtest.h>
 
-#include "parser/actions.h"
 #include "parser/annotation.h"
 #include "parser/function.h"
 #include "parser/metaparser.h"
@@ -56,20 +55,17 @@ TEST(FunctionParsing, funcDeclarationsAndVisibilities)
         private int privateExplicitly() {return 5;}
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 5u);
 
     ASSERT_EQ(functions[0]->name(), "privateByDefault");
-    ASSERT_EQ(functions[0]->visibility(), Visibility::Private);
+    ASSERT_EQ(functions[0]->visibility(), Visibility::Default);
     ASSERT_EQ(functions[0]->getChildren<Annotation>().size(), 0u);
 
     ASSERT_EQ(functions[1]->name(), "protectedByModifiedDefault1");
-    ASSERT_EQ(functions[1]->visibility(), Visibility::Protected);
+    ASSERT_EQ(functions[1]->visibility(), Visibility::Default);
     ASSERT_EQ(functions[1]->getChildren<Annotation>().size(), 0u);
 
     ASSERT_EQ(functions[2]->name(), "pubExplicitly");
@@ -77,7 +73,7 @@ TEST(FunctionParsing, funcDeclarationsAndVisibilities)
     ASSERT_EQ(functions[2]->getChildren<Annotation>().size(), 0u);
 
     ASSERT_EQ(functions[3]->name(), "protectedByModifiedDefault2");
-    ASSERT_EQ(functions[3]->visibility(), Visibility::Protected);
+    ASSERT_EQ(functions[3]->visibility(), Visibility::Default);
     ASSERT_EQ(functions[3]->getChildren<Annotation>().size(), 1u);
     ASSERT_EQ(functions[3]->getChildren<Annotation>()[0]->name(), "some");
     ASSERT_EQ(functions[3]->getChildren<Annotation>()[0]->target(), functions[3]);
@@ -94,30 +90,22 @@ TEST(FunctionParsing, funcDeclarationsAndVisibilities)
 TEST(FunctionParsing, zeroParamFunc) {
     const auto input = "package test; int foo() {return 5;}"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 1u);
     ASSERT_EQ(functions[0]->name(), "foo");
-    ASSERT_EQ(functions[0]->package(), "test");
     ASSERT_EQ(functions[0]->args().size(), 0u);
 }
 
 TEST(FunctionParsing, oneParamFunc) {
     const auto input = "package test; int foo(int x) {return 5*x*x - 2*x + 3;}"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 1u);
     ASSERT_EQ(functions[0]->name(), "foo");
-    ASSERT_EQ(functions[0]->package(), "test");
     const auto args = functions[0]->args();
     ASSERT_EQ(args.size(), 1u);
     ASSERT_EQ(args[0]->typeName(), "int");
@@ -127,15 +115,11 @@ TEST(FunctionParsing, oneParamFunc) {
 TEST(FunctionParsing, twoParamFunc) {
     const auto input = "package test; int foo(int x, int y) {return 5*x + 6/y;}"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 1u);
     ASSERT_EQ(functions[0]->name(), "foo");
-    ASSERT_EQ(functions[0]->package(), "test");
     const auto args = functions[0]->args();
     ASSERT_EQ(args.size(), 2u);
     ASSERT_EQ(args[0]->typeName(), "int");
@@ -147,23 +131,18 @@ TEST(FunctionParsing, twoParamFunc) {
 TEST(FunctionParsing, twoFunc) {
     const auto input = "package test; int foo(int x) {return 5*x;}\nint bar(int x) {return x/5;}"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 2u);
 
     ASSERT_EQ(functions[0]->name(), "foo");
-    ASSERT_EQ(functions[0]->package(), "test");
     const auto args1 = functions[0]->args();
     ASSERT_EQ(args1.size(), 1u);
     ASSERT_EQ(args1[0]->typeName(), "int");
     ASSERT_EQ(args1[0]->name(), "x");
 
     ASSERT_EQ(functions[1]->name(), "bar");
-    ASSERT_EQ(functions[1]->package(), "test");
     const auto args2 = functions[1]->args();
     ASSERT_EQ(args2.size(), 1u);
     ASSERT_EQ(args2[0]->typeName(), "int");
@@ -173,23 +152,18 @@ TEST(FunctionParsing, twoFunc) {
 TEST(FunctionParsing, funcCall) {
     const auto input = "package test; int foo(int x) {return 5*x;}\nint bar(int y) {return 5*foo(y/5);}"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 2u);
 
     ASSERT_EQ(functions[0]->name(), "foo");
-    ASSERT_EQ(functions[0]->package(), "test");
     const auto args1 = functions[0]->args();
     ASSERT_EQ(args1.size(), 1u);
     ASSERT_EQ(args1[0]->typeName(), "int");
     ASSERT_EQ(args1[0]->name(), "x");
 
     ASSERT_EQ(functions[1]->name(), "bar");
-    ASSERT_EQ(functions[1]->package(), "test");
     const auto args2 = functions[1]->args();
     ASSERT_EQ(args2.size(), 1u);
     ASSERT_EQ(args2[0]->typeName(), "int");
@@ -199,17 +173,12 @@ TEST(FunctionParsing, funcCall) {
 TEST(FunctionParsing, funcRetType) {
     const auto input = "package example.test; int iFoo() {return 0;}\ndouble dFoo() {return 0;}"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 2u);
     ASSERT_EQ(functions[0]->name(), "iFoo");
-    ASSERT_EQ(functions[0]->package(), "example.test");
     ASSERT_EQ(functions[0]->retType(), "int");
     ASSERT_EQ(functions[1]->name(), "dFoo");
-    ASSERT_EQ(functions[1]->package(), "example.test");
     ASSERT_EQ(functions[1]->retType(), "double");
 }

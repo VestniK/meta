@@ -26,12 +26,12 @@
 #include "utils/io.h"
 #include "utils/types.h"
 
-#include "parser/actions.h"
 #include "parser/metaparser.h"
 #include "parser/nodeexception.h"
 
 #include "typesystem/typesstore.h"
 
+#include "analysers/actions.h"
 #include "analysers/metaprocessor.h"
 #include "analysers/reachabilitychecker.h"
 #include "analysers/resolver.h"

@@ -19,8 +19,10 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <limits>
 
 namespace meta {
 namespace utils {
@@ -50,6 +52,17 @@ public:
 
     const T* begin() const {return mData;}
     const T* end() const {return mData + mSize;}
+
+    static constexpr size_t npos = std::numeric_limits<size_t>::max();
+
+    array_view slice(size_t from, size_t to = npos) {
+        array_view res;
+        if (from >= mSize || to <= from)
+            return res;
+        res.mData = mData + from;
+        res.mSize = std::min(to, mSize) - from;
+        return res;
+    }
 
 private:
     const T* mData = nullptr;

@@ -1,4 +1,5 @@
 set(SRC
+  actions.cpp
   metaprocessor.cpp
   reachabilitychecker.cpp
   resolver.cpp

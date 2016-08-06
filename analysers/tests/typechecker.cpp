@@ -19,17 +19,17 @@
 
 #include <gtest/gtest.h>
 
-#include "analysers/resolver.h"
-#include "analysers/semanticerror.h"
-#include "analysers/typechecker.h"
+#include "typesystem/typesstore.h"
 
-#include "parser/actions.h"
 #include "parser/binaryop.h"
 #include "parser/function.h"
 #include "parser/metaparser.h"
 #include "parser/vardecl.h"
 
-#include "typesystem/typesstore.h"
+#include "analysers/actions.h"
+#include "analysers/resolver.h"
+#include "analysers/semanticerror.h"
+#include "analysers/typechecker.h"
 
 using namespace meta;
 using namespace meta::analysers;

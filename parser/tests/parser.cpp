@@ -26,7 +26,6 @@
 
 #include <gtest/gtest.h>
 
-#include "parser/actions.h"
 #include "parser/annotation.h"
 #include "parser/assigment.h"
 #include "parser/binaryop.h"
@@ -46,11 +45,15 @@ using namespace meta;
 using namespace std::literals;
 
 TEST(MetaParser, imports) {
-    const auto input = "package test; import pkg.bar; import pkg.subpkg.bar as bar1; int foo() {return 5;}"s;
+    const auto input = R"META(
+        package test;
+
+        import pkg.bar;
+        import pkg.subpkg.bar as bar1;
+
+        int foo() {return 5;}
+    )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto imports = ast->getChildren<Import>(-1);
@@ -66,9 +69,6 @@ TEST(MetaParser, imports) {
 TEST(MetaParser, emptyPackage) {
     const auto input = "package test.test;"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
@@ -87,9 +87,6 @@ TEST(MetaParser, varTest) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto blocks = ast->getChildren<CodeBlock>(-1);
@@ -122,9 +119,6 @@ TEST(MetaParser, assignAsExpr) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto blocks = ast->getChildren<CodeBlock>(-1);
@@ -159,9 +153,6 @@ TEST(MetaParser, ifStatement) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
@@ -190,9 +181,6 @@ TEST(MetaParser, ifWithEmptyStatement) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
@@ -220,9 +208,6 @@ TEST(MetaParser, ifElseStatement) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
@@ -256,9 +241,6 @@ TEST(MetaParser, ifElseEmptyStatement) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
@@ -289,9 +271,6 @@ TEST(MetaParser, ifElseBothEmptyStatements) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
@@ -320,9 +299,6 @@ TEST(MetaParser, ifBlockStatement) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
@@ -357,9 +333,6 @@ TEST(MetaParser, ifElseBlockStatement) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
@@ -384,9 +357,6 @@ TEST(MetaParser, multipleFiles) {
     const auto src2 = "package test; bool bar() {return false;}"s;
 
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("src1", src1));
     ASSERT_NO_THROW(parser.parse("src2", src2));
 
@@ -428,9 +398,6 @@ TEST(Parser, stringLiteral) {
     )META"s;
 
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
 
     auto strs = parser.ast()->getChildren<StrLiteral>(-1);
@@ -457,9 +424,6 @@ TEST_P(MetaParser, binaryOp) {
     TestData data = GetParam();
     const std::string input = str(boost::format("package test; int foo(int x, int y) {return x %s y;}")%data.opStr);
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto binops = ast->getChildren<BinaryOp>(-1);

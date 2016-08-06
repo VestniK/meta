@@ -1,6 +1,7 @@
 include(TestTools)
 
 AddGTest(AnalysersTests
+  actions.cpp
   metaprocessor.cpp
   reachability.cpp
   resolver.cpp

@@ -20,7 +20,6 @@
 
 #include <gtest/gtest.h>
 
-#include "parser/actions.h"
 #include "parser/annotation.h"
 #include "parser/assigment.h"
 #include "parser/metaparser.h"
@@ -41,9 +40,6 @@ TEST(StructParsing, simpleStruct) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto structs = ast->getChildren<Struct>();
@@ -67,9 +63,6 @@ TEST(StructParsing, annotatedStruct) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto structs = ast->getChildren<Struct>();
@@ -97,9 +90,6 @@ TEST(StructParsing, defaultValsOnMembers) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto structs = ast->getChildren<Struct>();
@@ -127,9 +117,6 @@ TEST(StructParsing, declareStructVar) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto vars = ast->getChildren<VarDecl>(infinitDepth);
@@ -154,9 +141,6 @@ TEST(StructParsing, memberAccess) {
         }
     )META"s;
     Parser parser;
-    Actions act;
-    parser.setParseActions(&act);
-    parser.setNodeActions(&act);
     ASSERT_NO_THROW(parser.parse("test.meta", input));
     auto ast = parser.ast();
     auto assigments = ast->getChildren<Assigment>(infinitDepth);

@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include "parser/actions.h"
 #include "parser/function.h"
 #include "parser/sourcefile.h"
 #include "parser/struct.h"
+
+#include "analysers/actions.h"
 
 namespace meta {
 

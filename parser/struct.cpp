@@ -36,8 +36,10 @@ Struct::Struct(utils::array_view<StackFrame> reduction):
             ann.setTarget(this);
             mAnnotations.emplace_back(&ann);
         }
-        structReduction = {reduction.data() + 1, reduction.size() - 1};
+        structReduction = reduction.slice(1);
     }
+    if (!structReduction[0].tokens.empty())
+        mVisibility = fromToken(*structReduction[0].tokens.begin());
     mName = structReduction[2].tokens;
     for (auto& node: structReduction[4].nodes) {
         auto& member = dynamic_cast<VarDecl&>(*node);
