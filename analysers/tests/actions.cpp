@@ -63,7 +63,7 @@ const auto input = R"META(
     extern:
 
     void externByDefault();
-    struct externByDefault {int x;}
+    struct ExternByDefault {int x;}
 
     public void publicExplicitly() {return;}
     public struct PublicExplicitly2 {int x;}
@@ -93,6 +93,8 @@ TEST(Actions, funcVisibility) {
             EXPECT_EQ(func->visibility(), Visibility::Protected) << func->name();
         else if (utils::starts_with(func->name(), "private"))
             EXPECT_EQ(func->visibility(), Visibility::Private) << func->name();
+        else
+            FAIL() << func->name();
     }
 }
 
@@ -119,6 +121,8 @@ TEST(Actions, structVisibility) {
             EXPECT_EQ(strct->visibility(), Visibility::Protected) << strct->name();
         else if (utils::starts_with(strct->name(), "Private"))
             EXPECT_EQ(strct->visibility(), Visibility::Private) << strct->name();
+        else
+            FAIL() << strct->name();
     }
 }
 

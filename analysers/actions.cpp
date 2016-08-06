@@ -16,13 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include "utils/slice.h"
+
 #include "parser/function.h"
 #include "parser/sourcefile.h"
 #include "parser/struct.h"
 
+#include "analysers/declconflicts.h"
 #include "analysers/actions.h"
+#include "analysers/semanticerror.h"
 
-namespace meta {
+namespace meta::analysers {
 
 void Actions::changeVisibility(utils::array_view<StackFrame> reduction) {
     PRECONDITION(reduction.size() == 2);
@@ -36,8 +40,11 @@ void Actions::onFunction(Function* node) {
     node->setPackage(mCurrentPackage);
     if (node->visibility() == Visibility::Default)
         node->setVisibility(mDefaultVisibility);
-    /// @todo check and throw SemanticError if there is a struct with the same name in the same package
-    mDictionary[mCurrentPackage].functions.emplace(node->name(), node);
+    auto& pkgDict = mDictionary[mCurrentPackage];
+    auto structIt = pkgDict.structs.find(node->name());
+    if (structIt != pkgDict.structs.end())
+        throwDeclConflict(node, utils::slice(structIt));
+    pkgDict.functions.emplace(node->name(), node);
 }
 
 void Actions::onSourceFile(SourceFile* node) {
@@ -51,8 +58,11 @@ void Actions::onStruct(Struct* node) {
     if (node->visibility() == Visibility::Default)
         node->setVisibility(mDefaultVisibility);
     /// @todo check and throw SemanticError if there is a function with the same name in the same package
-    mDictionary[mCurrentPackage].structs.emplace(node->name(), node);
+    auto& pkgDict = mDictionary[mCurrentPackage];
+    auto funcsRng = utils::slice(pkgDict.functions.equal_range(node->name()));
+    if (!funcsRng.empty())
+        throwDeclConflict(node, funcsRng);
+    pkgDict.structs.emplace(node->name(), node);
 }
-
 
 } // namespace meta

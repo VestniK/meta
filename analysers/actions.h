@@ -28,7 +28,7 @@
 #include "parser/metaparser.h"
 #include "parser/visibility.h"
 
-namespace meta {
+namespace meta::analysers {
 
 class Actions: public ParseActions, public NodeActions {
 public:

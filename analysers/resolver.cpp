@@ -28,11 +28,11 @@
 #include "parser/metanodes.h"
 #include "parser/visibility.h"
 
+#include "analysers/declconflicts.h"
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
 
-namespace meta {
-namespace analysers {
+namespace meta::analysers {
 
 namespace {
 
@@ -51,80 +51,18 @@ struct DeclRef {
     Decl* decl;
 };
 
+template<typename Decl>
+Decl* decl(const DeclRef<Decl>& val) {return val.decl;}
+
+template<typename Decl>
+Import* import(const DeclRef<Decl>& val) {return val.import;}
+
 struct CodeContext {
     CodeContext* parent = nullptr;
     std::multimap<utils::string_view, DeclRef<Function>> functions;
     std::map<utils::string_view, DeclRef<Struct>> structs;
     std::map<utils::string_view, VarDecl*> vars;
 };
-
-template<typename T>
-auto typeName() {
-    utils::string_view res = __PRETTY_FUNCTION__;
-    const char marker[] = "with T =";
-    res = res.substr(res.find(marker) + utils::array_size(marker));
-    return res.substr(0, res.find(']'));
-}
-
-struct SourceInfo {
-    Node* node;
-};
-
-std::ostream& operator<< (std::ostream& out, const SourceInfo& info) {
-    out <<
-        info.node->sourceLocation() << ':' <<
-        info.node->tokens().linenum() << ':' << info.node->tokens().colnum()
-    ;
-    return out;
-}
-
-template<typename Decl>
-struct Declinfo {
-    Decl* decl;
-};
-
-template<typename Decl>
-auto declinfo(Decl* decl) {return Declinfo<Decl>{decl};}
-
-std::ostream& operator<< (std::ostream& out, const Declinfo<Import>& info) {
-    out <<
-        "Import of '" << info.decl->targetPackage() << '.' << info.decl->target() <<
-        "' as '" << info.decl->name() << '\''
-    ;
-    return out;
-}
-
-std::ostream& operator<< (std::ostream& out, const Declinfo<Struct>& info) {
-    out << "Struct '" << info.decl->package() << '.' << info.decl->name() << '\'';
-    return out;
-}
-
-std::ostream& operator<< (std::ostream& out, const Declinfo<Function>& info) {
-    out << "Function " << info.decl->package() << '.' << info.decl->name() << '(';
-    bool first = true;
-    for (const auto& arg: info.decl->args()) {
-        if (first)
-            first = false;
-        else
-            out << ", ";
-        out << arg->typeName();
-    }
-    out << ')';
-    return out;
-}
-
-template<typename Decl, typename Range>
-[[noreturn]]
-void throwDeclConflict(Decl* decl, const Range& range) {
-    std::ostringstream oss;
-    oss << declinfo(decl) << " conflicts with other declarations:\n";
-    for (const auto& declRef: range) {
-        oss << "notice: " << SourceInfo{declRef.second.decl} << "' " << declinfo(declRef.second.decl);
-        if (declRef.second.import)
-            oss << "\n\timported as '" << declRef.second.import->name() << "' here: " << SourceInfo{declRef.second.import};
-    }
-    throw SemanticError(decl, "%s", oss.str());
-}
 
 struct Resolver {
     void operator() (Node* node, Dictionary&, CodeContext&) {
@@ -317,7 +255,7 @@ private:
     std::map<utils::string_view, VarSrc> mVars;
 };
 
-namespace v1 {
+inline namespace v1 {
 
 void resolve(AST* ast, Dictionary& dict)
 {
@@ -325,7 +263,7 @@ void resolve(AST* ast, Dictionary& dict)
     ast->walk(&resolver);
 }
 
-}
+} // namespace v1
 
 namespace v2 {
 
@@ -336,7 +274,6 @@ void resolve(AST* ast, Dictionary& dict) {
         dispatch(resolver, root, dict, globalCtx);
 }
 
-}
+} // namespace v2
 
-} // namespace analysers
-} // namespace meta
+} // namespace meta::analysers

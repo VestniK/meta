@@ -151,7 +151,7 @@ bool main(const Options &opts) try {
     std::vector<std::string> input;
     input.reserve(opts.sources.size());
     Parser parser;
-    Actions act;
+    analysers::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     for (const auto& src: opts.sources) {
