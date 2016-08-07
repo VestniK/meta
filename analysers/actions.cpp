@@ -62,7 +62,9 @@ void Actions::onStruct(Struct* node) {
     auto funcsRng = utils::slice(pkgDict.functions.equal_range(node->name()));
     if (!funcsRng.empty())
         throwDeclConflict(node, funcsRng);
-    pkgDict.structs.emplace(node->name(), node);
+    const auto res = pkgDict.structs.emplace(node->name(), node);
+    if (!res.second)
+        throwDeclConflict(node, utils::slice(res.first));
 }
 
 } // namespace meta

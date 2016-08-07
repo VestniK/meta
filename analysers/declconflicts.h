@@ -17,7 +17,7 @@ struct SourceInfo {
 inline
 std::ostream& operator<< (std::ostream& out, const SourceInfo& info) {
     out <<
-        info.node->sourceLocation() << ':' <<
+        info.node->sourceLocation().string() << ':' <<
         info.node->tokens().linenum() << ':' << info.node->tokens().colnum()
     ;
     return out;
@@ -48,7 +48,7 @@ std::ostream& operator<< (std::ostream& out, const Declinfo<Struct>& info) {
 
 inline
 std::ostream& operator<< (std::ostream& out, const Declinfo<Function>& info) {
-    out << "Function " << info.decl->package() << '.' << info.decl->name() << '(';
+    out << "Function '" << info.decl->package() << '.' << info.decl->name() << '(';
     bool first = true;
     for (const auto& arg: info.decl->args()) {
         if (first)
@@ -57,7 +57,7 @@ std::ostream& operator<< (std::ostream& out, const Declinfo<Function>& info) {
             out << ", ";
         out << arg->typeName();
     }
-    out << ')';
+    out << ")'";
     return out;
 }
 
@@ -75,9 +75,9 @@ template<typename Decl, typename Range>
 [[noreturn]]
 void throwDeclConflict(Decl* node, const Range& range) {
     std::ostringstream oss;
-    oss << declinfo(node) << " conflicts with other declarations:\n";
+    oss << declinfo(node) << " conflicts with other declarations.";
     for (const auto& conflict: range) {
-        oss << "notice: " << SourceInfo{decl(conflict.second)} << "' " << declinfo(decl(conflict.second));
+        oss << "\nnotice: " << SourceInfo{decl(conflict.second)} << ": " << declinfo(decl(conflict.second));
         auto imported = import(conflict.second);
         if (imported)
             oss << "\n\timported as '" << imported->name() << "' here: " << SourceInfo{imported};
