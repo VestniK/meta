@@ -72,45 +72,59 @@ struct Resolver {
     void operator() (SourceFile* node, Dictionary& globalCtx, CodeContext& ctx) {
         CodeContext srcFileContext = {&ctx};
         for (const auto& kv: globalCtx[node->package()].functions)
-            ctx.functions.emplace(kv.first, DeclRef<Function>{nullptr, kv.second});
+            srcFileContext.functions.emplace(kv.first, DeclRef<Function>{nullptr, kv.second});
         for (const auto& kv: globalCtx[node->package()].structs)
-            ctx.structs.emplace(kv.first, DeclRef<Struct>{nullptr, kv.second});
+            srcFileContext.structs.emplace(kv.first, DeclRef<Struct>{nullptr, kv.second});
 
         /// @todo split SourceFile children into imports, functions and structs
         for (auto import: node->getChildren<Import>()) {
             if (import->targetPackage() == node->package())
-                throw SemanticError(import, "Import of a declaration from the current package is meaningless");
-            auto pkgIt = globalCtx.find(import->targetPackage());
-            if (pkgIt == globalCtx.end())
-                throw SemanticError(import, "No such package '%s'", import->targetPackage());
-            auto structIt = pkgIt->second.structs.find(import->target());
-            auto funcs = utils::slice(pkgIt->second.functions.equal_range(import->target()));
-            if (structIt != pkgIt->second.structs.end()) {
-                /// @todo check target visibility
-                const auto conflictingFuncs = utils::slice(ctx.functions.equal_range(import->name()));
-                if (!conflictingFuncs.empty())
-                    throwDeclConflict(import, conflictingFuncs);
-                const auto insres = ctx.structs.emplace(import->name(), DeclRef<Struct>{import, structIt->second});
-                if (!insres.second)
-                    throwDeclConflict(import, utils::slice(insres.first));
-            } else if (!funcs.empty()) {
-                for (const auto& func: funcs)
-                    /// @todo check target visibility
-                    /// @todo check symbols conflicts
-                    ctx.functions.emplace(import->name(), DeclRef<Function>{import, func.second});
-            } else {
-                throw SemanticError(
-                    import, "Declaration '%s' not found in package '%s'",
-                    import->target(), import->targetPackage()
-                );
-            }
+                throw SemanticError(node, "Import of a declaration from the current package is meaningless");
+            (*this)(import, globalCtx, srcFileContext);
         }
 
         for (auto structure: node->getChildren<Struct>())
-            (*this)(structure, globalCtx, ctx);
+            (*this)(structure, globalCtx, srcFileContext);
 
         for (auto func: node->getChildren<Function>())
-            (*this)(func, globalCtx, ctx);
+            (*this)(func, globalCtx, srcFileContext);
+    }
+
+    void operator() (Import* node, Dictionary& globalCtx, CodeContext& ctx) {
+        POSTCONDITION(!node->importedDeclarations().empty());
+        POSTCONDITION(
+            node->importedDeclarations().size() == 1 ||
+            utils::count_if(node->importedDeclarations(), [](Declaration* decl) {
+                return decl->getVisitableType() != std::type_index(typeid(Function));
+            }) == 0
+        );
+        auto pkgIt = globalCtx.find(node->targetPackage());
+        if (pkgIt == globalCtx.end())
+            throw SemanticError(node, "No such package '%s'", node->targetPackage());
+        auto structIt = pkgIt->second.structs.find(node->target());
+        auto funcs = utils::equal_range(pkgIt->second.functions, node->target());
+        if (structIt != pkgIt->second.structs.end()) {
+            /// @todo check target visibility
+            const auto conflictingFuncs = utils::equal_range(ctx.functions, node->name());
+            if (!conflictingFuncs.empty())
+                throwDeclConflict(node, conflictingFuncs);
+            const auto insres = ctx.structs.emplace(node->name(), DeclRef<Struct>{node, structIt->second});
+            if (!insres.second)
+                throwDeclConflict(node, utils::slice(insres.first));
+            node->addImportedDeclaration(structIt->second);
+        } else if (!funcs.empty()) {
+            for (const auto& func: funcs) {
+                /// @todo check target visibility
+                /// @todo check symbols conflicts
+                ctx.functions.emplace(node->name(), DeclRef<Function>{node, func.second});
+                node->addImportedDeclaration(func.second);
+            }
+        } else {
+            throw SemanticError(
+                node, "Declaration '%s' not found in package '%s'",
+                node->target(), node->targetPackage()
+            );
+        }
     }
 
     void operator() (Struct* node, Dictionary& globalCtx, CodeContext& ctx) {}
@@ -270,7 +284,7 @@ namespace v2 {
 void resolve(AST* ast, Dictionary& dict) {
     Resolver resolver;
     CodeContext globalCtx;
-    for (auto root: ast->getChildren<Node>())
+    for (auto root: ast->getChildren<Node>(0))
         dispatch(resolver, root, dict, globalCtx);
 }
 

@@ -132,8 +132,7 @@ Node::Node(utils::array_view<StackFrame> reduction):
 @node_name.1|bool Visitor::visit(%s *node) {return visit(static_cast<Node*>(node))\;}||\n|;
 @node_name.1|void Visitor::leave(%s *node) {leave(static_cast<Node*>(node))\;}||\n|;
 
-void AST::walk(Visitor *visitor, int depth)
-{
+void AST::walk(Visitor *visitor, int depth) {
     for (auto &root : roots())
         root->walk(visitor, depth);
 }

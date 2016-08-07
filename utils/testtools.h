@@ -23,6 +23,7 @@
 
 namespace meta::utils {
 
+/// @todo add SemanticError dump and think how to remove dependency on parser and analysers
 #define ASSERT_PARSE(parser, srcPath, input) \
     try { \
         parser.parse(srcPath, input); \

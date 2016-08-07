@@ -23,7 +23,7 @@
 namespace meta {
 
 Import::Import(utils::array_view<StackFrame> reduction):
-    Visitable<Node, Import>(reduction)
+    Visitable<Declaration, Import>(reduction)
 {
     // {'import', <qname>, ';'} OR {'import', <qname>, 'as' <identifier>, ';'}
     PRECONDITION(reduction.size() == 3 || reduction.size() == 5);
@@ -40,6 +40,11 @@ Import::Import(utils::array_view<StackFrame> reduction):
         mName = reduction[3].tokens;
     else
         mName = mTarget;
+}
+
+const Declaration::AttributesMap& Import::attributes() const {
+    static AttributesMap attrmap;
+    return attrmap;
 }
 
 } // namespace meta

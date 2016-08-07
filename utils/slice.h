@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <algorithm>
 #include <map>
 
 namespace meta::utils {
@@ -40,5 +41,15 @@ auto slice(Iter b) {Slice<Iter> res{b, b}; ++res.end_it; return res;}
 
 template<typename Iter>
 auto slice(std::pair<Iter, Iter> range) {return Slice<Iter>{range.first, range.second};}
+
+template<typename Container, typename Key>
+auto equal_range(const Container& cnt, const Key& key) {
+    return slice(cnt.equal_range(key));
+}
+
+template<typename Container, typename Pred>
+auto count_if(const Container& cnt, Pred&& pred) {
+    return std::count_if(cnt.begin(), cnt.end(), std::forward<Pred>(pred));
+}
 
 } // namespace meta::utils

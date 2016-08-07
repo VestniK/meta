@@ -18,28 +18,33 @@
  */
 #pragma once
 
-#include <experimental/string_view>
+#include "utils/types.h"
 
+#include "parser/declaration.h"
 #include "parser/metaparser.h"
 
 namespace meta {
 
-class Import: public Visitable<Node, Import>
-{
+class Import: public Visitable<Declaration, Import> {
 public:
     Import(utils::array_view<StackFrame> reduction);
 
-    const utils::string_view &name() const {return mName;}
-    const utils::string_view &targetPackage() const {return mPackage;}
-    const utils::string_view &target() const {return mTarget;}
+    utils::string_view name() const {return mName;}
+    utils::string_view targetPackage() const {return mPackage;}
+    utils::string_view target() const {return mTarget;}
+
+    void addImportedDeclaration(Declaration* decl) {mImported.push_back(decl);}
+    const std::vector<Declaration*>& importedDeclarations() const {return mImported;}
 
     void walk(Visitor* visitor, int) override {
         accept(visitor);
         seeOff(visitor);
     }
 
+    const AttributesMap& attributes() const override;
+
 private:
-    std::vector<Node::Ptr<Node>> mChildren;
+    std::vector<Declaration*> mImported;
     utils::string_view mPackage;
     utils::string_view mTarget;
     utils::string_view mName;
