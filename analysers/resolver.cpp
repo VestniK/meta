@@ -59,6 +59,7 @@ Import* import(const DeclRef<Decl>& val) {return val.import;}
 
 struct CodeContext {
     CodeContext* parent = nullptr;
+    utils::string_view package;
     std::multimap<utils::string_view, DeclRef<Function>> functions;
     std::map<utils::string_view, DeclRef<Struct>> structs;
     std::map<utils::string_view, VarDecl*> vars;
@@ -70,18 +71,15 @@ struct Resolver {
     }
 
     void operator() (SourceFile* node, Dictionary& globalCtx, CodeContext& ctx) {
-        CodeContext srcFileContext = {&ctx};
+        CodeContext srcFileContext = {&ctx, node->package()};
         for (const auto& kv: globalCtx[node->package()].functions)
             srcFileContext.functions.emplace(kv.first, DeclRef<Function>{nullptr, kv.second});
         for (const auto& kv: globalCtx[node->package()].structs)
             srcFileContext.structs.emplace(kv.first, DeclRef<Struct>{nullptr, kv.second});
 
         /// @todo split SourceFile children into imports, functions and structs
-        for (auto import: node->getChildren<Import>()) {
-            if (import->targetPackage() == node->package())
-                throw SemanticError(node, "Import of a declaration from the current package is meaningless");
+        for (auto import: node->getChildren<Import>())
             (*this)(import, globalCtx, srcFileContext);
-        }
 
         for (auto structure: node->getChildren<Struct>())
             (*this)(structure, globalCtx, srcFileContext);
@@ -98,13 +96,25 @@ struct Resolver {
                 return decl->getVisitableType() != std::type_index(typeid(Function));
             }) == 0
         );
+        if (node->targetPackage() == ctx.package)
+            throw SemanticError(node, "Import of a declaration from the current package is meaningless");
         auto pkgIt = globalCtx.find(node->targetPackage());
         if (pkgIt == globalCtx.end())
             throw SemanticError(node, "No such package '%s'", node->targetPackage());
         auto structIt = pkgIt->second.structs.find(node->target());
         auto funcs = utils::equal_range(pkgIt->second.functions, node->target());
         if (structIt != pkgIt->second.structs.end()) {
-            /// @todo check target visibility
+            if (structIt->second->visibility() == Visibility::Private)
+                throw SemanticError(node, "Struct '%s' is private in the package '%s'", node->name(), node->targetPackage());
+            if (
+                structIt->second->visibility() == Visibility::Protected &&
+                !isChildPackage(ctx.package, node->targetPackage())
+            ) {
+                throw SemanticError(
+                    node, "Struct '%s' is protected in the package '%s' which is not parent of current package '%s'",
+                    node->name(), node->targetPackage(), ctx.package
+                );
+            }
             const auto conflictingFuncs = utils::equal_range(ctx.functions, node->name());
             if (!conflictingFuncs.empty())
                 throwDeclConflict(node, conflictingFuncs);
@@ -113,9 +123,11 @@ struct Resolver {
                 throwDeclConflict(node, utils::slice(insres.first));
             node->addImportedDeclaration(structIt->second);
         } else if (!funcs.empty()) {
+            auto conflictingStruct = ctx.structs.find(node->name());
+            if (conflictingStruct != ctx.structs.end())
+                throwDeclConflict(node, utils::slice(conflictingStruct));
             for (const auto& func: funcs) {
                 /// @todo check target visibility
-                /// @todo check symbols conflicts
                 ctx.functions.emplace(node->name(), DeclRef<Function>{node, func.second});
                 node->addImportedDeclaration(func.second);
             }
