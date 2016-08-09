@@ -19,7 +19,7 @@
 
 #include <gtest/gtest.h>
 
-#include "utils/slice.h"
+#include "utils/range.h"
 #include "utils/string.h"
 #include "utils/testtools.h"
 
@@ -200,21 +200,11 @@ TEST(ActionsTest, funcOverloads) {
     }
 }
 
-struct TestData {
-    utils::string_view input;
-    utils::string_view errMsg;
-};
-
-std::ostream& operator<< (std::ostream& out, const TestData& dat) {
-    out << "=== input ===\n" << dat.input << "\n=== expected error ===\n" << dat.errMsg;
-    return out;
-}
-
-class ActionsTest: public ::testing::TestWithParam<TestData> {};
+class ActionsTest: public utils::ErrorTest {};
 
 INSTANTIATE_TEST_CASE_P(DeclConflincts, ActionsTest, ::testing::Values(
     // Struct with struct
-    TestData{
+    utils::ErrorTestData{
         .input=
 R"META(
 package test;
@@ -228,7 +218,7 @@ R"(Struct 'test.Point' conflicts with other declarations.
 notice: test.meta:4:1: Struct 'test.Point')"
     },
     // Struct with function
-    TestData{
+    utils::ErrorTestData{
         .input=
 R"META(
 package test;
@@ -242,7 +232,7 @@ R"(Struct 'test.foo' conflicts with other declarations.
 notice: test.meta:4:1: Function 'test.foo()')"
     },
     // Struct with overloaded function
-    TestData{
+    utils::ErrorTestData{
         .input=
 R"META(
 package test;
@@ -257,7 +247,7 @@ notice: test.meta:3:1: Function 'test.foo()'
 notice: test.meta:4:1: Function 'test.foo(int)')"
     },
     // Function with struct
-    TestData{
+    utils::ErrorTestData{
         .input=
 R"META(
 package test;

@@ -20,8 +20,8 @@
 #include <set>
 #include <algorithm>
 
-#include <utils/array_view.h>
-#include "utils/slice.h"
+#include "utils/array_view.h"
+#include "utils/range.h"
 
 #include "parser/dictionary.h"
 #include "parser/metaparser.h"
@@ -161,7 +161,24 @@ struct Resolver {
 
     void operator() (Struct* node, Dictionary& globalCtx, CodeContext& ctx) {}
 
-    void operator() (Function* node, Dictionary& globalCtx, CodeContext& ctx) {}
+    void operator() (Function* node, Dictionary& globalCtx, CodeContext& ctx) {
+        if (node->visibility() != Visibility::Extern && node->body() == nullptr)
+            throw SemanticError(node, "Implementation missing for the function '%s'", node->name());
+        if (node->visibility() == Visibility::Extern && node->body() != nullptr)
+            throw SemanticError(node, "Extern function '%s' must not have implementation", node->name());
+
+        for (auto adjustedArgs: utils::segments(node->args())) {
+            if (std::get<0>(adjustedArgs)->inited() && !std::get<1>(adjustedArgs)->inited())
+                throw SemanticError(
+                    std::get<1>(adjustedArgs),
+                    "Argument '%s' has no default value while previous argument '%s' has",
+                    std::get<1>(adjustedArgs)->name(), std::get<0>(adjustedArgs)->name()
+                );
+        }
+
+        if (!node->body())
+            return;
+    }
 };
 
 }

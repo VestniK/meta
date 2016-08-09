@@ -52,4 +52,51 @@ auto count_if(const Container& cnt, Pred&& pred) {
     return std::count_if(cnt.begin(), cnt.end(), std::forward<Pred>(pred));
 }
 
+template<typename Iter>
+struct SegmentsIter {
+    Iter head;
+    Iter tailStart;
+
+    SegmentsIter& operator++ () {
+        ++head;
+        ++tailStart;
+        return *this;
+    }
+
+    bool operator!= (const SegmentsIter& rhs) {
+        return tailStart != rhs.tailStart;
+    }
+
+    bool operator== (const SegmentsIter& rhs) {
+        return tailStart == rhs.tailStart;
+    }
+
+    auto operator*() {
+        return std::tie(*head, *tailStart);
+    }
+};
+
+template<typename Iter>
+auto segments(Iter b, Iter e) {
+    if (b == e)
+        return slice(SegmentsIter<Iter>{b, e}, SegmentsIter<Iter>{b, e});
+    Iter n = b;
+    ++n;
+    return slice(SegmentsIter<Iter>{b,n}, SegmentsIter<Iter>{e,e});
+}
+
+template<typename Rng>
+auto segments(const Rng& range) {
+    using std::begin;
+    using std::end;
+    return segments(begin(range), end(range));
+}
+
+template<typename Rng>
+auto segments(Rng& range) {
+    using std::begin;
+    using std::end;
+    return segments(begin(range), end(range));
+}
+
 } // namespace meta::utils

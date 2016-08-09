@@ -21,11 +21,104 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/testtools.h"
+
 #include "parser/metaparser.h"
 
 #include "analysers/actions.h"
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
+
+namespace meta::analysers {
+namespace {
+
+class ResolveErrors: public utils::ErrorTest {};
+
+TEST_P(ResolveErrors, resolveErrors) {
+    auto param = GetParam();
+    Parser parser;
+    Actions act;
+    parser.setNodeActions(&act);
+    parser.setParseActions(&act);
+    ASSERT_PARSE(parser, "test.meta", param.input);
+    auto ast = parser.ast();
+    try {
+        v2::resolve(ast, act.dictionary());
+        FAIL() << "Error was not detected: " << param.errMsg;
+    } catch (const SemanticError& err) {
+        EXPECT_EQ(err.what(), param.errMsg) << err.what();
+    }
+}
+
+INSTANTIATE_TEST_CASE_P(Resolver, ResolveErrors, ::testing::Values(
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            extern int foo(int x) {return 2*x;}
+        )META",
+        .errMsg=R"(Extern function 'foo' must not have implementation)"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            export string foo(int x);
+        )META",
+        .errMsg=R"(Implementation missing for the function 'foo')"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            public string foo(int x);
+        )META",
+        .errMsg=R"(Implementation missing for the function 'foo')"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            protected string foo(int x);
+        )META",
+        .errMsg=R"(Implementation missing for the function 'foo')"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            private string foo(int x);
+        )META",
+        .errMsg=R"(Implementation missing for the function 'foo')"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            int foo(int x = 42, int y) {return x + y;}
+        )META",
+        .errMsg=R"(Argument 'y' has no default value while previous argument 'x' has)"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            int foo(int x = 42, int y, int z)  {return x + y + z;}
+        )META",
+        .errMsg=R"(Argument 'y' has no default value while previous argument 'x' has)"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            int foo(int x, int y = 42, int z)  {return x + y + z;}
+        )META",
+        .errMsg=R"(Argument 'z' has no default value while previous argument 'y' has)"
+    }
+));
+
+} // anonymous namespace
+} // namespace meta::analysers
 
 using namespace meta;
 using namespace meta::analysers;
@@ -34,12 +127,7 @@ using namespace std::literals;
 
 namespace {
 
-class Resolver: public testing::TestWithParam<std::string>
-{
-public:
-};
-
-}
+class Resolver: public testing::TestWithParam<std::string> {};
 
 TEST_P(Resolver, resolveErrors) {
     const auto lib = R"META(
@@ -63,7 +151,7 @@ TEST_P(Resolver, resolveErrors) {
     auto ast = parser.ast();
     try {
         resolve(ast, act.dictionary());
-        ASSERT_TRUE(false) << "Input code contains symbol resolvation errors which were not found";
+        ASSERT_TRUE(false) << "Input code contains symbol resolution errors which were not found";
     } catch (SemanticError &err) {
         ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << utils::string_view(err.tokens());
         ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << utils::string_view(err.tokens());
@@ -73,12 +161,7 @@ TEST_P(Resolver, resolveErrors) {
 INSTANTIATE_TEST_CASE_P(semanticErrors, Resolver, ::testing::Values(
     "package test; auto foo(int x) {\nbool x; return x;}", // argument redifinition
     "package test; auto foo() {int x = 0; \nbool x; return x;}", // shadow another var
-    "package test; auto foo(int x) {\nbool b; return x;}", // never used
-    "package test; import some.lib.foo1; import some.lib.foo2; \nimport some.lib.foo3; int foo(int x) {return foo1(x) + foo2(x) + foo3(x);}", // import ptotected func
-    "package some.lib.subpkg; import some.lib.foo1; import some.lib.foo2; import some.lib.foo3; \nimport some.lib.foo4; int foo() {return foo1(x) + foo2(x) + foo3(x) + foo4(x);}", // import private func
-    "package test; \nextern int foo() {return 5;}", // extern with body
-    "package test; \nexport int foo();", // local function without body
-    "package test; \npublic int foo();", // local function without body
-    "package test; \nprotected int foo();", // local function without body
-    "package test; \nprivate int foo();" // local function without body
+    "package test; auto foo(int x) {\nbool b; return x;}" // never used
 ));
+
+}

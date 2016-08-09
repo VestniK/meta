@@ -290,22 +290,11 @@ TEST(ResolveImports, importExtendingOverload) {
 
 namespace {
 
-struct TestData {
-    utils::string_view input;
-    utils::string_view errMsg;
-};
+struct ImportErrors: public utils::ErrorTest {};
 
-
-std::ostream& operator<< (std::ostream& out, const TestData& dat) {
-    out << "=== input ===\n" << dat.input << "\n=== expected error ===\n" << dat.errMsg;
-    return out;
-}
-
-struct ResolveImports: public ::testing::TestWithParam<TestData> {};
-
-INSTANTIATE_TEST_CASE_P(ImportErrors, ResolveImports, ::testing::Values(
+INSTANTIATE_TEST_CASE_P(ResolveImports, ImportErrors, ::testing::Values(
     // Import from current pkg
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -316,7 +305,7 @@ INSTANTIATE_TEST_CASE_P(ImportErrors, ResolveImports, ::testing::Values(
         .errMsg = "Import of a declaration from the current package is meaningless"
     },
     // invalid import targets
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -324,7 +313,7 @@ INSTANTIATE_TEST_CASE_P(ImportErrors, ResolveImports, ::testing::Values(
         )META",
         .errMsg = "No such package 'no.such.pkg'"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -333,7 +322,7 @@ INSTANTIATE_TEST_CASE_P(ImportErrors, ResolveImports, ::testing::Values(
         .errMsg = "Declaration 'NoSuchDecl' not found in package 'test.lib'"
     },
     // structs import violating visibility restrictions
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -341,7 +330,7 @@ INSTANTIATE_TEST_CASE_P(ImportErrors, ResolveImports, ::testing::Values(
         )META",
         .errMsg = "Struct 'Color' is private in the package 'test.lib'"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -350,7 +339,7 @@ INSTANTIATE_TEST_CASE_P(ImportErrors, ResolveImports, ::testing::Values(
         .errMsg = "Struct 'PointF3d' is protected in the package 'test.lib' which is not parent of current package 'test'"
     },
     // struct import with conflicts
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -362,7 +351,7 @@ INSTANTIATE_TEST_CASE_P(ImportErrors, ResolveImports, ::testing::Values(
 R"(Import of 'test.lib.Point' as 'Point' conflicts with other declarations.
 notice: test.meta:6:13: Struct 'test.Point')"
     },
-        TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -374,7 +363,7 @@ notice: test.meta:6:13: Struct 'test.Point')"
 R"(Import of 'test.lib.Point' as 'Point2d' conflicts with other declarations.
 notice: test.meta:6:13: Struct 'test.Point2d')"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -386,7 +375,7 @@ notice: test.meta:6:13: Struct 'test.Point2d')"
 R"(Import of 'test.lib.Point' as 'point' conflicts with other declarations.
 notice: test.meta:6:13: Function 'test.point()')"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -400,7 +389,7 @@ R"(Import of 'test.lib.Point' as 'point' conflicts with other declarations.
 notice: test.meta:6:13: Function 'test.point()'
 notice: test.meta:7:13: Function 'test.point(int)')"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -412,7 +401,7 @@ notice: test.meta:7:13: Function 'test.point(int)')"
 R"(Import of 'test.lib.Point' as 'Point' conflicts with other declarations.
 notice: test.meta:6:13: Function 'test.Point()')"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -426,7 +415,7 @@ R"(Import of 'test.lib.Point' as 'Point' conflicts with other declarations.
 notice: test.meta:6:13: Function 'test.Point()'
 notice: test.meta:7:13: Function 'test.Point(int)')"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -438,7 +427,7 @@ R"(Import of 'test.lib.Point3d' as 'Point' conflicts with other declarations.
 notice: lib.meta:4:5: Struct 'test.lib.Point'
 	imported as 'Point' here: test.meta:4:13)"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -450,7 +439,7 @@ R"(Import of 'test.lib.Point' as 'Point' conflicts with other declarations.
 notice: lib.meta:10:5: Struct 'test.lib.Point3d'
 	imported as 'Point' here: test.meta:4:13)"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -463,7 +452,7 @@ notice: lib.meta:37:5: Function 'test.lib.foo(int)'
 	imported as 'bar' here: test.meta:4:13)"
     },
     // func imports with conflicts
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -476,7 +465,7 @@ R"(Import of 'test.lib.foo' as 'Point' conflicts with other declarations.
 notice: test.meta:6:13: Struct 'test.Point')"
     },
     // func imports violating visibility rules
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -486,7 +475,7 @@ notice: test.meta:6:13: Struct 'test.Point')"
 R"(Function 'privFoo' from the package 'test.lib' has no overloads visible from the current package 'test'
 notice: lib.meta:38:5: Function 'test.lib.privFoo(int)' is private)"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -496,7 +485,7 @@ notice: lib.meta:38:5: Function 'test.lib.privFoo(int)' is private)"
 R"(Function 'protFoo' from the package 'test.lib' has no overloads visible from the current package 'test'
 notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
     },
-    TestData{
+    utils::ErrorTestData{
         .input = R"META(
             package test;
 
@@ -511,7 +500,7 @@ notice: lib.meta:42:5: Function 'test.lib.overload2(int)' is private)"
 
 } // anonymous namespace
 
-TEST_P(ResolveImports, importErrors) {
+TEST_P(ImportErrors, importErrors) {
     auto param = GetParam();
     Parser parser;
     Actions act;

@@ -19,7 +19,11 @@
 
 #pragma once
 
+#include <ostream>
+
 #include <gtest/gtest.h>
+
+#include "utils/types.h"
 
 namespace meta::utils {
 
@@ -34,5 +38,18 @@ namespace meta::utils {
             err.line() << "\nExpected one of the following terms:\n" << \
             err.expected() << "Parser stack dump:\n" << err.parserStack(); \
     }
+
+struct ErrorTestData {
+    utils::string_view input;
+    utils::string_view errMsg;
+};
+
+inline
+std::ostream& operator<< (std::ostream& out, const ErrorTestData& dat) {
+    out << "=== input ===\n" << dat.input << "\n=== expected error ===\n" << dat.errMsg << "\n======";
+    return out;
+}
+
+class ErrorTest: public ::testing::TestWithParam<ErrorTestData> {};
 
 } // namespace meta::utils

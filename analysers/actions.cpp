@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#include "utils/slice.h"
+#include "utils/range.h"
 
 #include "parser/function.h"
 #include "parser/sourcefile.h"
