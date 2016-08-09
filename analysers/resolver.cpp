@@ -127,9 +127,29 @@ struct Resolver {
             if (conflictingStruct != ctx.structs.end())
                 throwDeclConflict(node, utils::slice(conflictingStruct));
             for (const auto& func: funcs) {
-                /// @todo check target visibility
+                if (func.second->visibility() == Visibility::Private)
+                    continue;
+                if (
+                    func.second->visibility() == Visibility::Protected &&
+                    !isChildPackage(ctx.package, node->targetPackage())
+                )
+                    continue;
                 ctx.functions.emplace(node->name(), DeclRef<Function>{node, func.second});
                 node->addImportedDeclaration(func.second);
+            }
+            if (node->importedDeclarations().empty()) {
+                std::ostringstream oss;
+                oss <<
+                    "Function '" << node->name() << "' from the package '" << node->targetPackage() <<
+                    "' has no overloads visible from the current package '" << ctx.package << '\''
+                ;
+                for (const auto& func: funcs) {
+                    oss <<
+                        "\nnotice: " << SourceInfo{func.second} << ": " << declinfo(func.second) <<
+                        " is " << func.second->visibility()
+                    ;
+                }
+                throw SemanticError(node, "%s", oss.str());
             }
         } else {
             throw SemanticError(
