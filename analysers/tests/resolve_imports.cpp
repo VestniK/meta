@@ -8,6 +8,7 @@
 #include "parser/struct.h"
 
 #include "analysers/actions.h"
+#include "analysers/declconflicts.h"
 #include "analysers/semanticerror.h"
 #include "analysers/resolver.h"
 
@@ -513,7 +514,7 @@ TEST_P(ImportErrors, importErrors) {
         v2::resolve(ast, act.dictionary());
         FAIL() << "Error was not detected: " << param.errMsg;
     } catch (const SemanticError& err) {
-        EXPECT_EQ(err.what(), param.errMsg) << err.what();
+        EXPECT_EQ(err.what(), param.errMsg) << SourceInfo(err) << ": " << err.what();
     }
 }
 

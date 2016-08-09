@@ -159,8 +159,6 @@ struct Resolver {
         }
     }
 
-    void operator() (Struct* node, Dictionary& globalCtx, CodeContext& ctx) {}
-
     void operator() (Function* node, Dictionary& globalCtx, CodeContext& ctx) {
         if (node->visibility() != Visibility::Extern && node->body() == nullptr)
             throw SemanticError(node, "Implementation missing for the function '%s'", node->name());
@@ -178,7 +176,22 @@ struct Resolver {
 
         if (!node->body())
             return;
+        CodeContext funcContext{&ctx};
+        for (auto arg: node->args()) {
+            auto res = funcContext.vars.emplace(arg->name(), arg);
+            if (!res.second)
+                throw SemanticError(
+                    arg, "%s has more than one arguments with the same name '%s'",
+                    declinfo(node), arg->name()
+                );
+        }
+        for (auto statement: node->body()->statements())
+            dispatch(*this, statement, globalCtx, funcContext);
     }
+
+    void operator() (Return* node, Dictionary& globalCtx, CodeContext& ctx) {}
+
+    void operator() (Struct* node, Dictionary& globalCtx, CodeContext& ctx) {}
 };
 
 }

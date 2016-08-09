@@ -11,15 +11,24 @@
 namespace meta::analysers {
 
 struct SourceInfo {
-    Node* node;
+    SourceInfo(Node* node):
+        location(node->sourceLocation()),
+        line(node->tokens().linenum()),
+        column(node->tokens().colnum())
+    {}
+    SourceInfo(const NodeException& err):
+        location(err.sourcePath()),
+        line(err.tokens().linenum()),
+        column(err.tokens().colnum())
+    {}
+
+    std::string location;
+    int line, column;
 };
 
 inline
 std::ostream& operator<< (std::ostream& out, const SourceInfo& info) {
-    out <<
-        info.node->sourceLocation().string() << ':' <<
-        info.node->tokens().linenum() << ':' << info.node->tokens().colnum()
-    ;
+    out << info.location << ':' << info.line << ':' << info.column;
     return out;
 }
 

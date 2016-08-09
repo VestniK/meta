@@ -114,6 +114,14 @@ INSTANTIATE_TEST_CASE_P(Resolver, ResolveErrors, ::testing::Values(
             int foo(int x, int y = 42, int z)  {return x + y + z;}
         )META",
         .errMsg=R"(Argument 'z' has no default value while previous argument 'y' has)"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            int foo(int x, int y, int x) {return x + y + x;}
+        )META",
+        .errMsg=R"(Function 'test.foo(int, int, int)' has more than one arguments with the same name 'x')"
     }
 ));
 
