@@ -52,6 +52,16 @@ auto count_if(const Container& cnt, Pred&& pred) {
     return std::count_if(cnt.begin(), cnt.end(), std::forward<Pred>(pred));
 }
 
+template<typename Container, typename Pred>
+auto find_if(const Container& cnt, Pred&& pred) {
+    return std::find_if(cnt.begin(), cnt.end(), std::forward<Pred>(pred));
+}
+
+template<typename Container, typename BinPred>
+auto adjacent_find(const Container& cnt, BinPred&& pred) {
+    return std::adjacent_find(cnt.begin(), cnt.end(), std::forward<BinPred>(pred));
+}
+
 template<typename Iter>
 struct SegmentsIter {
     Iter head;

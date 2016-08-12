@@ -119,9 +119,53 @@ INSTANTIATE_TEST_CASE_P(Resolver, ResolveErrors, ::testing::Values(
         .input=R"META(
             package test;
 
-            int foo(int x, int y, int x) {return x + y + x;}
+            bool foo(int x, int y) {bool x = y < 0; return x;}
         )META",
-        .errMsg=R"(Function 'test.foo(int, int, int)' has more than one arguments with the same name 'x')"
+        .errMsg=
+R"(Variable 'bool x' conflicts with other declarations.
+notice: test.meta:4:22: Variable 'int x' (function argument))"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            bool foo(int x, int y) {
+                if (x < 0) {
+                    bool x = y < 0;
+                    return x;
+                }
+                return true;
+            }
+        )META",
+        .errMsg=
+R"(Variable 'bool x' conflicts with other declarations.
+notice: test.meta:4:22: Variable 'int x' (function argument))"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            int foo(int x) {
+                bool var = x < 0;
+                if (var)
+                    return -x;
+                int var = x - 9;
+                return var;
+            }
+        )META",
+        .errMsg=
+R"(Variable 'int var' conflicts with other declarations.
+notice: test.meta:5:17: Variable 'bool var')"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            int foo(int x) {
+                return y;
+            }
+        )META",
+        .errMsg=R"(Undefined variable 'y')"
     }
 ));
 
@@ -167,8 +211,6 @@ TEST_P(Resolver, resolveErrors) {
 }
 
 INSTANTIATE_TEST_CASE_P(semanticErrors, Resolver, ::testing::Values(
-    "package test; auto foo(int x) {\nbool x; return x;}", // argument redifinition
-    "package test; auto foo() {int x = 0; \nbool x; return x;}", // shadow another var
     "package test; auto foo(int x) {\nbool b; return x;}" // never used
 ));
 

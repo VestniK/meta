@@ -65,6 +65,19 @@ struct CodeContext {
     std::map<utils::string_view, VarDecl*> vars;
 };
 
+template<typename Decl>
+Decl* find(const CodeContext& ctx, utils::string_view name);
+
+template<>
+VarDecl* find<VarDecl>(const CodeContext& ctx, utils::string_view name) {
+    for (auto context = &ctx; context != nullptr; context = context->parent) {
+        auto it = context->vars.find(name);
+        if (it != context->vars.end())
+            return it->second;
+    }
+    return nullptr;
+}
+
 struct Resolver {
     void operator() (Node* node, Dictionary&, CodeContext&) {
         throw UnexpectedNode(node, "Don't know how to resolve declaration and types for");
@@ -165,13 +178,15 @@ struct Resolver {
         if (node->visibility() == Visibility::Extern && node->body() != nullptr)
             throw SemanticError(node, "Extern function '%s' must not have implementation", node->name());
 
-        for (auto adjustedArgs: utils::segments(node->args())) {
-            if (std::get<0>(adjustedArgs)->inited() && !std::get<1>(adjustedArgs)->inited())
-                throw SemanticError(
-                    std::get<1>(adjustedArgs),
-                    "Argument '%s' has no default value while previous argument '%s' has",
-                    std::get<1>(adjustedArgs)->name(), std::get<0>(adjustedArgs)->name()
-                );
+        const auto it = utils::adjacent_find(node->args(), [](VarDecl* prev, VarDecl* next) {
+            return prev->inited() && !next->inited();
+        });
+        if (it != node->args().end()) {
+            throw SemanticError(
+                *it,
+                "Argument '%s' has no default value while previous argument '%s' has",
+                (*(it + 1))->name(), (*it)->name()
+            );
         }
 
         if (!node->body())
@@ -189,9 +204,65 @@ struct Resolver {
             dispatch(*this, statement, globalCtx, funcContext);
     }
 
-    void operator() (Return* node, Dictionary& globalCtx, CodeContext& ctx) {}
+    void operator() (CodeBlock* node, Dictionary& globalCtx, CodeContext& ctx) {
+        CodeContext blockCtx{ctx};
+        for (auto statement: node->statements())
+            dispatch(*this, statement, globalCtx, blockCtx);
+    }
 
-    void operator() (Struct* node, Dictionary& globalCtx, CodeContext& ctx) {}
+    void operator() (VarDecl* node, Dictionary& globalCtx, CodeContext& ctx) {
+        auto conflict = find<VarDecl>(ctx, node->name());
+        if (conflict && (conflict->flags() & VarFlags::argument))
+            throwDeclConflict(node, conflict);
+        if (node->inited() && !(node->flags() & VarFlags::argument))
+            dispatch(*this, node->initExpr(), globalCtx, ctx);
+        auto res = ctx.vars.emplace(node->name(), node);
+        if (!res.second)
+            throwDeclConflict(node, utils::slice(res.first));
+    }
+
+    void operator() (If* node, Dictionary& globalCtx, CodeContext& ctx) {
+        dispatch(*this, node->condition(), globalCtx, ctx);
+        if (node->thenBlock()) {
+            CodeContext thenCtx{ctx};
+            dispatch(*this, node->thenBlock(), globalCtx, thenCtx);
+        }
+        if (node->elseBlock()) {
+            CodeContext elseCtx{ctx};
+            dispatch(*this, node->elseBlock(), globalCtx, elseCtx);
+        }
+    }
+
+    void operator() (BinaryOp* node, Dictionary& globalCtx, CodeContext& ctx) {
+        dispatch(*this, node->left(), globalCtx, ctx);
+        dispatch(*this, node->right(), globalCtx, ctx);
+    }
+
+    void operator() (PrefixOp* node, Dictionary& globalCtx, CodeContext& ctx) {
+        dispatch(*this, node->operand(), globalCtx, ctx);
+    }
+
+    void operator() (Number*, Dictionary&, CodeContext&) {}
+    void operator() (StrLiteral*, Dictionary&, CodeContext&) {}
+    void operator() (Literal*, Dictionary&, CodeContext&) {}
+
+    void operator() (Var* node, Dictionary&, CodeContext& ctx) {
+        auto decl = find<VarDecl>(ctx, node->name());
+        if (!decl)
+            throw SemanticError(node, "Undefined variable '%s'", node->name());
+        node->setDeclaration(decl);
+    }
+
+    void operator() (Return* node, Dictionary& globalCtx, CodeContext& ctx) {
+        if (node->value())
+            dispatch(*this, node->value(), globalCtx, ctx);
+    }
+
+    void operator() (Struct* node, Dictionary& globalCtx, CodeContext& ctx) {
+        CodeContext structCtx{ctx};
+        for (VarDecl* member: node->members())
+            (*this)(member, globalCtx, structCtx);
+    }
 };
 
 }

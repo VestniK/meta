@@ -33,6 +33,7 @@ namespace utils {
 using std::experimental::string_view;
 
 using std::experimental::optional;
+using std::experimental::make_optional;
 using std::experimental::nullopt;
 
 namespace fs = std::experimental::filesystem;

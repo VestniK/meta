@@ -56,6 +56,14 @@ std::ostream& operator<< (std::ostream& out, const Declinfo<Struct>& info) {
 }
 
 inline
+std::ostream& operator<< (std::ostream& out, const Declinfo<VarDecl>& info) {
+    out << "Variable '" << info.decl->typeName() << ' ' << info.decl->name() << '\'';
+    if (info.decl->flags() & VarFlags::argument)
+        out << " (function argument)";
+    return out;
+}
+
+inline
 std::ostream& operator<< (std::ostream& out, const Declinfo<Function>& info) {
     out << "Function '" << info.decl->package() << '.' << info.decl->name() << '(';
     bool first = true;
@@ -76,6 +84,8 @@ inline
 Struct* decl(Struct* node) {return node;}
 inline
 Function* decl(Function* node) {return node;}
+inline
+VarDecl* decl(VarDecl* node) {return node;}
 
 inline
 Import* import(Node*) {return nullptr;}
@@ -91,6 +101,18 @@ void throwDeclConflict(Decl* node, const Range& range) {
         if (imported)
             oss << "\n\timported as '" << imported->name() << "' here: " << SourceInfo{imported};
     }
+    throw SemanticError(node, "%s", oss.str());
+}
+
+template<typename Decl1, typename Decl2>
+[[noreturn]]
+void throwDeclConflict(Decl1* node, Decl2* conflict) {
+    std::ostringstream oss;
+    oss << declinfo(node) << " conflicts with other declarations.";
+    oss << "\nnotice: " << SourceInfo{conflict} << ": " << declinfo(decl(conflict));
+    auto imported = import(conflict);
+    if (imported)
+        oss << "\n\timported as '" << imported->name() << "' here: " << SourceInfo{imported};
     throw SemanticError(node, "%s", oss.str());
 }
 

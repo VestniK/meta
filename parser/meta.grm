@@ -66,7 +66,7 @@ Annotation -> <annotation> +> Annotation
 // which is resolved by spliting this rule into two.
 Function -> [Visibility] Type <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') *> Function
          -> Annotation... [Visibility] Type <identifier> '(' [VarDecl]/','... ')' (CodeBlock|';') *> Function
-CodeBlock -> '{' (Statement)... '}' +> CodeBlock
+CodeBlock -> '{' [Statement]... '}' +> CodeBlock
 
 Struct -> [Visibility] 'struct' <identifier> '{' [VarDecl ';']... '}' *> Struct
        -> Annotation... [Visibility] 'struct' <identifier> '{' [VarDecl ';']... '}' *> Struct
