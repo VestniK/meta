@@ -79,29 +79,31 @@ VarDecl* find<VarDecl>(const CodeContext& ctx, utils::string_view name) {
 }
 
 struct Resolver {
-    void operator() (Node* node, Dictionary&, CodeContext&) {
+    Dictionary& dict;
+
+    void operator() (Node* node, CodeContext&) {
         throw UnexpectedNode(node, "Don't know how to resolve declaration and types for");
     }
 
-    void operator() (SourceFile* node, Dictionary& globalCtx, CodeContext& ctx) {
+    void operator() (SourceFile* node, CodeContext& ctx) {
         CodeContext srcFileContext = {&ctx, node->package()};
-        for (const auto& kv: globalCtx[node->package()].functions)
+        for (const auto& kv: dict[node->package()].functions)
             srcFileContext.functions.emplace(kv.first, DeclRef<Function>{nullptr, kv.second});
-        for (const auto& kv: globalCtx[node->package()].structs)
+        for (const auto& kv: dict[node->package()].structs)
             srcFileContext.structs.emplace(kv.first, DeclRef<Struct>{nullptr, kv.second});
 
         /// @todo split SourceFile children into imports, functions and structs
         for (auto import: node->getChildren<Import>())
-            (*this)(import, globalCtx, srcFileContext);
+            (*this)(import, srcFileContext);
 
         for (auto structure: node->getChildren<Struct>())
-            (*this)(structure, globalCtx, srcFileContext);
+            (*this)(structure, srcFileContext);
 
         for (auto func: node->getChildren<Function>())
-            (*this)(func, globalCtx, srcFileContext);
+            (*this)(func, srcFileContext);
     }
 
-    void operator() (Import* node, Dictionary& globalCtx, CodeContext& ctx) {
+    void operator() (Import* node, CodeContext& ctx) {
         POSTCONDITION(!node->importedDeclarations().empty());
         POSTCONDITION(
             node->importedDeclarations().size() == 1 ||
@@ -111,8 +113,8 @@ struct Resolver {
         );
         if (node->targetPackage() == ctx.package)
             throw SemanticError(node, "Import of a declaration from the current package is meaningless");
-        auto pkgIt = globalCtx.find(node->targetPackage());
-        if (pkgIt == globalCtx.end())
+        auto pkgIt = dict.find(node->targetPackage());
+        if (pkgIt == dict.end())
             throw SemanticError(node, "No such package '%s'", node->targetPackage());
         auto structIt = pkgIt->second.structs.find(node->target());
         auto funcs = utils::equal_range(pkgIt->second.functions, node->target());
@@ -172,7 +174,7 @@ struct Resolver {
         }
     }
 
-    void operator() (Function* node, Dictionary& globalCtx, CodeContext& ctx) {
+    void operator() (Function* node, CodeContext& ctx) {
         if (node->visibility() != Visibility::Extern && node->body() == nullptr)
             throw SemanticError(node, "Implementation missing for the function '%s'", node->name());
         if (node->visibility() == Visibility::Extern && node->body() != nullptr)
@@ -201,67 +203,67 @@ struct Resolver {
                 );
         }
         for (auto statement: node->body()->statements())
-            dispatch(*this, statement, globalCtx, funcContext);
+            dispatch(*this, statement, funcContext);
     }
 
-    void operator() (CodeBlock* node, Dictionary& globalCtx, CodeContext& ctx) {
+    void operator() (CodeBlock* node, CodeContext& ctx) {
         CodeContext blockCtx{ctx};
         for (auto statement: node->statements())
-            dispatch(*this, statement, globalCtx, blockCtx);
+            dispatch(*this, statement, blockCtx);
     }
 
-    void operator() (VarDecl* node, Dictionary& globalCtx, CodeContext& ctx) {
+    void operator() (VarDecl* node, CodeContext& ctx) {
         auto conflict = find<VarDecl>(ctx, node->name());
         if (conflict && (conflict->flags() & VarFlags::argument))
             throwDeclConflict(node, conflict);
         if (node->inited() && !(node->flags() & VarFlags::argument))
-            dispatch(*this, node->initExpr(), globalCtx, ctx);
+            dispatch(*this, node->initExpr(), ctx);
         auto res = ctx.vars.emplace(node->name(), node);
         if (!res.second)
             throwDeclConflict(node, utils::slice(res.first));
     }
 
-    void operator() (If* node, Dictionary& globalCtx, CodeContext& ctx) {
-        dispatch(*this, node->condition(), globalCtx, ctx);
+    void operator() (If* node, CodeContext& ctx) {
+        dispatch(*this, node->condition(), ctx);
         if (node->thenBlock()) {
             CodeContext thenCtx{ctx};
-            dispatch(*this, node->thenBlock(), globalCtx, thenCtx);
+            dispatch(*this, node->thenBlock(), thenCtx);
         }
         if (node->elseBlock()) {
             CodeContext elseCtx{ctx};
-            dispatch(*this, node->elseBlock(), globalCtx, elseCtx);
+            dispatch(*this, node->elseBlock(), elseCtx);
         }
     }
 
-    void operator() (BinaryOp* node, Dictionary& globalCtx, CodeContext& ctx) {
-        dispatch(*this, node->left(), globalCtx, ctx);
-        dispatch(*this, node->right(), globalCtx, ctx);
+    void operator() (BinaryOp* node, CodeContext& ctx) {
+        dispatch(*this, node->left(), ctx);
+        dispatch(*this, node->right(), ctx);
     }
 
-    void operator() (PrefixOp* node, Dictionary& globalCtx, CodeContext& ctx) {
-        dispatch(*this, node->operand(), globalCtx, ctx);
+    void operator() (PrefixOp* node, CodeContext& ctx) {
+        dispatch(*this, node->operand(), ctx);
     }
 
-    void operator() (Number*, Dictionary&, CodeContext&) {}
-    void operator() (StrLiteral*, Dictionary&, CodeContext&) {}
-    void operator() (Literal*, Dictionary&, CodeContext&) {}
+    void operator() (Number*, CodeContext&) {}
+    void operator() (StrLiteral*, CodeContext&) {}
+    void operator() (Literal*, CodeContext&) {}
 
-    void operator() (Var* node, Dictionary&, CodeContext& ctx) {
+    void operator() (Var* node, CodeContext& ctx) {
         auto decl = find<VarDecl>(ctx, node->name());
         if (!decl)
             throw SemanticError(node, "Undefined variable '%s'", node->name());
         node->setDeclaration(decl);
     }
 
-    void operator() (Return* node, Dictionary& globalCtx, CodeContext& ctx) {
+    void operator() (Return* node, CodeContext& ctx) {
         if (node->value())
-            dispatch(*this, node->value(), globalCtx, ctx);
+            dispatch(*this, node->value(), ctx);
     }
 
-    void operator() (Struct* node, Dictionary& globalCtx, CodeContext& ctx) {
+    void operator() (Struct* node, CodeContext& ctx) {
         CodeContext structCtx{ctx};
         for (VarDecl* member: node->members())
-            (*this)(member, globalCtx, structCtx);
+            (*this)(member, structCtx);
     }
 };
 
@@ -415,10 +417,10 @@ void resolve(AST* ast, Dictionary& dict)
 namespace v2 {
 
 void resolve(AST* ast, Dictionary& dict) {
-    Resolver resolver;
+    Resolver resolver{dict};
     CodeContext globalCtx;
     for (auto root: ast->getChildren<Node>(0))
-        dispatch(resolver, root, dict, globalCtx);
+        dispatch(resolver, root, globalCtx);
 }
 
 } // namespace v2
