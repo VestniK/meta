@@ -28,7 +28,8 @@
 namespace meta {
 
 enum class VarFlags {
-    argument
+    argument,
+    member
 };
 
 class VarDecl: public Visitable<Node, VarDecl>, public Typed {

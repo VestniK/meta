@@ -43,6 +43,7 @@ Struct::Struct(utils::array_view<StackFrame> reduction):
     mName = structReduction[2].tokens;
     for (auto& node: structReduction[4].nodes) {
         auto& member = dynamic_cast<VarDecl&>(*node);
+        member.flags() |= VarFlags::member;
         mMembers.emplace_back(&member);
     }
 }
