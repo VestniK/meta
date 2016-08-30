@@ -28,8 +28,6 @@
 using namespace meta;
 using namespace meta::analysers;
 
-using namespace std::literals;
-
 TEST(MetaProcessor, attribute)
 {
     const auto input = R"META(

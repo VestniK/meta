@@ -34,8 +34,6 @@
 using namespace meta;
 using namespace meta::analysers;
 
-using namespace std::literals;
-
 namespace {
 const auto input = R"META(
     package test;

@@ -27,8 +27,6 @@
 #include "parser/metanodes.h"
 #include "parser/unexpectednode.h"
 
-using namespace std::literals;
-
 namespace meta::parser::tests {
 
 namespace {

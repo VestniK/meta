@@ -28,8 +28,6 @@
 
 using namespace meta;
 
-using namespace std::literals;
-
 TEST(StructParsing, simpleStruct) {
      const auto input = R"META(
         package test;

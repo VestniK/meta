@@ -27,8 +27,6 @@
 
 using namespace meta;
 
-using namespace std::literals;
-
 /**
  * @class meta::Parser
  * @test This test checks that all possible function delaration syntaxes are parsed correctly and visibility

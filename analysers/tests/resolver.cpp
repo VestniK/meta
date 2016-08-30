@@ -175,8 +175,6 @@ notice: test.meta:5:17: Variable 'bool var')"
 using namespace meta;
 using namespace meta::analysers;
 
-using namespace std::literals;
-
 namespace {
 
 class Resolver: public testing::TestWithParam<std::string> {};

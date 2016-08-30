@@ -42,8 +42,6 @@
 
 using namespace meta;
 
-using namespace std::literals;
-
 TEST(MetaParser, imports) {
     const auto input = R"META(
         package test;
