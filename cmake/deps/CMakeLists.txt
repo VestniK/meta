@@ -12,7 +12,7 @@ if (NOT GTest_FOUND)
   ExternalProject_Add(GTest
     PREFIX ${CMAKE_BINARY_DIR}
     GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG master # 'install' target and top level cmake are not released yet
+    GIT_TAG release-1.8.0
     CMAKE_CACHE_ARGS
       -DBUILD_SHARED_LIBS:bool=Off
       -DCMAKE_INSTALL_PREFIX:path=${CMAKE_BINARY_DIR}
@@ -24,7 +24,7 @@ find_package(LLVM QUIET)
 if (NOT LLVM_FOUND)
   ExternalProject_Add(llvm
     PREFIX ${CMAKE_BINARY_DIR}
-    SVN_REPOSITORY http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_371/final/
+    SVN_REPOSITORY http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_381/final/
     CMAKE_CACHE_ARGS
       -DLLVM_ENABLE_RTTI:bool=On
       -DCMAKE_INSTALL_PREFIX:path=${CMAKE_BINARY_DIR}
