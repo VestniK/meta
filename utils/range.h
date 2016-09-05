@@ -26,67 +26,79 @@ namespace meta::utils {
 using std::begin;
 using std::end;
 
-template<typename T>
-concept bool Range = requires(T t) {
-    {begin(t)};
-    {end(t)};
-    {++begin(t)};
-    {begin(t) != end(t)} -> bool;
-    {*begin(t)};
-};
-
-template<Range R>
-struct range_traits {
-    using iterator = std::decay_t<decltype(begin(std::declval<R>()))>;
-    using value_type = std::decay_t<decltype(*std::declval<iterator>())>;
-};
-
-template<Range R>
-using range_iterator_t = typename range_traits<R>::iterator;
-template<Range R>
-using range_value_t = typename range_traits<R>::value_type;
-
 template<typename I>
 concept bool Iterator = requires(I i) {
     {*i};
     {++i};
 };
 
-template<typename I, typename F>
-concept bool IteratorValueTransformation =
-    Iterator<I> &&
-    requires(I i, F f)
-{
-    {f(*i)};
+template<typename T>
+concept bool Iterable = requires(T& t) {
+    {begin(t)} -> Iterator;
+    {end(t)};
+    {begin(t) != end(t)} -> bool;
 };
 
-template<typename Iter, typename Func>
-    requires IteratorValueTransformation<Iter, Func>
-struct TransformIter {
-    Func func;
-    Iter it;
-
-    bool operator!= (Iter end) {return it != end;}
-    auto operator* () {return func(*it);}
-    TransformIter& operator++ () {++it; return *this;}
+template<typename T, typename V>
+concept bool Range = Iterable<T> && requires(T& t) {
+    {*begin(t)} -> V;
 };
 
-template<typename Iter, typename Sentinel>
+template<Iterable R>
+struct range_traits {
+    using iterator = std::decay_t<decltype(begin(std::declval<R>()))>;
+    using value_type = std::decay_t<decltype(*std::declval<iterator>())>;
+};
+
+template<Iterable R>
+using range_iterator_t = typename range_traits<R>::iterator;
+template<Iterable R>
+using range_value_t = typename range_traits<R>::value_type;
+
+template<Iterator I>
+struct iterator_traits {
+    using value_type = std::decay_t<decltype(*std::declval<I>())>;
+};
+
+template<Iterator I>
+using iterator_value_t = typename iterator_traits<I>::value_type;
+
+template<Iterable R, Iterator I, typename Sentinel>
 struct View {
-    Iter begin_it;
+    R&& range;
+    I begin_it;
     Sentinel end_it;
 
-    Iter begin() const {return begin_it;}
+    auto begin() const {return begin_it;}
     Sentinel end() const {return end_it;}
     bool empty() const {return !(begin_it != end_it);}
 };
 
-template<typename R, typename F>
-    requires Range<R> && IteratorValueTransformation<range_iterator_t<R>, F>
-auto operator| (R& rng, F&& func) {
-    using Iter = decltype(begin(rng));
-    return View<TransformIter<Iter, F>, Iter>{
-        TransformIter<Iter, F>{std::forward<F>(func), begin(rng)},
+template<typename T, class C>
+concept bool MemberOf = requires(T t, C& c) {
+    {(c.*t)};
+};
+
+template<Iterator I, typename M>
+    requires MemberOf<M, iterator_value_t<I>>
+struct MemberIterator {
+    I iter;
+    M member;
+
+    MemberIterator& operator++ () {++iter; return *this;}
+    auto& operator* () {return ((*iter).*member);}
+    template<typename Sentinel>
+    bool operator!= (Sentinel rhs) const {return iter != rhs;}
+};
+
+template<typename R, typename M>
+    requires Iterable<R> && MemberOf<M, range_value_t<R>>
+auto operator| (R&& rng, M member)
+{
+    using sentinel_t = decltype(end(rng));
+    return View<R, MemberIterator<range_iterator_t<R>, M>, sentinel_t>{
+        std::forward<R>(rng),
+        MemberIterator<range_iterator_t<R>, M>{begin(rng), member},
         end(rng)
     };
 }
