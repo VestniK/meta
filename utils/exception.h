@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include "utils/array_view.h"
+
 namespace meta {
 namespace utils {
 
@@ -29,7 +31,7 @@ public:
     Exception();
     virtual ~Exception() = default;
 
-    const std::vector<std::string> &backtrace() const {return mBacktrace;}
+    utils::array_view<std::string> backtrace() const {return mBacktrace;}
 
 private:
     std::vector<std::string> mBacktrace;
