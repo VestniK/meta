@@ -31,7 +31,7 @@ namespace {
 
 class InvalidTypeId: public utils::Exception {
 public:
-    InvalidTypeId() = default;
+    InvalidTypeId(): utils::Exception(utils::captureBacktrace()) {}
 
     const char* what() const noexcept override {return "Invalid type id";}
 };

@@ -169,7 +169,10 @@ ExecStatus StatementBuilder::operator() (ExprStatement *node, Context &ctx)
 class IRVerificationError: public utils::Exception {
 public:
     template<typename T>
-    IRVerificationError(T&& t): utils::Exception(), mMsg(std::forward<T>(t)) {}
+    IRVerificationError(T&& t):
+        utils::Exception(utils::captureBacktrace()),
+        mMsg(std::forward<T>(t))
+    {}
     const char* what() const noexcept override {return mMsg.c_str();}
 
 private:

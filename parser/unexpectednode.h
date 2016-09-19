@@ -26,12 +26,12 @@ namespace meta {
 class UnexpectedNode: public NodeException {
 public:
     UnexpectedNode(Node* node, const char* msg):
-        NodeException(node, msg)
+        NodeException(node, msg, utils::captureBacktrace())
     {}
 
     template<typename... A>
     UnexpectedNode(Node* node, const char* fmt, A&&... a):
-        NodeException(node, str((boost::format(fmt) % ... % std::forward<A>(a))))
+        NodeException(node, str((boost::format(fmt) % ... % std::forward<A>(a))), utils::captureBacktrace())
     {}
     ~UnexpectedNode() = default;
 };

@@ -29,11 +29,11 @@ namespace meta::analysers {
 
 class SemanticError: public NodeException {
 public:
-    SemanticError(Node* node, const char* msg): NodeException(node, msg) {}
+    SemanticError(Node* node, const char* msg): NodeException(node, msg, {}) {}
 
     template<typename... A>
     SemanticError(Node* node, const char* fmt, A&& ...a):
-        NodeException(node, str((boost::format(fmt) % ... % std::forward<A>(a))))
+        NodeException(node, str((boost::format(fmt) % ... % std::forward<A>(a))), {})
     {}
     ~SemanticError() = default;
 };

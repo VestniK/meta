@@ -27,7 +27,8 @@
 namespace meta {
 namespace utils {
 
-Exception::Exception(): std::exception() {
+std::vector<std::string> captureBacktrace() {
+    std::vector<std::string> res;
     constexpr size_t sizeinc = 128;
     constexpr size_t sizelimit = 1024;
     std::vector<void*> stacktrace(sizeinc);
@@ -37,16 +38,16 @@ Exception::Exception(): std::exception() {
         stacktrace.size() <= sizelimit
     )
         stacktrace.resize(stacktrace.size() + sizeinc);
-    mBacktrace.reserve(stacktrace.size());
+    res.reserve(stacktrace.size());
     std::unique_ptr<char*, decltype(&::free)> strings = {::backtrace_symbols(stacktrace.data(), traceSize), &::free};
     if (!strings)
-        return;
+        return res;
     for (int i = 0; i < traceSize; ++i) {
         string_view btLine = strings.get()[i];
         const size_t fnameStart = btLine.find('(');
         const size_t fnameEnd = btLine.rfind('+');
         if (fnameStart == string_view::npos || fnameEnd == string_view::npos || fnameStart + 1 == fnameEnd) {
-            mBacktrace.push_back(std::string(btLine));
+            res.push_back(std::string(btLine));
             continue;
         }
         std::string fname = {btLine.begin() + fnameStart + 1, btLine.begin() + fnameEnd};
@@ -56,15 +57,16 @@ Exception::Exception(): std::exception() {
             &::free
         };
         if (status != 0) {
-            mBacktrace.push_back(std::string(btLine));
+            res.push_back(std::string(btLine));
             continue;
         }
         std::string str = {btLine.begin(), btLine.begin() + fnameStart + 1};
         str += strbuf.get();
         str.append(btLine.begin() + fnameEnd, btLine.end());
 
-        mBacktrace.push_back(str);
+        res.push_back(str);
     }
+    return res;
 }
 
 } // namespace utils

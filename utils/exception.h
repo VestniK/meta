@@ -26,9 +26,11 @@
 namespace meta {
 namespace utils {
 
+std::vector<std::string> captureBacktrace();
+
 class Exception: public std::exception {
 public:
-    Exception();
+    Exception(std::vector<std::string>&& backtrace): mBacktrace(std::move(backtrace)) {}
     virtual ~Exception() = default;
 
     utils::array_view<std::string> backtrace() const {return mBacktrace;}

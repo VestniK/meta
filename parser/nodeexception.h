@@ -34,8 +34,8 @@ public:
     const std::string &sourcePath() const {return mSrc;}
 
 protected:
-    NodeException(Node *node, const std::string &msg = {}):
-        utils::Exception(), mMsg(msg),
+    NodeException(Node *node, const std::string &msg, std::vector<std::string>&& backtrace):
+        utils::Exception(std::move(backtrace)), mMsg(msg),
         mTokens(node->tokens()), mSrc(node->sourceLocation())
     {
         mTokens.detach(mErrContext);
