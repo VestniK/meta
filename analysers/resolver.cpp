@@ -47,8 +47,14 @@ bool isChildPackage(utils::string_view subpkg, utils::string_view parentpkg) {
 
 template<typename Decl>
 struct DeclRef {
-    Import* import;
     Decl* decl;
+    Import* import = nullptr;
+
+    utils::string_view name() const {
+        if (import)
+            return import->name();
+        return decl->name();
+    }
 };
 
 template<typename Decl>
@@ -60,8 +66,8 @@ Import* import(const DeclRef<Decl>& val) {return val.import;}
 struct CodeContext {
     CodeContext* parent = nullptr;
     utils::string_view package;
-    std::multimap<utils::string_view, DeclRef<Function>> functions;
-    std::map<utils::string_view, DeclRef<Struct>> structs;
+    std::multiset<DeclRef<Function>, NameComparator<DeclRef<Function>>> functions;
+    std::set<DeclRef<Struct>, NameComparator<DeclRef<Struct>>> structs;
     std::map<utils::string_view, VarDecl*> vars;
 };
 
@@ -87,10 +93,10 @@ struct Resolver {
 
     void operator() (SourceFile* node, CodeContext& ctx) {
         CodeContext srcFileContext = {&ctx, node->package()};
-        for (const auto& kv: dict[node->package()].functions)
-            srcFileContext.functions.emplace(kv.first, DeclRef<Function>{nullptr, kv.second});
-        for (const auto& kv: dict[node->package()].structs)
-            srcFileContext.structs.emplace(kv.first, DeclRef<Struct>{nullptr, kv.second});
+        for (auto* func: dict[node->package()].functions)
+            srcFileContext.functions.emplace(DeclRef<Function>{func});
+        for (auto* strct: dict[node->package()].structs)
+            srcFileContext.structs.emplace(DeclRef<Struct>{strct});
 
         /// @todo split SourceFile children into imports, functions and structs
         for (auto import: node->getChildren<Import>())
@@ -119,10 +125,10 @@ struct Resolver {
         auto structIt = pkgIt->second.structs.find(node->target());
         auto funcs = utils::equal_range(pkgIt->second.functions, node->target());
         if (structIt != pkgIt->second.structs.end()) {
-            if (structIt->second->visibility() == Visibility::Private)
+            if ((*structIt)->visibility() == Visibility::Private)
                 throw SemanticError(node, "Struct '%s' is private in the package '%s'", node->name(), node->targetPackage());
             if (
-                structIt->second->visibility() == Visibility::Protected &&
+                (*structIt)->visibility() == Visibility::Protected &&
                 !isChildPackage(ctx.package, node->targetPackage())
             ) {
                 throw SemanticError(
@@ -133,24 +139,24 @@ struct Resolver {
             const auto conflictingFuncs = utils::equal_range(ctx.functions, node->name());
             if (!conflictingFuncs.empty())
                 throwDeclConflict(node, conflictingFuncs);
-            const auto insres = ctx.structs.emplace(node->name(), DeclRef<Struct>{node, structIt->second});
+            const auto insres = ctx.structs.emplace(DeclRef<Struct>{*structIt, node});
             if (!insres.second)
                 throwDeclConflict(node, utils::slice(insres.first));
-            node->addImportedDeclaration(structIt->second);
+            node->addImportedDeclaration(*structIt);
         } else if (!funcs.empty()) {
             auto conflictingStruct = ctx.structs.find(node->name());
             if (conflictingStruct != ctx.structs.end())
                 throwDeclConflict(node, utils::slice(conflictingStruct));
-            for (const auto& func: funcs) {
-                if (func.second->visibility() == Visibility::Private)
+            for (auto* func: funcs) {
+                if (func->visibility() == Visibility::Private)
                     continue;
                 if (
-                    func.second->visibility() == Visibility::Protected &&
+                    func->visibility() == Visibility::Protected &&
                     !isChildPackage(ctx.package, node->targetPackage())
                 )
                     continue;
-                ctx.functions.emplace(node->name(), DeclRef<Function>{node, func.second});
-                node->addImportedDeclaration(func.second);
+                ctx.functions.emplace(DeclRef<Function>{func, node});
+                node->addImportedDeclaration(func);
             }
             if (node->importedDeclarations().empty()) {
                 std::ostringstream oss;
@@ -160,8 +166,8 @@ struct Resolver {
                 ;
                 for (const auto& func: funcs) {
                     oss <<
-                        "\nnotice: " << SourceInfo{func.second} << ": " << declinfo(func.second) <<
-                        " is " << func.second->visibility()
+                        "\nnotice: " << SourceInfo{func} << ": " << declinfo(func) <<
+                        " is " << func->visibility()
                     ;
                 }
                 throw SemanticError(node, "%s", oss.str());
@@ -220,7 +226,7 @@ struct Resolver {
             dispatch(*this, node->initExpr(), ctx);
         auto res = ctx.vars.emplace(node->name(), node);
         if (!res.second)
-            throwDeclConflict(node, utils::slice(res.first));
+            throwDeclConflict(node, res.first->second);
     }
 
     void operator() (If* node, CodeContext& ctx) {
@@ -283,16 +289,11 @@ public:
         return true;
     }
 
-    virtual void leave(Import *node) override
+    virtual void leave(Import* node) override
     {
         if (node->targetPackage() == mCurrSrcPackage)
             return;
-        for (
-            auto it = mGlobalDict[node->targetPackage()].functions.lower_bound(node->target());
-            it != mGlobalDict[node->targetPackage()].functions.upper_bound(node->target());
-            ++it
-        ) {
-            Function *func = it->second;
+        for (Function *func: utils::equal_range(mGlobalDict[node->targetPackage()].functions, node->target())) {
             if (func->visibility() == Visibility::Private)
                 throw SemanticError(node, "Can't import private declaration '%s.%s'", func->package(), func->name());
             if (func->visibility() == Visibility::Protected && !isChildPackage(mCurrSrcPackage, node->targetPackage()))
@@ -301,7 +302,7 @@ public:
                     func->package(), func->name(), mCurrSrcPackage, node->targetPackage()
                 );
             assert(mCurrDecls.count(node->name()) == 0); /// @todo support for function overloads instead of assert here!!!
-            mCurrDecls.insert({node->name(), it->second});
+            mCurrDecls.insert(func);
         }
     }
 
@@ -311,7 +312,7 @@ public:
         auto it = mCurrDecls.lower_bound(node->functionName());
         if (it == mCurrDecls.end())
             throw SemanticError(node, "Unresolved function call '%s'", node->functionName());
-        node->setFunction(it->second); /// @todo: handle overloads
+        node->setFunction(*it); /// @todo: handle overloads
         auto expectedArgs = node->function()->args();
         auto passedArgs = node->getChildren<Node>(1);
         if (expectedArgs.size() != passedArgs.size())

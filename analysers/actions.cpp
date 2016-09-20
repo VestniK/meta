@@ -44,7 +44,7 @@ void Actions::onFunction(Function* node) {
     auto structIt = pkgDict.structs.find(node->name());
     if (structIt != pkgDict.structs.end())
         throwDeclConflict(node, utils::slice(structIt));
-    pkgDict.functions.emplace(node->name(), node);
+    pkgDict.functions.emplace(node);
 }
 
 void Actions::onSourceFile(SourceFile* node) {
@@ -62,9 +62,9 @@ void Actions::onStruct(Struct* node) {
     auto funcsRng = utils::slice(pkgDict.functions.equal_range(node->name()));
     if (!funcsRng.empty())
         throwDeclConflict(node, funcsRng);
-    const auto res = pkgDict.structs.emplace(node->name(), node);
+    const auto res = pkgDict.structs.emplace(node);
     if (!res.second)
-        throwDeclConflict(node, utils::slice(res.first));
+        throwDeclConflict(node, *res.first);
 }
 
 } // namespace meta

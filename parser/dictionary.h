@@ -19,16 +19,46 @@
 #pragma once
 
 #include <map>
+#include <set>
 
 #include "utils/types.h"
 
+#include "parser/function.h"
+#include "parser/struct.h"
+
 namespace meta {
 
-class Function;
-class Struct;
+template<typename Decl>
+struct NameComparator {
+    using is_transparent = void;
 
-using FunctionsDict = std::multimap<utils::string_view, Function*>;
-using StructsDict = std::map<utils::string_view, Struct*>;
+    bool operator() (const Decl* lhs, const Decl* rhs) const {
+        return lhs->name() < rhs->name();
+    }
+
+    bool operator() (const Decl& lhs, const Decl& rhs) const {
+        return lhs.name() < rhs.name();
+    }
+
+    bool operator() (const Decl* lhs, utils::string_view rhs) const {
+        return lhs->name() < rhs;
+    }
+
+    bool operator() (const Decl& lhs, utils::string_view rhs) const {
+        return lhs.name() < rhs;
+    }
+
+    bool operator() (utils::string_view lhs, const Decl* rhs) const {
+        return lhs < rhs->name();
+    }
+
+    bool operator() (utils::string_view lhs, const Decl& rhs) const {
+        return lhs < rhs.name();
+    }
+};
+
+using FunctionsDict = std::multiset<Function*, NameComparator<Function>>;
+using StructsDict = std::set<Struct*, NameComparator<Struct>>;
 
 struct PackageDict {
     FunctionsDict functions;

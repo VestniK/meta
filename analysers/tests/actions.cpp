@@ -166,8 +166,6 @@ TEST(ActionsTest, funcDict) {
     const auto& kv = *(act.dictionary().begin());
     EXPECT_EQ(kv.first, "test");
     EXPECT_EQ(kv.second.functions.size(), 8u);
-    for (const auto& fkv: kv.second.functions)
-        EXPECT_EQ(fkv.first, fkv.second->name());
 }
 
 TEST(ActionsTest, structDict) {
@@ -180,8 +178,6 @@ TEST(ActionsTest, structDict) {
     const auto& kv = *(act.dictionary().begin());
     EXPECT_EQ(kv.first, "test");
     EXPECT_EQ(kv.second.structs.size(), 8u);
-    for (const auto& skv: kv.second.structs)
-        EXPECT_EQ(skv.first, skv.second->name());
 }
 
 TEST(ActionsTest, funcOverloads) {
@@ -192,10 +188,8 @@ TEST(ActionsTest, funcOverloads) {
     ASSERT_PARSE(parser, "test.meta", input);
     auto funcs = utils::slice(act.dictionary()["test"].functions.equal_range("publicExplicitly"));
     EXPECT_EQ(std::distance(funcs.begin(), funcs.end()), 2);
-    for (const auto& kv: funcs) {
-        EXPECT_EQ(kv.first, "publicExplicitly");
-        EXPECT_EQ(kv.second->name(), "publicExplicitly");
-    }
+    for (auto* func: funcs)
+        EXPECT_EQ(func->name(), "publicExplicitly");
 }
 
 class ActionsTest: public utils::ErrorTest {};

@@ -19,7 +19,9 @@
 #pragma once
 
 #include <algorithm>
-#include <map>
+#include <tuple>
+
+#include "utils/property.h"
 
 namespace meta::utils {
 
@@ -72,11 +74,6 @@ struct View {
     auto begin() const {return begin_it;}
     Sentinel end() const {return end_it;}
     bool empty() const {return !(begin_it != end_it);}
-};
-
-template<typename T, class C>
-concept bool MemberOf = requires(T t, C& c) {
-    {(c.*t)};
 };
 
 template<Iterator I, typename M>

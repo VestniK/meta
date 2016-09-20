@@ -96,8 +96,8 @@ void throwDeclConflict(Decl* node, const Range& range) {
     std::ostringstream oss;
     oss << declinfo(node) << " conflicts with other declarations.";
     for (const auto& conflict: range) {
-        oss << "\nnotice: " << SourceInfo{decl(conflict.second)} << ": " << declinfo(decl(conflict.second));
-        auto imported = import(conflict.second);
+        oss << "\nnotice: " << SourceInfo{decl(conflict)} << ": " << declinfo(decl(conflict));
+        auto imported = import(conflict);
         if (imported)
             oss << "\n\timported as '" << imported->name() << "' here: " << SourceInfo{imported};
     }
