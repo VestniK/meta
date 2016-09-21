@@ -57,12 +57,14 @@ struct NameComparator {
     }
 };
 
-using FunctionsDict = std::multiset<Function*, NameComparator<Function>>;
-using StructsDict = std::set<Struct*, NameComparator<Struct>>;
+template<typename T>
+using Dict = std::set<T, NameComparator<typename std::remove_pointer<T>::type>>;
+template<typename T>
+using MultiDict = std::multiset<T, NameComparator<typename std::remove_pointer<T>::type>>;
 
 struct PackageDict {
-    FunctionsDict functions;
-    StructsDict structs;
+    MultiDict<Function*> functions;
+    Dict<Struct*> structs;
 };
 
 using Dictionary = std::map<utils::string_view, PackageDict>;

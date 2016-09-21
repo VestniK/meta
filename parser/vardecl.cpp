@@ -24,7 +24,7 @@
 namespace meta {
 
 VarDecl::VarDecl(utils::array_view<StackFrame> reduction):
-    Visitable<Node, VarDecl>(reduction)
+    Visitable<Declaration, VarDecl>(reduction)
 {
     // {<type>, <name>, opt{'=', 'Expr'}}
     PRECONDITION(reduction.size() == 3);
@@ -35,6 +35,11 @@ VarDecl::VarDecl(utils::array_view<StackFrame> reduction):
     mName = reduction[1].tokens;
     if (!reduction[2].nodes.empty())
         mInitExpr = dynamic_cast<Expression*>(reduction[2].nodes[0].get());
+}
+
+const Declaration::AttributesMap& VarDecl::attributes() const {
+    static AttributesMap res;
+    return res;
 }
 
 }

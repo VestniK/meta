@@ -21,6 +21,7 @@
 #include "utils/types.h"
 #include "utils/bitmask.h"
 
+#include "parser/declaration.h"
 #include "parser/expression.h"
 #include "parser/metaparser.h"
 #include "parser/typed.h"
@@ -32,13 +33,13 @@ enum class VarFlags {
     member
 };
 
-class VarDecl: public Visitable<Node, VarDecl>, public Typed {
+class VarDecl: public Visitable<Declaration, VarDecl>, public Typed {
 public:
     VarDecl(utils::array_view<StackFrame> reduction);
 
-    const utils::string_view& name() const {return mName;}
+    const AttributesMap& attributes() const override;
 
-    const utils::string_view& typeName() const {return mTypeName;}
+    utils::string_view typeName() const {return mTypeName;}
 
     bool inited() const {return mInitExpr != nullptr;}
     Expression* initExpr() const {return mInitExpr;}
@@ -55,7 +56,7 @@ public:
 
 private:
     Node::Ptr<Expression> mInitExpr;
-    utils::string_view mName, mTypeName;
+    utils::string_view mTypeName;
     utils::Bitmask<VarFlags> mFlags;
 };
 

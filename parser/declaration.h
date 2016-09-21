@@ -30,8 +30,11 @@ public:
     using AttributesMap = std::map<std::string, std::function<void(Declaration*)>>;
     virtual const AttributesMap &attributes() const = 0;
 
+    utils::string_view name() const {return mName;}
+
 protected:
     Declaration(utils::array_view<StackFrame> reduction): Node(reduction) {}
+    utils::string_view mName;
 };
 
 } // namespace meta

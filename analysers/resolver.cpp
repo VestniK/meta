@@ -66,9 +66,9 @@ Import* import(const DeclRef<Decl>& val) {return val.import;}
 struct CodeContext {
     CodeContext* parent = nullptr;
     utils::string_view package;
-    std::multiset<DeclRef<Function>, NameComparator<DeclRef<Function>>> functions;
-    std::set<DeclRef<Struct>, NameComparator<DeclRef<Struct>>> structs;
-    std::map<utils::string_view, VarDecl*> vars;
+    MultiDict<DeclRef<Function>> functions;
+    Dict<DeclRef<Struct>> structs;
+    Dict<VarDecl*> vars;
 };
 
 template<typename Decl>
@@ -76,10 +76,10 @@ Decl* find(const CodeContext& ctx, utils::string_view name);
 
 template<>
 VarDecl* find<VarDecl>(const CodeContext& ctx, utils::string_view name) {
-    for (auto context = &ctx; context != nullptr; context = context->parent) {
+    for (auto* context = &ctx; context != nullptr; context = context->parent) {
         auto it = context->vars.find(name);
         if (it != context->vars.end())
-            return it->second;
+            return *it;
     }
     return nullptr;
 }
@@ -201,7 +201,7 @@ struct Resolver {
             return;
         CodeContext funcContext{&ctx};
         for (auto arg: node->args()) {
-            auto res = funcContext.vars.emplace(arg->name(), arg);
+            auto res = funcContext.vars.emplace(arg);
             if (!res.second)
                 throw SemanticError(
                     arg, "%s has more than one arguments with the same name '%s'",
@@ -224,9 +224,9 @@ struct Resolver {
             throwDeclConflict(node, conflict);
         if (node->inited() && !(node->flags() & VarFlags::argument))
             dispatch(*this, node->initExpr(), ctx);
-        auto res = ctx.vars.emplace(node->name(), node);
+        auto res = ctx.vars.emplace(node);
         if (!res.second)
-            throwDeclConflict(node, res.first->second);
+            throwDeclConflict(node, *res.first);
     }
 
     void operator() (If* node, CodeContext& ctx) {
@@ -400,7 +400,7 @@ private:
     };
 
     Dictionary& mGlobalDict;
-    FunctionsDict mCurrDecls;
+    MultiDict<Function*> mCurrDecls;
     utils::string_view mCurrSrcPackage;
     std::map<utils::string_view, VarSrc> mVars;
 };

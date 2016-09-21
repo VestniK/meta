@@ -42,7 +42,6 @@ public:
 
     const Declaration::AttributesMap &attributes() const override {return attrMap;}
 
-    const utils::string_view &name() const {return mName;}
     const utils::string_view &retType() const {return mRetType;}
     const utils::string_view &package() const {return mPackage;}
     void setPackage(const utils::string_view &pkg) {mPackage = pkg;}
@@ -75,7 +74,6 @@ private:
     std::vector<Node::Ptr<VarDecl>> mArgs;
     Node::Ptr<CodeBlock> mBody;
     utils::string_view mPackage;
-    utils::string_view mName;
     utils::string_view mRetType;
     utils::optional<utils::string_view> mMangledName;
     Visibility mVisibility = Visibility::Default;

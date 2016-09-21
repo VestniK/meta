@@ -29,7 +29,6 @@ class Import: public Visitable<Declaration, Import> {
 public:
     Import(utils::array_view<StackFrame> reduction);
 
-    utils::string_view name() const {return mName;}
     utils::string_view targetPackage() const {return mPackage;}
     utils::string_view target() const {return mTarget;}
 
@@ -47,7 +46,6 @@ private:
     std::vector<Declaration*> mImported;
     utils::string_view mPackage;
     utils::string_view mTarget;
-    utils::string_view mName;
 };
 
 } // namespace meta

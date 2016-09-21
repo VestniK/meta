@@ -34,7 +34,6 @@ public:
 
     const Declaration::AttributesMap& attributes() const override {return attrMap;}
 
-    utils::string_view name() const {return mName;}
     const auto& members() const {return mMembers;}
 
     utils::string_view package() const {return mPackage;}
@@ -56,7 +55,6 @@ public:
 private:
     std::vector<Node::Ptr<Annotation>> mAnnotations;
     std::vector<Node::Ptr<VarDecl>> mMembers;
-    utils::string_view mName;
     utils::string_view mPackage;
     Visibility mVisibility = Visibility::Default;
 
