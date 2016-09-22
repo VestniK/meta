@@ -245,7 +245,13 @@ TEST(ResolveImports, importAsOverload) {
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>();
     ASSERT_EQ(imports.size(), 2u);
-    ASSERT_EQ(imports[0]->name(), imports[1]->name());
+    EXPECT_EQ(imports[0]->name(), imports[1]->name());
+
+    EXPECT_EQ(imports[0]->target(), "foo");
+    EXPECT_EQ(imports[0]->targetPackage(), "test.lib");
+
+    EXPECT_EQ(imports[1]->target(), "bar");
+    EXPECT_EQ(imports[1]->targetPackage(), "test.lib");
 }
 
 TEST(ResolveImports, importAsRenamedOverload) {
@@ -265,7 +271,13 @@ TEST(ResolveImports, importAsRenamedOverload) {
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>();
     ASSERT_EQ(imports.size(), 2u);
-    ASSERT_EQ(imports[0]->name(), imports[1]->name());
+    EXPECT_EQ(imports[0]->name(), imports[1]->name());
+
+    EXPECT_EQ(imports[0]->target(), "foo");
+    EXPECT_EQ(imports[0]->targetPackage(), "test.lib");
+
+    EXPECT_EQ(imports[1]->target(), "bar");
+    EXPECT_EQ(imports[1]->targetPackage(), "test.lib");
 }
 
 TEST(ResolveImports, importExtendingOverload) {
@@ -286,7 +298,7 @@ TEST(ResolveImports, importExtendingOverload) {
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>();
     ASSERT_EQ(imports.size(), 1u);
-    ASSERT_EQ(imports[0]->name(), "foo");
+    EXPECT_EQ(imports[0]->name(), "foo");
 }
 
 namespace {
