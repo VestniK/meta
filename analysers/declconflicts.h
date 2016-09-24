@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "utils/range.h"
+
 #include "parser/function.h"
 #include "parser/import.h"
 #include "parser/struct.h"

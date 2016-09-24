@@ -57,6 +57,19 @@ struct DeclRef {
     }
 };
 
+struct VarStats {
+    VarStats(VarDecl* decl):
+        decl(decl),
+        assignCount((decl->flags() & VarFlags::argument) || decl->inited() ? 1 : 0)
+    {}
+
+    VarDecl* decl;
+    unsigned assignCount;
+    unsigned accessCount = 0;
+
+    utils::string_view name() const {return decl->name();}
+};
+
 template<typename Decl>
 Decl* decl(const DeclRef<Decl>& val) {return val.decl;}
 
@@ -68,18 +81,27 @@ struct CodeContext {
     utils::string_view package;
     MultiDict<DeclRef<Function>> functions;
     Dict<DeclRef<Struct>> structs;
-    Dict<VarDecl*> vars;
+    std::map<utils::string_view, VarStats> vars;
+
+    ~CodeContext() noexcept(false) {
+        if (std::uncaught_exceptions() != 0)
+            return;
+        for (const auto& kv: vars) {
+            if (kv.second.accessCount == 0)
+                throw SemanticError(kv.second.decl, "Variable '%s' is never used", kv.first);
+        }
+    }
 };
 
 template<typename Decl>
-Decl* find(const CodeContext& ctx, utils::string_view name);
+Decl* find(CodeContext& ctx, utils::string_view name);
 
 template<>
-VarDecl* find<VarDecl>(const CodeContext& ctx, utils::string_view name) {
+VarStats* find<VarStats>(CodeContext& ctx, utils::string_view name) {
     for (auto* context = &ctx; context != nullptr; context = context->parent) {
         auto it = context->vars.find(name);
         if (it != context->vars.end())
-            return *it;
+            return &(it->second);
     }
     return nullptr;
 }
@@ -201,7 +223,7 @@ struct Resolver {
             return;
         CodeContext funcContext{&ctx};
         for (auto arg: node->args()) {
-            auto res = funcContext.vars.emplace(arg);
+            auto res = funcContext.vars.emplace(arg->name(), VarStats{arg});
             if (!res.second)
                 throw SemanticError(
                     arg, "%s has more than one arguments with the same name '%s'",
@@ -219,14 +241,14 @@ struct Resolver {
     }
 
     void operator() (VarDecl* node, CodeContext& ctx) {
-        auto conflict = find<VarDecl>(ctx, node->name());
-        if (conflict && (conflict->flags() & VarFlags::argument))
-            throwDeclConflict(node, conflict);
+        auto conflict = find<VarStats>(ctx, node->name());
+        if (conflict && (conflict->decl->flags() & VarFlags::argument))
+            throwDeclConflict(node, conflict->decl);
         if (node->inited() && !(node->flags() & VarFlags::argument))
             dispatch(*this, node->initExpr(), ctx);
-        auto res = ctx.vars.emplace(node);
+        auto res = ctx.vars.emplace(node->name(), VarStats{node});
         if (!res.second)
-            throwDeclConflict(node, *res.first);
+            throwDeclConflict(node, res.first->second.decl);
     }
 
     void operator() (If* node, CodeContext& ctx) {
@@ -255,10 +277,28 @@ struct Resolver {
     void operator() (Literal*, CodeContext&) {}
 
     void operator() (Var* node, CodeContext& ctx) {
-        auto decl = find<VarDecl>(ctx, node->name());
-        if (!decl)
+        auto varstat = find<VarStats>(ctx, node->name());
+        if (!varstat)
             throw SemanticError(node, "Undefined variable '%s'", node->name());
-        node->setDeclaration(decl);
+        if (varstat->assignCount == 0)
+            throw SemanticError(node, "Variable '%s' accessed before initialization", node->name());
+        varstat->accessCount++;
+        node->setDeclaration(varstat->decl);
+    }
+
+    void operator() (Assigment* node, CodeContext& ctx) {
+        if (node->target()->getVisitableType() == std::type_index(typeid(Var))) {
+            auto target = static_cast<Var*>(node->target());
+            auto stats = find<VarStats>(ctx, target->name());
+            if (stats->decl->flags() & VarFlags::argument)
+                throw SemanticError(node, "Attempt to modify function argument '%s'", target->name());
+            stats->assignCount++;
+            target->setDeclaration(stats->decl);
+        } else if (node->target()->getVisitableType() == std::type_index(typeid(MemberAccess))) {
+            throw UnexpectedNode(node->target(), "Member assigment is not yet implemented");
+        } else
+            throw UnexpectedNode(node->target(), "Unexpected assigment left side expression type");
+        dispatch(*this, node->value(), ctx);
     }
 
     void operator() (Return* node, CodeContext& ctx) {
@@ -266,10 +306,7 @@ struct Resolver {
             dispatch(*this, node->value(), ctx);
     }
 
-    void operator() (Struct* node, CodeContext& ctx) {
-        CodeContext structCtx{ctx};
-        for (VarDecl* member: node->members())
-            (*this)(member, structCtx);
+    void operator() (Struct*, CodeContext&) {
     }
 };
 

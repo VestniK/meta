@@ -166,6 +166,38 @@ notice: test.meta:5:17: Variable 'bool var')"
             }
         )META",
         .errMsg=R"(Undefined variable 'y')"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            int foo(int x) {
+                return 5;
+            }
+        )META",
+        .errMsg=R"(Variable 'x' is never used)"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            int foo(int x) {
+                bool b;
+                return x;
+            }
+        )META",
+        .errMsg=R"(Variable 'b' is never used)"
+    },
+    utils::ErrorTestData{
+        .input=R"META(
+            package test;
+
+            int foo(int x) {
+                int y;
+                return x+y;
+            }
+        )META",
+        .errMsg=R"(Variable 'y' accessed before initialization)"
     }
 ));
 
