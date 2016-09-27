@@ -13,6 +13,7 @@
 #include "analysers/resolver.h"
 
 namespace meta::analysers {
+namespace {
 
 const utils::string_view lib = R"META(
     package test.lib;
@@ -301,8 +302,6 @@ TEST(ResolveImports, importExtendingOverload) {
     EXPECT_EQ(imports[0]->name(), "foo");
 }
 
-namespace {
-
 struct ImportErrors: public utils::ErrorTest {};
 
 INSTANTIATE_TEST_CASE_P(ResolveImports, ImportErrors, ::testing::Values(
@@ -511,8 +510,6 @@ notice: lib.meta:42:5: Function 'test.lib.overload2(int)' is private)"
     }
 ));
 
-} // anonymous namespace
-
 TEST_P(ImportErrors, importErrors) {
     auto param = GetParam();
     Parser parser;
@@ -530,4 +527,5 @@ TEST_P(ImportErrors, importErrors) {
     }
 }
 
+} // anonymous namespace
 } // namespace meta::analysers

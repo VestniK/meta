@@ -188,7 +188,7 @@ void Parser::parse(const utils::fs::path &location, utils::string_view input) {
             if (stateNum == acceptState) {
                 reduce(location, 0); // last reduction when accept state reached.
 @numb_node?;...
-                roots().insert(roots().begin(), stack[stackTop].nodes.begin(), stack[stackTop].nodes.end());
+                std::move(stack[stackTop].nodes.begin(), stack[stackTop].nodes.end(), std::back_inserter(roots()));
 @@
                 return;
             }

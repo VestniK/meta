@@ -234,6 +234,30 @@ struct Resolver {
             dispatch(*this, statement, funcContext);
     }
 
+    void operator() (Call* node, CodeContext& ctx) {
+        POSTCONDITION(node->function() != nullptr);
+        for (auto* currctx = &ctx; currctx != nullptr; currctx = currctx->parent) {
+            auto matches = utils::equal_range(currctx->functions, node->functionName());
+            if (matches.empty())
+                continue;
+            /// @todo replace assert by proper support of function overload
+            assert(std::distance(matches.begin(), matches.end()) == 1);
+            node->setFunction(matches.begin()->decl);
+            auto expectedArgs = node->function()->args();
+            auto passedArgs = node->args();
+            if (expectedArgs.size() != passedArgs.size()) {
+                throw SemanticError(
+                    node,
+                    "%s is called with incorrect number of arguments",
+                    declinfo(node->function())
+                );
+            }
+            return;
+        }
+        if (!node->function())
+            throw SemanticError(node, "Unresolved function call '%s'", node->functionName());
+    }
+
     void operator() (CodeBlock* node, CodeContext& ctx) {
         CodeContext blockCtx{ctx};
         for (auto statement: node->statements())

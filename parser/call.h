@@ -32,7 +32,7 @@ public:
     Function* function() const {return mFunction;}
     void setFunction(Function* func);
 
-    const std::vector<Node::Ptr<Expression>>& args() const {return mArgs;}
+    utils::array_view<Node::Ptr<Expression>> args() const {return mArgs;}
 
     void walk(Visitor* visitor, int depth) override {
         if (accept(visitor) && depth != 0) {

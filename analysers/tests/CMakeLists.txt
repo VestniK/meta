@@ -5,6 +5,7 @@ AddGTest(AnalysersTests
   metaprocessor.cpp
   reachability.cpp
   resolver.cpp
+  resolve_call.cpp
   resolve_imports.cpp
   typechecker.cpp
 )

@@ -53,7 +53,7 @@ void Call::setFunction(Function* func) {
     for (size_t pos = mArgs.size(); pos < declaredArgs.size(); ++pos) {
         auto defaultVal = declaredArgs[pos]->initExpr();
         if (!defaultVal)
-            break;
+            break; /// @todo Report error here! Move adding default values for args into analysers.
         mArgs.push_back(defaultVal);
     }
 }
