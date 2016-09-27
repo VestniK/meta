@@ -25,19 +25,48 @@
 
 #include "utils/types.h"
 
-namespace meta::utils {
+#if !defined(PARSER_ONLY_TEST)
+#   include "analysers/semanticerror.h"
+#endif
 
-/// @todo add SemanticError dump and think how to remove dependency on parser and analysers
+#if defined(PARSER_ONLY_TEST)
+#   define CATCH_SEMANTIC_ERROR
+#else
+#   define CATCH_SEMANTIC_ERROR \
+        catch (const ::meta::analysers::SemanticError& err) { \
+            FAIL() << \
+                err.sourcePath() << ':' << err.tokens().begin()->line << \
+                ':' << err.tokens().begin()->column << ": " << err.what() << ":\n" << \
+                err.tokens().lineStr() << "...\n" << \
+                meta::utils::markerLine(static_cast<size_t>(err.tokens().colnum())); \
+        }
+
+#   define ASSERT_ANALYSE(statement) \
+        try { \
+            statement; \
+        } CATCH_SEMANTIC_ERROR
+
+#endif
+
 #define ASSERT_PARSE(parser, srcPath, input) \
     try { \
         parser.parse(srcPath, input); \
-    } catch (const SyntaxError& err) { \
+    } catch (const ::meta::SyntaxError& err) { \
         FAIL() << \
             err.sourcePath() << ':' << err.token().line << ':' << \
             err.token().column << ": " << err.what() << ":\n" << \
             err.line() << "\nExpected one of the following terms:\n" << \
             err.expected() << "Parser stack dump:\n" << err.parserStack(); \
-    }
+    } CATCH_SEMANTIC_ERROR
+
+namespace meta::utils {
+
+inline
+std::string markerLine(size_t column) {
+    std::string res(column, ' ');
+    res.back() = '^';
+    return res;
+}
 
 struct ErrorTestData {
     utils::string_view input;

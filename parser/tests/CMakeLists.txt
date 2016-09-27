@@ -9,3 +9,4 @@ AddGTest(ParserTests
   priority.cpp
 )
 target_link_libraries(ParserTests parser)
+target_compile_definitions(ParserTests PRIVATE PARSER_ONLY_TEST)
