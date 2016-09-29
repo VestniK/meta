@@ -252,10 +252,12 @@ struct Resolver {
                     declinfo(node->function())
                 );
             }
-            return;
+            break;
         }
         if (!node->function())
             throw SemanticError(node, "Unresolved function call '%s'", node->functionName());
+        for (Expression* arg: node->args())
+            dispatch(*this, arg, ctx);
     }
 
     void operator() (CodeBlock* node, CodeContext& ctx) {
