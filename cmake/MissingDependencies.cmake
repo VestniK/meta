@@ -19,5 +19,9 @@ if (BUILD_MISSING_DEPS)
     message(FATAL_ERROR "Fetch and build dependecies failure")
   endif()
   list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR}/deps)
+
+  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  conan_basic_setup()
+
   message(STATUS "Dependencies build DONE")
 endif()

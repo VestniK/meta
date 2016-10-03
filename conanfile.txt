@@ -1,0 +1,8 @@
+[requires]
+Boost/1.61.0@eliaskousk/stable
+gtest/1.8.0@eliaskousk/stable
+gsl/0.0.1@KindDragon/stable
+llvm/3.8.0@smspillaz/stable
+
+[generators]
+cmake
