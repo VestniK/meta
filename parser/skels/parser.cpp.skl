@@ -15,7 +15,7 @@
 @numb_node?;...
 // Should be created manually. Should contain Node sublcasses forward declared in
 // the @grm_name;parser.h
-#include "@grm_name;nodes.h"
+#include "parser/@grm_name;nodes.h"
 @@
 
 namespace @grm_name; {

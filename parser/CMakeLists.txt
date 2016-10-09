@@ -1,8 +1,5 @@
 find_package(lrstar)
 
-# Needed to include metanodes.h from parser cpp file inside current binary dir
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
 set(SRC
   binaryop.cpp
   call.cpp
