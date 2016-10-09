@@ -44,7 +44,8 @@ public:
     SourceFile& operator= (SourceFile&&) = default;
 
     const fs::path& path() const {return mPath;}
-    operator string_view () const {return mContent;}
+    string_view content() const {return mContent;}
+    operator string_view () const {return mContent;} // TODO: check if needed
 
 #if defined(META_UNIT_TEST)
 private:

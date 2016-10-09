@@ -29,27 +29,27 @@ bool islinebrk(char ch) {
 }
 
 SyntaxError::SyntaxError(
-    const std::string &srcPath,
-    utils::string_view input,
+    const utils::SourceFile& source,
     utils::array_view<StackFrame> stack,
     int stateNum,
-    const Token &token
+    const Token& token
 ):
-    errorToken(token), src(srcPath)
+    errorToken(token), srcPath(source.path())
 {
     std::stringstream ss;
     ss << "unexpected symbol " << termNames[token.termNum];
     msg = ss.str();
 
     ss.str(std::string());
-    const char *lineStart = std::find_if(
+    const char* lineStart = std::find_if(
         std::make_reverse_iterator(token.start),
-        std::make_reverse_iterator(input.data()),
+        std::make_reverse_iterator(source.content().data()),
         islinebrk
     ).base();
     if (lineStart != token.start && islinebrk(*lineStart))
         ++lineStart;
-    const char *lineEnd = std::find_if(token.end, input.data() + input.size(), islinebrk);
+    const char* sourceEnd = source.content().data() + source.content().size();
+    const char* lineEnd = std::find_if(token.end, sourceEnd, islinebrk);
     ss << utils::string_view(lineStart, lineEnd - lineStart) << std::endl;
     for (const char *pos = lineStart; pos != lineEnd; ++pos) {
         if (pos == token.start)
@@ -150,8 +150,7 @@ Parser::Parser():
 Parser::~Parser() = default;
 
 void Parser::parse(const utils::SourceFile &src) {
-    utils::string_view input = src;
-    lexer.start(input.data());
+    lexer.start(src.content().data());
     stateNum = 0;
     stackTop = 0;
     while (true) {
@@ -194,7 +193,7 @@ void Parser::parse(const utils::SourceFile &src) {
                 return;
             }
             throw SyntaxError(
-                src.path(), input,
+                src,
                 utils::array_view<StackFrame>(stack.data() + 1, stackTop > 0 ? stackTop - 1 : 0),
                 stateNum, lexer.currentToken()
             );

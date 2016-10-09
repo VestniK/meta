@@ -42,14 +42,13 @@ struct StackFrame;
 class SyntaxError: public std::exception {
 public:
     SyntaxError(
-        const std::string &src,
-        utils::string_view input,
+        const utils::SourceFile& source,
         utils::array_view<StackFrame> stack,
         int stateNum,
         const Token& token
     );
     const char* what() const noexcept override {return msg.c_str();}
-    const std::string& sourcePath() const {return src;}
+    const utils::fs::path& sourcePath() const {return srcPath;}
     const Token token() const {return errorToken;}
     const std::string& line() const {return markedLine;}
 @optn_exp?;...
@@ -69,7 +68,7 @@ private:
     std::string stackDump;
 @@
     Token errorToken;
-    std::string src;
+    utils::fs::path srcPath;
 
     static @term_symb.t; termNames[];
 @optn_exp?;...
