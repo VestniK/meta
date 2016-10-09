@@ -20,25 +20,28 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/testtools.h"
+
 #include "parser/annotation.h"
 #include "parser/assigment.h"
 #include "parser/metaparser.h"
 #include "parser/struct.h"
 #include "parser/vardecl.h"
 
-using namespace meta;
+namespace meta {
+namespace {
 
 TEST(StructParsing, simpleStruct) {
-     const auto input = R"META(
+     const utils::SourceFile input = R"META(
         package test;
 
         struct Point {
             int x;
             int y;
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto structs = ast->getChildren<Struct>();
     ASSERT_EQ(structs.size(), 1u);
@@ -50,7 +53,7 @@ TEST(StructParsing, simpleStruct) {
 }
 
 TEST(StructParsing, annotatedStruct) {
-     const auto input = R"META(
+     const utils::SourceFile input = R"META(
         package test;
 
         @foo
@@ -59,9 +62,9 @@ TEST(StructParsing, annotatedStruct) {
             int x;
             int y;
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto structs = ast->getChildren<Struct>();
     ASSERT_EQ(structs.size(), 1u);
@@ -79,16 +82,16 @@ TEST(StructParsing, annotatedStruct) {
 }
 
 TEST(StructParsing, defaultValsOnMembers) {
-     const auto input = R"META(
+     const utils::SourceFile input = R"META(
         package test;
 
         struct Point {
             int x = 0;
             int y = 0;
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto structs = ast->getChildren<Struct>();
     ASSERT_EQ(structs.size(), 1u);
@@ -102,7 +105,7 @@ TEST(StructParsing, defaultValsOnMembers) {
 }
 
 TEST(StructParsing, declareStructVar) {
-     const auto input = R"META(
+     const utils::SourceFile input = R"META(
         package test;
 
         struct Point {
@@ -113,9 +116,9 @@ TEST(StructParsing, declareStructVar) {
         void foo() {
             Point pt;
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto vars = ast->getChildren<VarDecl>(infinitDepth);
     ASSERT_EQ(vars.size(), 3u);
@@ -124,7 +127,7 @@ TEST(StructParsing, declareStructVar) {
 }
 
 TEST(StructParsing, memberAccess) {
-     const auto input = R"META(
+     const utils::SourceFile input = R"META(
         package test;
 
         struct Point {
@@ -137,12 +140,15 @@ TEST(StructParsing, memberAccess) {
             pt.y = 5;
             pt.x = pt.y + 7;
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto assigments = ast->getChildren<Assigment>(infinitDepth);
     ASSERT_EQ(assigments.size(), 2u);
 //    EXPECT_EQ(assigments[2]->, "pt");
 //    EXPECT_EQ(assigments[3]->typeName(), "Point");
 }
+
+} // anonymous namespace
+} // namespace meta

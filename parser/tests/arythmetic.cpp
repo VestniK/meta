@@ -24,11 +24,12 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/testtools.h"
+
 #include "parser/metanodes.h"
 #include "parser/unexpectednode.h"
 
 namespace meta::parser::tests {
-
 namespace {
 
 struct Operation {
@@ -85,12 +86,10 @@ auto findExpressions(Walkable* walkable) {
     return res;
 }
 
-}
-
 TEST(Arythmetic, parenthesis) {
-    const auto input = "package test; int foo() {return 2*(11+5)/8;}"s;
+    const utils::SourceFile input = "package test; int foo() {return 2*(11+5)/8;}";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     const auto expressions = findExpressions(parser.ast());
     ASSERT_EQ(expressions.size(), 1u);
     LoggingCalc calc;
@@ -125,10 +124,13 @@ class Arythmetic: public ::testing::TestWithParam<TestData> {};
 
 TEST_P(Arythmetic, calcTest) {
     TestData data = GetParam();
-    const std::string input = str(boost::format("package test; int foo() {return %s;}")%data.expression);
+    const auto input = utils::SourceFile::fake(
+        "test.meta",
+        str(boost::format("package test; int foo() {return %s;}")%data.expression)
+    );
 
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     const auto expressions = findExpressions(parser.ast());
     ASSERT_EQ(expressions.size(), 1u);
     LoggingCalc calc;
@@ -148,4 +150,5 @@ INSTANTIATE_TEST_CASE_P(PrefixOp, Arythmetic, ::testing::Values(
     TestData({"2*3 + -4", 2})
 ));
 
+} // anonymous namespace
 } // namespace meta::parser::tests

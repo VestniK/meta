@@ -24,32 +24,32 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/testtools.h"
+
 #include "parser/binaryop.h"
 #include "parser/metaparser.h"
 
-using namespace meta;
-
+namespace meta::parser {
 namespace {
 
 struct TestData
 {
-    const char *expr;
+    const char* expr;
     std::vector<BinaryOp::Operation> opSequence;
 };
 
 class Priority: public ::testing::TestWithParam<TestData>
-{
-public:
-};
-
-}
+{};
 
 TEST_P(Priority, priority)
 {
     const auto &param = GetParam();
-    const std::string input = str(boost::format("package test; int foo() {return %s;}")%param.expr);
+    const auto input = utils::SourceFile::fake(
+        "test.meta",
+        str(boost::format("package test; int foo() {return %s;}")%param.expr)
+    );
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     std::vector<BinaryOp::Operation> opSequence;
     walk<BinaryOp, BottomUp>(*ast, [&](BinaryOp *node) {opSequence.push_back(node->operation());});
@@ -93,3 +93,6 @@ INSTANTIATE_TEST_CASE_P(Operations, Priority, ::testing::Values(
     TestData({"1 < 2 && 3 != 4", std::vector<BinaryOp::Operation>({BinaryOp::less, BinaryOp::noteq, BinaryOp::boolAnd})}),
     TestData({"1+3 != 2 || 3 <= 4", std::vector<BinaryOp::Operation>({BinaryOp::add, BinaryOp::noteq, BinaryOp::lesseq, BinaryOp::boolOr})})
 ));
+
+} // anonymous namespace
+} // namesoace meta::parser

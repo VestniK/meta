@@ -31,11 +31,10 @@
 #include "analysers/metaprocessor.h"
 #include "analysers/semanticerror.h"
 
-using namespace meta;
-using namespace meta::analysers;
-
+namespace meta::analysers {
 namespace {
-const auto input = R"META(
+
+const utils::SourceFile input = R"META(
     package test;
 
     void privateByDefault() {return;}
@@ -67,15 +66,14 @@ const auto input = R"META(
 
     public void publicExplicitly(bool b) {return;}
     public struct PublicExplicitly2 {int x;}
-)META"s;
-}
+)META";
 
 TEST(ActionsTest, funcVisibility) {
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
 
     auto functions = ast->getChildren<Function>(-1);
@@ -103,7 +101,7 @@ TEST(ActionsTest, structVisibility) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
 
     auto structs = ast->getChildren<Struct>(-1);
@@ -131,7 +129,7 @@ TEST(ActionsTest, funcPackages) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
 
     auto functions = ast->getChildren<Function>(-1);
@@ -146,7 +144,7 @@ TEST(ActionsTest, structPackages) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
 
     auto structs = ast->getChildren<Struct>(-1);
@@ -161,7 +159,7 @@ TEST(ActionsTest, funcDict) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     ASSERT_EQ(act.dictionary().size(), 1u);
     const auto& kv = *(act.dictionary().begin());
     EXPECT_EQ(kv.first, "test");
@@ -173,7 +171,7 @@ TEST(ActionsTest, structDict) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     ASSERT_EQ(act.dictionary().size(), 1u);
     const auto& kv = *(act.dictionary().begin());
     EXPECT_EQ(kv.first, "test");
@@ -185,7 +183,7 @@ TEST(ActionsTest, funcOverloads) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     auto funcs = utils::slice(act.dictionary()["test"].functions.equal_range("publicExplicitly"));
     EXPECT_EQ(std::distance(funcs.begin(), funcs.end()), 2);
     for (auto* func: funcs)
@@ -255,13 +253,13 @@ notice: test.meta:4:1: Struct 'test.Point')"
 ));
 
 TEST_P(ActionsTest, conflictsTest) {
-    auto param = GetParam();
+    const auto& param = GetParam();
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
     try {
-        parser.parse("test.meta", param.input);
+        parser.parse(param.input);
         FAIL() << "Failed to detect declaration conflict";
     } catch (const SemanticError& err) {
         EXPECT_EQ(param.errMsg, err.what()) << err.what();
@@ -269,3 +267,6 @@ TEST_P(ActionsTest, conflictsTest) {
         EXPECT_EQ(err.tokens().colnum(), 14);
     }
 }
+
+} // anonymous namespace
+} // namespace meta::analysers

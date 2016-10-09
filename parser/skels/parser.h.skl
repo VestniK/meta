@@ -15,8 +15,9 @@
 #include <typeinfo>
 #include <vector>
 
-#include "utils/types.h"
 #include "utils/contract.h"
+#include "utils/sourcefile.h"
+#include "utils/types.h"
 
 #include "@grm_name;lexer.h"
 
@@ -418,8 +419,8 @@ public:
 @numb_nact?;...
     void setNodeActions(NodeActions* actions) {nodeActions = actions;}
 @@
-    void parse(const utils::fs::path& location, utils::string_view input);
-    void parse(const utils::fs::path& location, std::string&& input) = delete;
+    void parse(const utils::SourceFile& src);
+    void parse(const utils::SourceFile&& src) = delete;
 
 @numb_node?;...
     AST* ast() {return this;}
@@ -427,7 +428,7 @@ public:
 
 // Internal methods
 private:
-    void reduce(const utils::fs::path& location, int prodRule);
+    void reduce(const utils::SourceFile& src, int prodRule);
 
 @numb_node?;...
     Node* addNode(Node* node);

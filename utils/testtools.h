@@ -23,6 +23,7 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/sourcefile.h"
 #include "utils/types.h"
 
 #if !defined(PARSER_ONLY_TEST)
@@ -48,9 +49,9 @@
 
 #endif
 
-#define ASSERT_PARSE(parser, srcPath, input) \
+#define ASSERT_PARSE(parser, source) \
     try { \
-        parser.parse(srcPath, input); \
+        parser.parse(source); \
     } catch (const ::meta::SyntaxError& err) { \
         FAIL() << \
             err.sourcePath() << ':' << err.token().line << ':' << \
@@ -69,13 +70,18 @@ std::string markerLine(size_t column) {
 }
 
 struct ErrorTestData {
-    utils::string_view input;
+    utils::SourceFile input;
     utils::string_view errMsg;
 };
 
 inline
 std::ostream& operator<< (std::ostream& out, const ErrorTestData& dat) {
-    out << "=== input ===\n" << dat.input << "\n=== expected error ===\n" << dat.errMsg << "\n======";
+    out <<
+        "=== input ===\n" <<
+        utils::string_view(dat.input) <<
+        "\n=== expected error ===\n" <<
+        dat.errMsg <<
+        "\n======";
     return out;
 }
 

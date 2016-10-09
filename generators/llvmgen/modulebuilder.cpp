@@ -23,9 +23,11 @@
 #include <system_error>
 #include <vector>
 
+#include <llvm/Analysis/CGSCCPassManager.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Verifier.h>
+#include <llvm/IR/PassManager.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/raw_ostream.h>
@@ -39,11 +41,10 @@
 
 #include "generators/llvmgen/expressionbuilder.h"
 #include "generators/llvmgen/modulebuilder.h"
+#include "generators/llvmgen/fixstructretpass.h"
 #include "generators/llvmgen/mangling.h"
 
-namespace meta {
-namespace generators {
-namespace llvmgen {
+namespace meta::generators::llvmgen {
 
 bool ModuleBuilder::visit(Function *node)
 {
@@ -185,7 +186,11 @@ void ModuleBuilder::save(const std::string &path) {
     llvm::raw_os_ostream llvmOss(oss);
     if (llvm::verifyModule(*mCtx.env.module, &llvmOss))
         throw IRVerificationError{oss.str()};
+    // ABI fixup pases
+    // llvm::ModulePassManager passMgr;
+    // passMgr.addPass();
     // Write IR
+    llvm::ModulePassManager passMgr;
     std::error_code errCode;
     llvm::raw_fd_ostream out(path.c_str(), errCode, llvm::sys::fs::F_None);
     llvm::WriteBitcodeToFile(mCtx.env.module.get(), out);
@@ -194,6 +199,4 @@ void ModuleBuilder::save(const std::string &path) {
         throw std::system_error(errCode);
 }
 
-} // namespace llvmgen
-} // namespace generators
-} // namespace meta
+} // namespace meta::generators::llvmgen

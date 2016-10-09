@@ -14,7 +14,7 @@ namespace meta::analysers {
 namespace {
 
 TEST(ResolveCall, simple) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         int foo(int x, int y) {return x + y - 42;}
@@ -30,7 +30,7 @@ TEST(ResolveCall, simple) {
     Actions act;
     parser.setNodeActions(&act);
     parser.setParseActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     ASSERT_NO_THROW(v2::resolve(ast, act.dictionary()));
     auto calls = ast->getChildren<Call>(infinitDepth);
@@ -42,7 +42,7 @@ TEST(ResolveCall, simple) {
 }
 
 TEST(ResolveCall, recursive) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         int fact(int n) {
@@ -56,7 +56,7 @@ TEST(ResolveCall, recursive) {
     Actions act;
     parser.setNodeActions(&act);
     parser.setParseActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     ASSERT_NO_THROW(v2::resolve(ast, act.dictionary()));
     auto calls = ast->getChildren<Call>(infinitDepth);
@@ -66,7 +66,7 @@ TEST(ResolveCall, recursive) {
 }
 
 TEST(ResolveCall, inderectRecursive) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         int foo(int n) {
@@ -86,7 +86,7 @@ TEST(ResolveCall, inderectRecursive) {
     Actions act;
     parser.setNodeActions(&act);
     parser.setParseActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     ASSERT_NO_THROW(v2::resolve(ast, act.dictionary()));
     auto calls = ast->getChildren<Call>(infinitDepth);
@@ -102,7 +102,7 @@ TEST(ResolveCall, inderectRecursive) {
 }
 
 TEST(ResolveCall, imported) {
-    utils::string_view input1 = R"META(
+    const utils::SourceFile input1 = R"META(
         package test.a;
 
         import test.b.baz as bar;
@@ -113,7 +113,7 @@ TEST(ResolveCall, imported) {
             return 2*n;
         }
     )META";
-    utils::string_view input2 = R"META(
+    const utils::SourceFile input2 = R"META(
         package test.b;
 
         import test.a.foo;
@@ -129,8 +129,8 @@ TEST(ResolveCall, imported) {
     Actions act;
     parser.setNodeActions(&act);
     parser.setParseActions(&act);
-    ASSERT_PARSE(parser, "test1.meta", input1);
-    ASSERT_PARSE(parser, "test2.meta", input2);
+    ASSERT_PARSE(parser, input1);
+    ASSERT_PARSE(parser, input2);
     auto ast = parser.ast();
     ASSERT_NO_THROW(v2::resolve(ast, act.dictionary()));
     auto calls = ast->getChildren<Call>(infinitDepth);
@@ -147,7 +147,7 @@ TEST(ResolveCall, imported) {
 }
 
 TEST(ResolveCall, samePkgAnotherFile) {
-    utils::string_view input1 = R"META(
+    const utils::SourceFile input1 = R"META(
         package test;
 
         int foo(int n) {
@@ -156,7 +156,7 @@ TEST(ResolveCall, samePkgAnotherFile) {
             return 2*n;
         }
     )META";
-    utils::string_view input2 = R"META(
+    const utils::SourceFile input2 = R"META(
         package test;
 
         public int bar(int n) {
@@ -170,8 +170,8 @@ TEST(ResolveCall, samePkgAnotherFile) {
     Actions act;
     parser.setNodeActions(&act);
     parser.setParseActions(&act);
-    ASSERT_PARSE(parser, "test1.meta", input1);
-    ASSERT_PARSE(parser, "test2.meta", input2);
+    ASSERT_PARSE(parser, input1);
+    ASSERT_PARSE(parser, input2);
     auto ast = parser.ast();
     ASSERT_NO_THROW(v2::resolve(ast, act.dictionary()));
     auto calls = ast->getChildren<Call>(infinitDepth);
@@ -189,12 +189,12 @@ TEST(ResolveCall, samePkgAnotherFile) {
 class ResolveCallErrors: public utils::ErrorTest {};
 
 TEST_P(ResolveCallErrors, resolveErrors) {
-    auto param = GetParam();
+    const auto& param = GetParam();
     Parser parser;
     Actions act;
     parser.setNodeActions(&act);
     parser.setParseActions(&act);
-    ASSERT_PARSE(parser, "test.meta", param.input);
+    ASSERT_PARSE(parser, param.input);
     auto ast = parser.ast();
     try {
         v2::resolve(ast, act.dictionary());

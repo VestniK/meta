@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "utils/testtools.h"
+#include "utils/sourcefile.h"
 
 #include "parser/function.h"
 #include "parser/import.h"
@@ -15,7 +16,7 @@
 namespace meta::analysers {
 namespace {
 
-const utils::string_view lib = R"META(
+const utils::SourceFile lib = R"META(
     package test.lib;
 
     extern
@@ -71,7 +72,7 @@ const utils::string_view lib = R"META(
 )META";
 
 TEST(ResolveImports, properStructImport) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test.lib.subpkg;
 
         import test.lib.Point;
@@ -83,8 +84,8 @@ TEST(ResolveImports, properStructImport) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
-    ASSERT_PARSE(parser, "lib.meta", lib);
+    ASSERT_PARSE(parser, input);
+    ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>(infinitDepth);
@@ -99,7 +100,7 @@ TEST(ResolveImports, properStructImport) {
 }
 
 TEST(ResolveImports, simpleFuncImport) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test.lib.subpkg;
 
         import test.lib.foo;
@@ -109,8 +110,8 @@ TEST(ResolveImports, simpleFuncImport) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
-    ASSERT_PARSE(parser, "lib.meta", lib);
+    ASSERT_PARSE(parser, input);
+    ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>();
@@ -125,7 +126,7 @@ TEST(ResolveImports, simpleFuncImport) {
 }
 
 TEST(ResolveImports, partialFuncImport) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test.lib.subpkg;
 
         import test.lib.overload2;
@@ -135,8 +136,8 @@ TEST(ResolveImports, partialFuncImport) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
-    ASSERT_PARSE(parser, "lib.meta", lib);
+    ASSERT_PARSE(parser, input);
+    ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>();
@@ -172,7 +173,7 @@ TEST(ResolveImports, partialFuncImport) {
 }
 
 TEST(ResolveImports, allFuncImport) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test.lib.subpkg;
 
         import test.lib.visibleOverloads;
@@ -181,8 +182,8 @@ TEST(ResolveImports, allFuncImport) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
-    ASSERT_PARSE(parser, "lib.meta", lib);
+    ASSERT_PARSE(parser, input);
+    ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>();
@@ -199,7 +200,7 @@ TEST(ResolveImports, allFuncImport) {
 }
 
 TEST(ResolveImports, filterOutProtectedFuncImport) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         import test.lib.overloadAll;
@@ -208,8 +209,8 @@ TEST(ResolveImports, filterOutProtectedFuncImport) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
-    ASSERT_PARSE(parser, "lib.meta", lib);
+    ASSERT_PARSE(parser, input);
+    ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>();
@@ -230,7 +231,7 @@ TEST(ResolveImports, filterOutProtectedFuncImport) {
 }
 
 TEST(ResolveImports, importAsOverload) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         import test.lib.foo;
@@ -240,8 +241,8 @@ TEST(ResolveImports, importAsOverload) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
-    ASSERT_PARSE(parser, "lib.meta", lib);
+    ASSERT_PARSE(parser, input);
+    ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>();
@@ -256,7 +257,7 @@ TEST(ResolveImports, importAsOverload) {
 }
 
 TEST(ResolveImports, importAsRenamedOverload) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         import test.lib.foo as baz;
@@ -266,8 +267,8 @@ TEST(ResolveImports, importAsRenamedOverload) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
-    ASSERT_PARSE(parser, "lib.meta", lib);
+    ASSERT_PARSE(parser, input);
+    ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>();
@@ -282,7 +283,7 @@ TEST(ResolveImports, importAsRenamedOverload) {
 }
 
 TEST(ResolveImports, importExtendingOverload) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         import test.lib.foo;
@@ -293,8 +294,8 @@ TEST(ResolveImports, importExtendingOverload) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
-    ASSERT_PARSE(parser, "lib.meta", lib);
+    ASSERT_PARSE(parser, input);
+    ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
     v2::resolve(ast, act.dictionary());
     auto imports = ast->getChildren<Import>();
@@ -516,8 +517,8 @@ TEST_P(ImportErrors, importErrors) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_PARSE(parser, "test.meta", param.input);
-    ASSERT_PARSE(parser, "lib.meta", lib);
+    ASSERT_PARSE(parser, param.input);
+    ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
     try {
         v2::resolve(ast, act.dictionary());

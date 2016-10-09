@@ -25,6 +25,7 @@
 
 #include "utils/io.h"
 #include "utils/types.h"
+#include "utils/sourcefile.h"
 
 #include "parser/metaparser.h"
 #include "parser/nodeexception.h"
@@ -148,15 +149,15 @@ namespace meta {
 
 bool main(const Options &opts) try {
     // parse
-    std::vector<std::string> input;
-    input.reserve(opts.sources.size());
+    std::vector<utils::SourceFile> sources;
+    sources.reserve(opts.sources.size());
     Parser parser;
     analysers::Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    for (const auto& src: opts.sources) {
-        input.emplace_back(utils::readAll(src));
-        parser.parse(src, input.back());
+    for (const auto& srcpath: opts.sources) {
+        sources.emplace_back(srcpath);
+        parser.parse(sources.back());
     }
     auto ast = parser.ast();
     // analyse

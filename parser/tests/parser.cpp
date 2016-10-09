@@ -26,6 +26,8 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/testtools.h"
+
 #include "parser/annotation.h"
 #include "parser/assigment.h"
 #include "parser/binaryop.h"
@@ -40,19 +42,20 @@
 #include "parser/var.h"
 #include "parser/vardecl.h"
 
-using namespace meta;
+namespace meta::parser {
+namespace {
 
 TEST(MetaParser, imports) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         import pkg.bar;
         import pkg.subpkg.bar as bar1;
 
         int foo() {return 5;}
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     const auto imports = ast->getChildren<Import>(-1);
     ASSERT_EQ(imports.size(), 2u);
@@ -65,16 +68,16 @@ TEST(MetaParser, imports) {
 }
 
 TEST(MetaParser, emptyPackage) {
-    const auto input = "package test.test;"s;
+    const utils::SourceFile input = "package test.test;";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 0u);
 }
 
 TEST(MetaParser, varTest) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
         int foo(int x)
         {
@@ -83,9 +86,9 @@ TEST(MetaParser, varTest) {
             z = x*x;
             return z + y - 3;
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto blocks = ast->getChildren<CodeBlock>(-1);
     ASSERT_EQ(blocks.size(), 1u);
@@ -106,7 +109,7 @@ TEST(MetaParser, varTest) {
 }
 
 TEST(MetaParser, assignAsExpr) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
         int foo(int x)
         {
@@ -115,9 +118,9 @@ TEST(MetaParser, assignAsExpr) {
             z = (y = x + 1)*x;
             return z + y - 3;
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto blocks = ast->getChildren<CodeBlock>(-1);
     ASSERT_EQ(blocks.size(), 1u);
@@ -140,7 +143,7 @@ TEST(MetaParser, assignAsExpr) {
 }
 
 TEST(MetaParser, ifStatement) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         void foo0(int x)
@@ -149,9 +152,9 @@ TEST(MetaParser, ifStatement) {
                 foo1(x);
             foo2(x);
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -168,7 +171,7 @@ TEST(MetaParser, ifStatement) {
 }
 
 TEST(MetaParser, ifWithEmptyStatement) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         void foo0(int x)
@@ -177,9 +180,9 @@ TEST(MetaParser, ifWithEmptyStatement) {
                 ;
             foo1(x);
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -193,7 +196,7 @@ TEST(MetaParser, ifWithEmptyStatement) {
 }
 
 TEST(MetaParser, ifElseStatement) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         void foo0(int x)
@@ -204,9 +207,9 @@ TEST(MetaParser, ifElseStatement) {
                 foo2(x);
             foo3(x);
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -226,7 +229,7 @@ TEST(MetaParser, ifElseStatement) {
 }
 
 TEST(MetaParser, ifElseEmptyStatement) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         void foo0(int x)
@@ -237,9 +240,9 @@ TEST(MetaParser, ifElseEmptyStatement) {
                 ;
             foo2(x);
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -256,7 +259,7 @@ TEST(MetaParser, ifElseEmptyStatement) {
 }
 
 TEST(MetaParser, ifElseBothEmptyStatements) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         void foo0(int x)
@@ -267,9 +270,9 @@ TEST(MetaParser, ifElseBothEmptyStatements) {
                 ;
             foo1(x);
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -283,7 +286,7 @@ TEST(MetaParser, ifElseBothEmptyStatements) {
 }
 
 TEST(MetaParser, ifBlockStatement) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
         int foo0(int x)
         {
@@ -295,9 +298,9 @@ TEST(MetaParser, ifBlockStatement) {
             y = foo2(y);
             return y;
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -314,7 +317,7 @@ TEST(MetaParser, ifBlockStatement) {
 }
 
 TEST(MetaParser, ifElseBlockStatement) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
         int foo0(int x)
         {
@@ -329,9 +332,9 @@ TEST(MetaParser, ifElseBlockStatement) {
             y = foo3(y);
             return y;
         }
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto ifs = ast->getChildren<If>(-1);
     ASSERT_EQ(ifs.size(), 1u);
@@ -351,12 +354,12 @@ TEST(MetaParser, ifElseBlockStatement) {
 }
 
 TEST(MetaParser, multipleFiles) {
-    const auto src1 = "package test; int foo() {return 0;}"s;
-    const auto src2 = "package test; bool bar() {return false;}"s;
+    const utils::SourceFile src1 = "package test; int foo() {return 0;}";
+    const utils::SourceFile src2 = "package test; bool bar() {return false;}";
 
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("src1", src1));
-    ASSERT_NO_THROW(parser.parse("src2", src2));
+    ASSERT_PARSE(parser, src1);
+    ASSERT_PARSE(parser, src2);
 
     auto ast = parser.ast();
     Function *foo = nullptr;
@@ -369,23 +372,18 @@ TEST(MetaParser, multipleFiles) {
         return false;
     });
     ASSERT_NE(foo, nullptr);
-    ASSERT_EQ(foo->sourceLocation(), "src1");
+    ASSERT_EQ(foo->sourceLocation(), src1.path());
     ASSERT_NE(bar, nullptr);
-    ASSERT_EQ(bar->sourceLocation(), "src2");
+    ASSERT_EQ(bar->sourceLocation(), src2.path());
 }
 
-namespace {
-
 template<size_t N>
-inline std::vector<char> str2buf(const char (&str)[N])
-{
+std::vector<char> str2buf(const utils::array_t<const char, N>& str) {
     return std::vector<char>(str, str + N - 1); // ignore auto assigned zero terminator
 }
 
-}
-
 TEST(Parser, stringLiteral) {
-    const auto input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
         string foo() {
             return "Hello World";
@@ -393,10 +391,10 @@ TEST(Parser, stringLiteral) {
         string escaped() {
             return "\t \n \r \a \b \f \\ \" \0";
         }
-    )META"s;
+    )META";
 
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
 
     auto strs = parser.ast()->getChildren<StrLiteral>(-1);
     ASSERT_EQ(strs.size(), 2u);
@@ -404,11 +402,9 @@ TEST(Parser, stringLiteral) {
     ASSERT_EQ(strs[1]->value(), str2buf("\t \n \r \a \b \f \\ \" \0"));
 }
 
-namespace {
-
 struct TestData
 {
-    const char *opStr;
+    const char* opStr;
     BinaryOp::Operation op;
 };
 
@@ -416,13 +412,14 @@ class MetaParser: public testing::TestWithParam<TestData>
 {
 };
 
-}
-
 TEST_P(MetaParser, binaryOp) {
     TestData data = GetParam();
-    const std::string input = str(boost::format("package test; int foo(int x, int y) {return x %s y;}")%data.opStr);
+    const auto input = utils::SourceFile::fake(
+        "test.meta",
+        str(boost::format("package test; int foo(int x, int y) {return x %s y;}")%data.opStr)
+    );
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     auto binops = ast->getChildren<BinaryOp>(-1);
     ASSERT_EQ(binops.size(), 1u);
@@ -443,3 +440,6 @@ INSTANTIATE_TEST_CASE_P(BiaryOps, MetaParser, ::testing::Values(
     TestData({"&&", BinaryOp::boolAnd}),
     TestData({"||", BinaryOp::boolOr})
 ));
+
+} // anonymous namespace
+} // namespace meta::parser

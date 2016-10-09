@@ -19,43 +19,90 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/testtools.h"
+
 #include "parser/metaparser.h"
 
 #include "analysers/actions.h"
+#include "analysers/declconflicts.h" // TODO: for SourceInfo only!!! remove this header.
 #include "analysers/reachabilitychecker.h"
 #include "analysers/semanticerror.h"
 
-using namespace meta;
-using namespace meta::analysers;
-
+namespace meta::analysers::tests {
 namespace {
 
-class Reachability: public testing::TestWithParam<const char *>
-{
-public:
-};
-
-}
+class Reachability: public utils::ErrorTest {};
 
 TEST_P(Reachability, resolveErrors) {
-    const std::string input = GetParam();
+    const auto& param = GetParam();
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, param.input);
     auto ast = parser.ast();
     try {
         checkReachability(ast);
-        ASSERT_TRUE(false) << "Input code contains unrachable statements however check didn't find them";
-    } catch (SemanticError &err) {
-        ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << utils::string_view(err.tokens());
-        ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << utils::string_view(err.tokens());
+        FAIL() << "Error was not detected: " << param.errMsg;
+    } catch (const SemanticError &err) {
+        EXPECT_EQ(err.what(), param.errMsg) << SourceInfo(err) << ": " << err.what();
     }
 }
 
 INSTANTIATE_TEST_CASE_P(semanticErrors, Reachability, ::testing::Values(
-    "package test; auto foo(int x) {return x;\nbool y = x > 0;}",
-    "package test; auto foo(int x) {int y = 2*x; {y = y + 5; return y;} \nreturn 0;}",
-    "package test; auto foo(int x) {if (x < 0) return -x; else {int y = 5 + x; return y;\ny = y + x;} return 0;}"
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x) {
+                return x;
+                bool y = x > 0;
+            }
+        )META",
+        .errMsg =
+R"(Function 'overload2' from the package 'test.lib' has no overloads visible from the current package 'test'
+notice: lib.meta:41:5: Function 'test.lib.overload2()' is protected
+notice: lib.meta:42:5: Function 'test.lib.overload2(int)' is private)"
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x) {
+                int y = 2*x;
+                {
+                    y = y + 5;
+                    return y;
+                }
+                return 0;
+            }
+        )META",
+        .errMsg =
+R"(Function 'overload2' from the package 'test.lib' has no overloads visible from the current package 'test'
+notice: lib.meta:41:5: Function 'test.lib.overload2()' is protected
+notice: lib.meta:42:5: Function 'test.lib.overload2(int)' is private)"
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x) {
+                if (x < 0)
+                    return -x;
+                else {
+                    int y = 5 + x;
+                    return y;
+                    y = y + x;
+                }
+                return 0;
+            }
+        )META",
+        .errMsg =
+R"(Function 'overload2' from the package 'test.lib' has no overloads visible from the current package 'test'
+notice: lib.meta:41:5: Function 'test.lib.overload2()' is protected
+notice: lib.meta:42:5: Function 'test.lib.overload2(int)' is private)"
+    }
 ));
+
+} // anonymous namespace
+} // namespace meta::analysers::tests

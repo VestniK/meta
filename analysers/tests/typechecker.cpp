@@ -19,6 +19,8 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/testtools.h"
+
 #include "typesystem/typesstore.h"
 
 #include "parser/binaryop.h"
@@ -27,41 +29,29 @@
 #include "parser/vardecl.h"
 
 #include "analysers/actions.h"
+#include "analysers/declconflicts.h" // TODO elliminate necessity of this header (SourceInfo only)
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
 #include "analysers/typechecker.h"
 
-using namespace meta;
-using namespace meta::analysers;
-
+namespace meta::analysers::tests {
 namespace {
 
-struct NameType
-{
+struct NameType {
     NameType(const std::string name, typesystem::Type::TypeId type): name(name), type(type) {}
 
     std::string name;
     typesystem::Type::TypeId type;
 };
-typedef std::vector<NameType> NameTypeList;
+using NameTypeList = std::vector<NameType>;
 
-struct TestData
-{
-    TestData(const char *src, const NameTypeList &func, const NameTypeList &vars):
-        src(src), functions(func), vars(vars)
-    {}
-
-    std::string src;
+struct TestData {
+    utils::SourceFile src;
     NameTypeList functions;
     NameTypeList vars;
 };
 
-class TypeCheker: public testing::TestWithParam<TestData>
-{
-public:
-};
-
-}
+class TypeCheker: public testing::TestWithParam<TestData> {};
 
 TEST_P(TypeCheker, typeCheck) {
     auto param = GetParam();
@@ -69,11 +59,11 @@ TEST_P(TypeCheker, typeCheck) {
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse("test.meta", param.src));
+    ASSERT_PARSE(parser, param.src);
     auto ast = parser.ast();
-    ASSERT_NO_THROW(resolve(ast, act.dictionary()));
+    ASSERT_ANALYSE(resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;
-    ASSERT_NO_THROW(checkTypes(ast, typestore));
+    ASSERT_ANALYSE(checkTypes(ast, typestore));
     auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), param.functions.size());
     for (size_t pos = 0; pos < functions.size(); ++pos) {
@@ -102,144 +92,433 @@ TEST_P(TypeCheker, typeCheck) {
 }
 
 INSTANTIATE_TEST_CASE_P(typeCheckAndDeduce, TypeCheker, ::testing::Values(
-    TestData(
+    TestData{
         "package test; int foo() {return 5;} bool bar(int x) {return x < 5;}",
         NameTypeList({NameType("foo", typesystem::Type::Int), NameType("bar", typesystem::Type::Bool)}),
         NameTypeList({NameType("x", typesystem::Type::Int)})
-    ),
-    TestData(
+    },
+    TestData{
         "package test; auto foo() {return 5;} auto bar(int x) {return x < 5;}",
         NameTypeList({NameType("foo", typesystem::Type::Int), NameType("bar", typesystem::Type::Bool)}),
         NameTypeList({NameType("x", typesystem::Type::Int)})
-    ),
-    TestData(
+    },
+    TestData{
         "package test; bool foo(int x, int y) {auto var = x+y; auto flag = x < y; return flag == x < var;}",
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("x", typesystem::Type::Int), NameType("y", typesystem::Type::Int), NameType("var", typesystem::Type::Int), NameType("flag", typesystem::Type::Bool)})
-    ),
-    TestData(
+    },
+    TestData{
         "package test; bool foo(auto x = 5, auto y = !(5 < 2)) {return y != x < 5;}",
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("x", typesystem::Type::Int), NameType("y", typesystem::Type::Bool)})
-    ),
-    TestData(
+    },
+    TestData{
         "package test; auto foo() {auto val = 5; return val;}",
         NameTypeList({NameType("foo", typesystem::Type::Int)}),
         NameTypeList({NameType("val", typesystem::Type::Int)})
-    ),
-    TestData(
+    },
+    TestData{
         "package test; auto foo() {auto val = true; return val;}",
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("val", typesystem::Type::Bool)})
-    ),
-    TestData(
+    },
+    TestData{
         "package test; auto foo() {auto val = false; return val || true;}",
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("val", typesystem::Type::Bool)})
-    ),
-    TestData(
+    },
+    TestData{
         "package test; auto foo() {auto val = false; if (val) val = false; return val && true;}",
          NameTypeList({NameType("foo", typesystem::Type::Bool)}),
          NameTypeList({NameType("val", typesystem::Type::Bool)})
-    ),
-    TestData(
+    },
+    TestData{
         "package test; auto foo() {auto val = false; if (val) {int x = 5; return x > 2;} return val && true;}",
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("val", typesystem::Type::Bool), NameType("x", typesystem::Type::Int)})
-    ),
-    TestData(
+    },
+    TestData{
         "package test; auto foo() {auto val = false; if (val) val = false; else return val || true; return val && true;}",
          NameTypeList({NameType("foo", typesystem::Type::Bool)}),
          NameTypeList({NameType("val", typesystem::Type::Bool)})
-    ),
-    TestData(
+    },
+    TestData{
         "package test; auto foo() {auto val = false; if (val) {int x = 5; return x > 2;} else {int y = 7; val = val && y < 5;} return val && true;}",
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("val", typesystem::Type::Bool), NameType("x", typesystem::Type::Int), NameType("y", typesystem::Type::Int)})
-    ),
-    TestData(
+    },
+    TestData{
         R"META(package test; auto foo() {auto var = "Hello"; return var;})META",
         NameTypeList({NameType("foo", typesystem::Type::String)}),
         NameTypeList({NameType("var", typesystem::Type::String)})
-    ),
-    TestData(
+    },
+    TestData{
         R"META(package test; string foo() {auto var = "Hello"; return var;})META",
         NameTypeList({NameType("foo", typesystem::Type::String)}),
         NameTypeList({NameType("var", typesystem::Type::String)})
-    ),
-    TestData(
+    },
+    TestData{
         R"META(package test; auto foo() {string var = "Hello"; return var;})META",
         NameTypeList({NameType("foo", typesystem::Type::String)}),
         NameTypeList({NameType("var", typesystem::Type::String)})
-    ),
-    TestData(
+    },
+    TestData{
         R"META(package test; string foo() {string var = "Hello"; return var;})META",
         NameTypeList({NameType("foo", typesystem::Type::String)}),
         NameTypeList({NameType("var", typesystem::Type::String)})
-    )
+    }
 ));
 
-namespace {
 
-class TypeChekerErrors: public testing::TestWithParam<std::string>
-{
-public:
-};
-
-}
+class TypeChekerErrors: public utils::ErrorTest {};
 
 TEST_P(TypeChekerErrors, typeErrors) {
-    const std::string& input = GetParam();
+    const auto& param = GetParam();
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, param.input);
     auto ast = parser.ast();
-    ASSERT_NO_THROW(resolve(ast, act.dictionary()));
+    ASSERT_ANALYSE(resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;
     try {
         checkTypes(ast, typestore);
-        ASSERT_TRUE(false) << "Input code contains type integrity or deduce error which was not found";
-    } catch (SemanticError &err) {
-        ASSERT_EQ(err.tokens().linenum(), 2) << err.what() << ": " << utils::string_view(err.tokens());
-        ASSERT_EQ(err.tokens().colnum(), 1) << err.what() << ": " << utils::string_view(err.tokens());
+        FAIL() << "Error was not detected: " << param.errMsg;
+    } catch (const SemanticError &err) {
+        EXPECT_EQ(err.what(), param.errMsg) << SourceInfo(err) << ": " << err.what();
     }
 }
 
 INSTANTIATE_TEST_CASE_P(inconsistentTypes, TypeChekerErrors, ::testing::Values(
-    "package test; int foo(int x) {\nreturn x < 5;}", // wrrong return expr type
-    "package test; auto foo(int x) {\nbool b = x; return b;}", // incorret type of init expr
-    "package test; auto foo(int x) {bool b; \nb = x; return b;}", // incorret type of assign
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            int foo(int x) {
+                return x < 5;
+            }
+        )META",
+        .errMsg =
+R"(Function 'protFoo' from the package 'test.lib' has no overloads visible from the current package 'test'
+notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x) {
+                bool b = x;
+                return b;
+            }
+        )META",
+        .errMsg =
+R"(Function 'protFoo' from the package 'test.lib' has no overloads visible from the current package 'test'
+notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x) {
+                bool b;
+                b = x;
+                return b;
+            }
+        )META",
+        .errMsg =
+R"(Function 'protFoo' from the package 'test.lib' has no overloads visible from the current package 'test'
+notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
+    },
     // Deduce loops
-    "package test; auto foo() {return bar();} auto bar() {\nreturn foo();}",
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo() {
+                return bar();
+            }
+            auto bar() {
+                return foo();
+            }
+        )META",
+        .errMsg = ""
+    },
     // arythmetic on incompatible
-    "package test; auto foo(int x, bool y) {return \nx + y;}",
-    "package test; auto foo(int x, bool y) {return \nx - y;}",
-    "package test; auto foo(int x, bool y) {return \nx * y;}",
-    "package test; auto foo(int x, bool y) {return \nx / y;}",
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x, bool y) {
+                return x + y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x, bool y) {
+                return x - y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x, bool y) {
+                return x * y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x, bool y) {
+                return x / y;
+            }
+        )META",
+        .errMsg = ""
+    },
     // numeric operation on non-numeric
-    "package test; auto foo(bool x, bool y) {return \nx + y;}",
-    "package test; auto foo(bool x, bool y) {return \nx - y;}",
-    "package test; auto foo(bool x, bool y) {return \nx * y;}",
-    "package test; auto foo(bool x, bool y) {return \nx / y;}",
-    "package test; auto foo(bool x, bool y) {return \nx > y;}",
-    "package test; auto foo(bool x, bool y) {return \nx >= y;}",
-    "package test; auto foo(bool x, bool y) {return \nx < y;}",
-    "package test; auto foo(bool x, bool y) {return \nx <= y;}",
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(bool x, bool y) {
+                return x + y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(bool x, bool y) {
+                return x - y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(bool x, bool y) {
+                return x * y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(bool x, bool y) {
+                return x / y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(bool x, bool y) {
+                return x > y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(bool x, bool y) {
+                return x >= y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(bool x, bool y) {
+                return x < y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(bool x, bool y) {
+                return x <= y;
+            }
+        )META",
+        .errMsg = ""
+    },
     // Equality on different types
-    "package test; auto foo(int x, bool y) {return \nx == y;}",
-    "package test; auto foo(int x, bool y) {return \nx != y;}",
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x, bool y) {
+                return x == y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x, bool y) {
+                return x != y;
+            }
+        )META",
+        .errMsg = ""
+    },
     // Bool operations on nonbool
-    "package test; auto foo(int x) {return \n!x;}",
-    "package test; auto foo(int x, int y) {return \nx && y;}",
-    "package test; auto foo(int x, int y) {return \nx || y;}",
-    "package test; int foo(int x) {if (\nx) return 1; return 0;}",
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x) {
+                return !x;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x, int y) {
+                return x && y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            auto foo(int x, int y) {
+                return x || y;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            int foo(int x) {
+                if (x)
+                    return 1;
+                return 0;
+            }
+        )META",
+        .errMsg = ""
+    },
     // Types are checked inside if branches
-    "package test; bool foo(int x, int y) {if (true) return \nx && y; return false;}",
-    "package test; bool foo(int x, int y) {if (true) {auto z = x+y; return \nz && y;} return false;}",
-    "package test; bool foo(int x, int y) {if (true) return true; else return \nx && y; return false;}",
-    "package test; bool foo(int x, int y) {if (true) {auto res = x < y; return res;} else {return \nx && y;} return false;}",
-    "package test; bool foo(int x, int y) {if (true) return \nx && y; else return true; return false;}",
-    "package test; bool foo(int x, int y) {if (true) {auto z = x+y; return \nz && y;} else {auto res = x != y; return res;} return false;}"
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            bool foo(int x, int y) {
+                if (true)
+                    return x && y;
+                return false;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            bool foo(int x, int y) {
+                if (true) {
+                    auto z = x+y;
+                    return z && y;
+                }
+                return false;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            bool foo(int x, int y) {
+                if (true)
+                    return true;
+                else
+                    return x && y;
+                return false;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            bool foo(int x, int y) {
+                if (true) {
+                    auto res = x < y;
+                    return res;
+                } else {
+                    return x && y;
+                }
+                return false;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            bool foo(int x, int y) {
+                if (true)
+                    return x && y;
+                else
+                    return true;
+                return false;
+            }
+        )META",
+        .errMsg = ""
+    },
+    utils::ErrorTestData{
+        .input = R"META(
+            package test;
+
+            bool foo(int x, int y) {
+                if (true) {
+                    auto z = x+y; return z && y;
+                } else {
+                    auto res = x != y;
+                    return res;
+                }
+                return false;
+            }
+        )META",
+        .errMsg = ""
+    }
 ));
+
+
+} // anonymous namespace
+} // namespace meta::analysers::tests

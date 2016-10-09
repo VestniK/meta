@@ -33,8 +33,14 @@
 #include "analysers/semanticerror.h"
 
 namespace meta::analysers {
-
 namespace {
+
+void trace([[gnu::unused]]Node* node) {
+//     std::clog << node->sourceLocation() << ':' << node->tokens().linenum() << ':' << node->tokens().colnum();
+//     utils::string_view str = node->tokens();
+//     str = str.substr(0, str.find('\n'));
+//     std::clog << ": " << str << '\n';
+}
 
 bool isChildPackage(utils::string_view subpkg, utils::string_view parentpkg) {
     if (parentpkg.length() > subpkg.length())
@@ -110,10 +116,12 @@ struct Resolver {
     Dictionary& dict;
 
     void operator() (Node* node, CodeContext&) {
+        trace(node);
         throw UnexpectedNode(node, "Don't know how to resolve declaration and types for");
     }
 
     void operator() (SourceFile* node, CodeContext& ctx) {
+        trace(node);
         CodeContext srcFileContext = {&ctx, node->package()};
         for (auto* func: dict[node->package()].functions)
             srcFileContext.functions.emplace(DeclRef<Function>{func});
@@ -132,6 +140,7 @@ struct Resolver {
     }
 
     void operator() (Import* node, CodeContext& ctx) {
+        trace(node);
         POSTCONDITION(!node->importedDeclarations().empty());
         POSTCONDITION(
             node->importedDeclarations().size() == 1 ||
@@ -203,6 +212,7 @@ struct Resolver {
     }
 
     void operator() (Function* node, CodeContext& ctx) {
+        trace(node);
         if (node->visibility() != Visibility::Extern && node->body() == nullptr)
             throw SemanticError(node, "Implementation missing for the function '%s'", node->name());
         if (node->visibility() == Visibility::Extern && node->body() != nullptr)
@@ -235,6 +245,7 @@ struct Resolver {
     }
 
     void operator() (Call* node, CodeContext& ctx) {
+        trace(node);
         POSTCONDITION(node->function() != nullptr);
         for (auto* currctx = &ctx; currctx != nullptr; currctx = currctx->parent) {
             auto matches = utils::equal_range(currctx->functions, node->functionName());
@@ -261,12 +272,14 @@ struct Resolver {
     }
 
     void operator() (CodeBlock* node, CodeContext& ctx) {
+        trace(node);
         CodeContext blockCtx{ctx};
         for (auto statement: node->statements())
             dispatch(*this, statement, blockCtx);
     }
 
     void operator() (VarDecl* node, CodeContext& ctx) {
+        trace(node);
         auto conflict = find<VarStats>(ctx, node->name());
         if (conflict && (conflict->decl->flags() & VarFlags::argument))
             throwDeclConflict(node, conflict->decl);
@@ -278,6 +291,7 @@ struct Resolver {
     }
 
     void operator() (If* node, CodeContext& ctx) {
+        trace(node);
         dispatch(*this, node->condition(), ctx);
         if (node->thenBlock()) {
             CodeContext thenCtx{ctx};
@@ -290,19 +304,22 @@ struct Resolver {
     }
 
     void operator() (BinaryOp* node, CodeContext& ctx) {
+        trace(node);
         dispatch(*this, node->left(), ctx);
         dispatch(*this, node->right(), ctx);
     }
 
     void operator() (PrefixOp* node, CodeContext& ctx) {
+        trace(node);
         dispatch(*this, node->operand(), ctx);
     }
 
-    void operator() (Number*, CodeContext&) {}
-    void operator() (StrLiteral*, CodeContext&) {}
-    void operator() (Literal*, CodeContext&) {}
+    void operator() (Number* node, CodeContext&) {trace(node);}
+    void operator() (StrLiteral* node, CodeContext&) {trace(node);}
+    void operator() (Literal* node, CodeContext&) {trace(node);}
 
     void operator() (Var* node, CodeContext& ctx) {
+        trace(node);
         auto varstat = find<VarStats>(ctx, node->name());
         if (!varstat)
             throw SemanticError(node, "Undefined variable '%s'", node->name());
@@ -313,6 +330,7 @@ struct Resolver {
     }
 
     void operator() (Assigment* node, CodeContext& ctx) {
+        trace(node);
         if (node->target()->getVisitableType() == std::type_index(typeid(Var))) {
             auto target = static_cast<Var*>(node->target());
             auto stats = find<VarStats>(ctx, target->name());
@@ -328,11 +346,13 @@ struct Resolver {
     }
 
     void operator() (Return* node, CodeContext& ctx) {
+        trace(node);
         if (node->value())
             dispatch(*this, node->value(), ctx);
     }
 
-    void operator() (Struct*, CodeContext&) {
+    void operator() (Struct* node, CodeContext&) {
+        trace(node);
     }
 };
 

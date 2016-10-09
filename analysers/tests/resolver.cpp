@@ -35,12 +35,12 @@ namespace {
 class ResolveErrors: public utils::ErrorTest {};
 
 TEST_P(ResolveErrors, resolveErrors) {
-    auto param = GetParam();
+    const auto& param = GetParam();
     Parser parser;
     Actions act;
     parser.setNodeActions(&act);
     parser.setParseActions(&act);
-    ASSERT_PARSE(parser, "test.meta", param.input);
+    ASSERT_PARSE(parser, param.input);
     auto ast = parser.ast();
     try {
         v2::resolve(ast, act.dictionary());

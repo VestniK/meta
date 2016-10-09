@@ -15,7 +15,7 @@ namespace meta::analysers {
 namespace {
 
 TEST(ResolveVars, simple) {
-    utils::string_view input = R"META(
+    const utils::SourceFile input = R"META(
         package test;
 
         extern int dist(int y);
@@ -29,7 +29,7 @@ TEST(ResolveVars, simple) {
     Actions act;
     parser.setNodeActions(&act);
     parser.setParseActions(&act);
-    ASSERT_PARSE(parser, "test.meta", input);
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     ASSERT_ANALYSE(v2::resolve(ast, act.dictionary()));
     auto vars = ast->getChildren<Var>(infinitDepth);

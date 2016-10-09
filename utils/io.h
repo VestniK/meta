@@ -57,6 +57,7 @@ FStream<dir> open(const fs::path& path, std::ios_base::openmode mode) {
     return res;
 }
 
+inline
 std::string readAll(const fs::path& path) {
     auto in = open<IO::in>(path, std::ifstream::in | std::ifstream::binary);
     in.unsetf(std::ifstream::skipws);

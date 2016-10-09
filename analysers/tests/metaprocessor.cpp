@@ -19,32 +19,33 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/testtools.h"
+
 #include "parser/function.h"
 #include "parser/metaparser.h"
 
 #include "analysers/actions.h"
 #include "analysers/metaprocessor.h"
 
-using namespace meta;
-using namespace meta::analysers;
+namespace meta::analysers {
+namespace {
 
-TEST(MetaProcessor, attribute)
-{
-    const auto input = R"META(
+TEST(MetaProcessor, attribute) {
+    const utils::SourceFile input = R"META(
         package test;
 
         @entrypoint
         int foo() {return 0;}
 
         int bar() {return 1;}
-    )META"s;
+    )META";
     Parser parser;
     Actions act;
     parser.setParseActions(&act);
     parser.setNodeActions(&act);
-    ASSERT_NO_THROW(parser.parse("test.meta",input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
-    ASSERT_NO_THROW(processMeta(ast));
+    ASSERT_ANALYSE(processMeta(ast));
     auto functions = ast->getChildren<Function>(-1);
     ASSERT_EQ(functions.size(), 2u);
     ASSERT_EQ(functions[0]->name(), "foo");
@@ -53,3 +54,6 @@ TEST(MetaProcessor, attribute)
     ASSERT_EQ(functions[1]->name(), "bar");
     ASSERT_FALSE(functions[1]->flags() & FuncFlags::entrypoint);
 }
+
+} // anonymous namespace
+} // namespace meta::analysers

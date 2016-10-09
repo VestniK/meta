@@ -20,6 +20,8 @@
 
 #include <gtest/gtest.h>
 
+#include "utils/testtools.h"
+
 #include "parser/annotation.h"
 #include "parser/function.h"
 #include "parser/metaparser.h"
@@ -30,11 +32,10 @@ using namespace meta;
 /**
  * @class meta::Parser
  * @test This test checks that all possible function delaration syntaxes are parsed correctly and visibility
- * is set properly for functions with and with no annotations.
+ * is set properly for functions with and without annotations.
  */
-TEST(FunctionParsing, funcDeclarationsAndVisibilities)
-{
-    const auto input = R"META(
+TEST(FunctionParsing, funcDeclarationsAndVisibilities) {
+    const utils::SourceFile input = R"META(
         package test;
 
         int privateByDefault() {return 5;}
@@ -51,9 +52,9 @@ TEST(FunctionParsing, funcDeclarationsAndVisibilities)
         @some
         @other
         private int privateExplicitly() {return 5;}
-    )META"s;
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 5u);
@@ -86,9 +87,12 @@ TEST(FunctionParsing, funcDeclarationsAndVisibilities)
 }
 
 TEST(FunctionParsing, zeroParamFunc) {
-    const auto input = "package test; int foo() {return 5;}"s;
+    const utils::SourceFile input = R"META(
+        package test;
+        int foo() {return 5;}
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 1u);
@@ -97,9 +101,12 @@ TEST(FunctionParsing, zeroParamFunc) {
 }
 
 TEST(FunctionParsing, oneParamFunc) {
-    const auto input = "package test; int foo(int x) {return 5*x*x - 2*x + 3;}"s;
+    const utils::SourceFile input = R"META(
+        package test;
+        int foo(int x) {return 5*x*x - 2*x + 3;}
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 1u);
@@ -111,9 +118,12 @@ TEST(FunctionParsing, oneParamFunc) {
 }
 
 TEST(FunctionParsing, twoParamFunc) {
-    const auto input = "package test; int foo(int x, int y) {return 5*x + 6/y;}"s;
+    const utils::SourceFile input = R"META(
+        package test;
+        int foo(int x, int y) {return 5*x + 6/y;}
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 1u);
@@ -127,9 +137,13 @@ TEST(FunctionParsing, twoParamFunc) {
 }
 
 TEST(FunctionParsing, twoFunc) {
-    const auto input = "package test; int foo(int x) {return 5*x;}\nint bar(int x) {return x/5;}"s;
+    const utils::SourceFile input = R"META(
+        package test;
+        int foo(int x) {return 5*x;}
+        int bar(int x) {return x/5;}
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 2u);
@@ -148,9 +162,13 @@ TEST(FunctionParsing, twoFunc) {
 }
 
 TEST(FunctionParsing, funcCall) {
-    const auto input = "package test; int foo(int x) {return 5*x;}\nint bar(int y) {return 5*foo(y/5);}"s;
+    const utils::SourceFile input = R"META(
+        package test;
+        int foo(int x) {return 5*x;}
+        int bar(int y) {return 5*foo(y/5);}
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 2u);
@@ -169,9 +187,13 @@ TEST(FunctionParsing, funcCall) {
 }
 
 TEST(FunctionParsing, funcRetType) {
-    const auto input = "package example.test; int iFoo() {return 0;}\ndouble dFoo() {return 0;}"s;
+    const utils::SourceFile input = R"META(
+        package example.test;
+        int iFoo() {return 0;}
+        double dFoo() {return 0;}
+    )META";
     Parser parser;
-    ASSERT_NO_THROW(parser.parse("test.meta", input));
+    ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
     const auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), 2u);

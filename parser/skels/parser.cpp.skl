@@ -149,7 +149,8 @@ Parser::Parser():
 
 Parser::~Parser() = default;
 
-void Parser::parse(const utils::fs::path &location, utils::string_view input) {
+void Parser::parse(const utils::SourceFile &src) {
+    utils::string_view input = src;
     lexer.start(input.data());
     stateNum = 0;
     stackTop = 0;
@@ -175,25 +176,25 @@ void Parser::parse(const utils::fs::path &location, utils::string_view input) {
 @@
                 stateNum = Tm[Tr[stateNum] + Tc[termSymb]]; // Get next state from terminal transition matrix.
                 while (stateNum <= 0) // While shift-reduce actions.
-                    reduce(location, -stateNum);
+                    reduce(src, -stateNum);
                 break;
             }
             int prodRule = Rr[stateNum] > 0 ? Rr[stateNum] : Rm[Rc[termSymb] - Rr[stateNum]];
             if (prodRule > 0) {
-                reduce(location, prodRule);
+                reduce(src, prodRule);
                 while (stateNum <= 0) // While shift-reduce actions.
-                    reduce(location, -stateNum);
+                    reduce(src, -stateNum);
                 continue;
             }
             if (stateNum == acceptState) {
-                reduce(location, 0); // last reduction when accept state reached.
+                reduce(src, 0); // last reduction when accept state reached.
 @numb_node?;...
                 std::move(stack[stackTop].nodes.begin(), stack[stackTop].nodes.end(), std::back_inserter(roots()));
 @@
                 return;
             }
             throw SyntaxError(
-                location, input,
+                src.path(), input,
                 utils::array_view<StackFrame>(stack.data() + 1, stackTop > 0 ? stackTop - 1 : 0),
                 stateNum, lexer.currentToken()
             );
@@ -201,7 +202,7 @@ void Parser::parse(const utils::fs::path &location, utils::string_view input) {
     }
 }
 
-void Parser::reduce(const utils::fs::path &location, int prodRule)
+void Parser::reduce(const utils::SourceFile &src, int prodRule)
 {
     // Perform reduce related actions
     const size_t oldTop = stackTop;
@@ -225,7 +226,7 @@ void Parser::reduce(const utils::fs::path &location, int prodRule)
     }
 @numb_node?;...
     switch (nodeNumber[prodRule]) {
-        @node_name.1|case %d: addNode(new %s(utils::array_view<StackFrame>(&stack[stackTop], prodLen[prodRule]+1)))->setSourceLocation(location)\; break\;||\n        |;
+        @node_name.1|case %d: addNode(new %s(utils::array_view<StackFrame>(&stack[stackTop], prodLen[prodRule]+1)))->setSourceLocation(src.path())\; break\;||\n        |;
         default:
             for (int i = 1; i < prodLen[prodRule]+1; ++i)
                 stack[stackTop].nodes.insert(stack[stackTop].nodes.end(), stack[stackTop + i].nodes.begin(), stack[stackTop + i].nodes.end());
