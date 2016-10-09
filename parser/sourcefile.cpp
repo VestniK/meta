@@ -21,8 +21,8 @@
 
 namespace meta {
 
-SourceFile::SourceFile(utils::array_view<StackFrame> reduction):
-    Visitable<Node, SourceFile>(reduction),
+SourceFile::SourceFile(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Node, SourceFile>(src, reduction),
     mChildren(getNodes(reduction))
 {
 }

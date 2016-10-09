@@ -26,7 +26,7 @@ namespace meta {
 
 class Call: public Visitable<Expression, Call> {
 public:
-    Call(utils::array_view<StackFrame> reduction);
+    Call(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
 
     utils::string_view functionName() const {return mFunctionName;}
     Function* function() const {return mFunction;}

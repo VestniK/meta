@@ -23,8 +23,8 @@
 
 namespace meta {
 
-StrLiteral::StrLiteral(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, StrLiteral>(reduction)
+StrLiteral::StrLiteral(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Expression, StrLiteral>(src, reduction)
 {
     PRECONDITION(reduction.size() == 1);
     PRECONDITION(reduction[0].symbol == strLiteral);

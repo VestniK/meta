@@ -26,7 +26,7 @@ namespace meta {
 
 class Var: public Visitable<Expression, Var> {
 public:
-    Var(utils::array_view<StackFrame> reduction);
+    Var(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
 
     const utils::string_view& name() const {return mName;}
     VarDecl* declaration() {return mDeclaration;}

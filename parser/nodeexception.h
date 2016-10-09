@@ -31,12 +31,14 @@ public:
 
     const char *what() const noexcept override {return mMsg.c_str();}
     const TokenSequence &tokens() const {return mTokens;}
-    const std::string &sourcePath() const {return mSrc;}
+    const utils::fs::path& sourcePath() const {return mSrcPath;}
 
 protected:
     NodeException(Node *node, const std::string &msg, std::vector<std::string>&& backtrace):
-        utils::Exception(std::move(backtrace)), mMsg(msg),
-        mTokens(node->tokens()), mSrc(node->sourceLocation())
+        utils::Exception(std::move(backtrace)),
+        mMsg(msg),
+        mTokens(node->tokens()),
+        mSrcPath(node->source().path())
     {
         mTokens.detach(mErrContext);
     }
@@ -45,7 +47,7 @@ private:
     std::string mMsg;
     std::string mErrContext;
     TokenSequence mTokens;
-    std::string mSrc;
+    utils::fs::path mSrcPath;
 };
 
 } // namespace meta

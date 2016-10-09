@@ -24,7 +24,7 @@ namespace meta {
 
 class PrefixOp: public Visitable<Expression, PrefixOp> {
 public:
-    PrefixOp(utils::array_view<StackFrame> reduction);
+    PrefixOp(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
 
     enum Operation {
         // arithmetic

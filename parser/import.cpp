@@ -22,8 +22,8 @@
 
 namespace meta {
 
-Import::Import(utils::array_view<StackFrame> reduction):
-    Visitable<Declaration, Import>(reduction)
+Import::Import(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Declaration, Import>(src, reduction)
 {
     // {'import', <qname>, ';'} OR {'import', <qname>, 'as' <identifier>, ';'}
     PRECONDITION(reduction.size() == 3 || reduction.size() == 5);

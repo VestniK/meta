@@ -37,7 +37,7 @@ enum class FuncFlags {
 
 class Function: public Visitable<Declaration, Function>, public Typed {
 public:
-    Function(utils::array_view<StackFrame> reduction);
+    Function(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
     ~Function();
 
     const Declaration::AttributesMap &attributes() const override {return attrMap;}

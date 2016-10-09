@@ -27,8 +27,8 @@
 
 namespace meta {
 
-Number::Number(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, Number>(reduction)
+Number::Number(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Expression, Number>(src, reduction)
 {
     PRECONDITION(reduction.size() == 1);
     PRECONDITION(countNodes(reduction) == 0);

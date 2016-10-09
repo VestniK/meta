@@ -24,7 +24,7 @@ namespace meta {
 
 class Literal: public Visitable<Expression, Literal> {
 public:
-    Literal(utils::array_view<StackFrame> reduction);
+    Literal(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
 
     enum Value {
         // boolean

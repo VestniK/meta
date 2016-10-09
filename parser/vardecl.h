@@ -35,7 +35,7 @@ enum class VarFlags {
 
 class VarDecl: public Visitable<Declaration, VarDecl>, public Typed {
 public:
-    VarDecl(utils::array_view<StackFrame> reduction);
+    VarDecl(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
 
     const AttributesMap& attributes() const override;
 

@@ -21,8 +21,8 @@
 
 namespace meta {
 
-CodeBlock::CodeBlock(utils::array_view<StackFrame> reduction):
-    Visitable<Node, CodeBlock>(reduction),
+CodeBlock::CodeBlock(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Node, CodeBlock>(src, reduction),
     mChildren(getNodes(reduction))
 {
 }

@@ -30,7 +30,7 @@ namespace meta {
 
 class Struct: public Visitable<Declaration, Struct> {
 public:
-    Struct(utils::array_view<StackFrame> reduction);
+    Struct(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
 
     const Declaration::AttributesMap& attributes() const override {return attrMap;}
 

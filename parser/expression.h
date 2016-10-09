@@ -24,9 +24,10 @@
 namespace meta {
 
 class Expression: public Node, public Typed {
-public:
 protected:
-    Expression(utils::array_view<StackFrame> reduction): Node(reduction) {}
+    Expression(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+        Node(src, reduction)
+    {}
 };
 
 } // namespace meta

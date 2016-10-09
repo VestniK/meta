@@ -24,7 +24,8 @@
 
 namespace meta {
 
-Literal::Literal(utils::array_view<StackFrame> reduction): Visitable<Expression, Literal>(reduction)
+Literal::Literal(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Expression, Literal>(src, reduction)
 {
     PRECONDITION(reduction.size() == 1);
     PRECONDITION(reduction[0].symbol > 0); // symbol is terminal

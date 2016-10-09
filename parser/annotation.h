@@ -28,8 +28,8 @@ class Declaration;
 
 class Annotation: public Visitable<Node, Annotation> {
 public:
-    Annotation(utils::array_view<StackFrame> reduction):
-        Visitable<Node, Annotation>(reduction)
+    Annotation(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+        Visitable<Node, Annotation>(src, reduction)
     {
         PRECONDITION(reduction.size() == 1);
         PRECONDITION(reduction[0].tokens.begin() != reduction[0].tokens.end());

@@ -27,8 +27,8 @@ namespace meta {
 
 class MemberAccess: public Visitable<Expression, MemberAccess> {
 public:
-    MemberAccess(utils::array_view<StackFrame> reduction):
-        Visitable<Expression, MemberAccess>(reduction)
+    MemberAccess(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+        Visitable<Expression, MemberAccess>(src, reduction)
     {
         // {<aggregate>, '.', <member>}
         PRECONDITION(reduction.size() == 3);

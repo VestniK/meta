@@ -26,8 +26,8 @@ namespace meta {
 
 class Return: public Visitable<Node, Return> {
 public:
-    Return(utils::array_view<StackFrame> reduction):
-        Visitable<Node, Return>(reduction)
+    Return(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+        Visitable<Node, Return>(src, reduction)
     {
         PRECONDITION(reduction.size() == 3);
         PRECONDITION(countNodes(reduction) <= 1);

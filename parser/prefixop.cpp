@@ -22,8 +22,8 @@
 
 namespace meta {
 
-PrefixOp::PrefixOp(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, PrefixOp>(reduction)
+PrefixOp::PrefixOp(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Expression, PrefixOp>(src, reduction)
 {
     PRECONDITION(reduction.size() == 2);
     PRECONDITION(reduction[0].symbol > 0); // symbol is terminal

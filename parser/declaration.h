@@ -33,7 +33,9 @@ public:
     utils::string_view name() const {return mName;}
 
 protected:
-    Declaration(utils::array_view<StackFrame> reduction): Node(reduction) {}
+    Declaration(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+        Node(src, reduction)
+    {}
     utils::string_view mName;
 };
 

@@ -23,8 +23,8 @@
 
 namespace meta {
 
-VarDecl::VarDecl(utils::array_view<StackFrame> reduction):
-    Visitable<Declaration, VarDecl>(reduction)
+VarDecl::VarDecl(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Declaration, VarDecl>(src, reduction)
 {
     // {<type>, <name>, opt{'=', 'Expr'}}
     PRECONDITION(reduction.size() == 3);

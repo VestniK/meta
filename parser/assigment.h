@@ -27,8 +27,8 @@ namespace meta {
 
 class Assigment: public Visitable<Expression, Assigment> {
 public:
-    Assigment(utils::array_view<StackFrame> reduction):
-        Visitable<Expression, Assigment>(reduction)
+    Assigment(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+        Visitable<Expression, Assigment>(src, reduction)
     {
         PRECONDITION(reduction.size() == 3);
         PRECONDITION(reduction[0].nodes.size() == 1);

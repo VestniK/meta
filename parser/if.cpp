@@ -23,8 +23,8 @@
 
 namespace meta {
 
-If::If(utils::array_view<StackFrame> reduction):
-    Visitable<Node, If>(reduction)
+If::If(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Node, If>(src, reduction)
 {
     constexpr size_t condPos = 2;
     constexpr size_t thenPos = 4;

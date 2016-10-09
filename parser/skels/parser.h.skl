@@ -147,7 +147,7 @@ void walk(Walkable *walkable, Func &&func, int depth = infinitDepth) {
 
 class Node {
 public:
-    Node(utils::array_view<StackFrame> reduction);
+    Node(const utils::SourceFile& source, utils::array_view<StackFrame> reduction);
     virtual ~Node() = default;
 
     Node(const Node&) = delete;
@@ -167,12 +167,11 @@ public:
         return res;
     }
 
-    const TokenSequence &tokens() const {return mSrcTokens;}
-    const utils::fs::path &sourceLocation() const {return mLocation;}
-    void setSourceLocation(const utils::fs::path &val) {mLocation = val;}
+    const TokenSequence& tokens() const {return mSrcTokens;}
+    const utils::SourceFile& source() const {return mSource;}
 
     /// Returns type index of the nearest VisitableNode base class of a real node
-    virtual std::type_index getVisitableType() = 0;
+    virtual std::type_index getVisitableType() const = 0;
 
     template<typename T>
     class Ptr {
@@ -312,7 +311,7 @@ protected:
 
 private:
     TokenSequence mSrcTokens;
-    utils::fs::path mLocation;
+    const utils::SourceFile& mSource;
     size_t mRefcount = 0;
 };
 
@@ -351,9 +350,12 @@ auto dispatch(Func&& func, Node* node, Args&&... args) {
 
 template<typename Base, typename Impl>
 class Visitable: public Base {
-    std::type_index getVisitableType() override {return std::type_index(typeid(Impl));}
+    static_assert(std::is_base_of<Node, Base>::value);
+    std::type_index getVisitableType() const override {return std::type_index(typeid(Impl));}
 protected:
-    Visitable(utils::array_view<StackFrame> reduction): Base(reduction) {}
+    Visitable(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+        Base(src, reduction)
+    {}
 
     bool accept(Visitor* visitor) override {return visitor->visit(static_cast<Impl*>(this));}
     void seeOff(Visitor* visitor) override {visitor->leave(static_cast<Impl*>(this));}

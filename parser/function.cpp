@@ -28,8 +28,8 @@
 
 namespace meta {
 
-Function::Function(utils::array_view<StackFrame> reduction):
-    Visitable<Declaration, Function>(reduction)
+Function::Function(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Declaration, Function>(src, reduction)
 {
     // 7: {opt{<visibility>}, <rettype>, <name>, '(', <arglist>, ')', opt{<body>}}
     // 8: {<annotations>, opt{<visibility>}, <rettype>, <name>, '(', <arglist>, ')', opt{<body>}}

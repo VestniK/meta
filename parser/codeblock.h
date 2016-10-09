@@ -24,7 +24,7 @@ namespace meta {
 
 class CodeBlock: public Visitable<Node, CodeBlock> {
 public:
-    CodeBlock(utils::array_view<StackFrame> reduction);
+    CodeBlock(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
 
     void add(Node* statement);
     const std::vector<Node::Ptr<Node>>& statements() const;

@@ -24,7 +24,7 @@ namespace meta {
 
 class BinaryOp: public Visitable<Expression, BinaryOp> {
 public:
-    BinaryOp(utils::array_view<StackFrame> reduction);
+    BinaryOp(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
 
     Expression* left() {return mLeft;}
     Expression* right() {return mRight;}

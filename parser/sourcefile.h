@@ -24,7 +24,7 @@ namespace meta {
 
 class SourceFile: public Visitable<Node, SourceFile> {
 public:
-    SourceFile(utils::array_view<StackFrame> reduction);
+    SourceFile(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
 
     void setPackage(const utils::string_view& val) {mPackage = val;}
     const utils::string_view& package() const {return mPackage;}

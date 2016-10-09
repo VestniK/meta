@@ -18,15 +18,13 @@
  */
 #pragma once
 
+namespace meta::typesystem {
+class Type;
+} // namespace meta::typesystem
 
 namespace meta {
 
-namespace typesystem {
-class Type;
-} // namespace typesystem
-
-class Typed
-{
+class Typed {
 public:
     virtual ~Typed() {}
 

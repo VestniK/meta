@@ -372,9 +372,9 @@ TEST(MetaParser, multipleFiles) {
         return false;
     });
     ASSERT_NE(foo, nullptr);
-    ASSERT_EQ(foo->sourceLocation(), src1.path());
+    ASSERT_EQ(foo->source().path(), src1.path());
     ASSERT_NE(bar, nullptr);
-    ASSERT_EQ(bar->sourceLocation(), src2.path());
+    ASSERT_EQ(bar->source().path(), src2.path());
 }
 
 template<size_t N>

@@ -23,8 +23,8 @@
 
 namespace meta {
 
-Var::Var(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, Var>(reduction)
+Var::Var(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Expression, Var>(src, reduction)
 {
     PRECONDITION(reduction.size() == 1);
     PRECONDITION(countNodes(reduction) == 0);

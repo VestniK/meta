@@ -24,7 +24,7 @@ namespace meta {
 
 class Number: public Visitable<Expression, Number> {
 public:
-    Number(utils::array_view<StackFrame> reduction);
+    Number(const utils::SourceFile& src, utils::array_view<StackFrame> reduction);
 
     int value() const {return mValue;}
 

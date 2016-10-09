@@ -26,8 +26,8 @@
 
 namespace meta {
 
-Call::Call(utils::array_view<StackFrame> reduction):
-    Visitable<Expression, Call>(reduction)
+Call::Call(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Expression, Call>(src, reduction)
 {
     // {<name>, '(', <ArgList>, ')'}
     // Все дочерние ноды это исключительно аргументы

@@ -22,8 +22,8 @@
 
 namespace meta {
 
-Struct::Struct(utils::array_view<StackFrame> reduction):
-    Visitable<Declaration, Struct>(reduction)
+Struct::Struct(const utils::SourceFile& src, utils::array_view<StackFrame> reduction):
+    Visitable<Declaration, Struct>(src, reduction)
 {
     // 6: {opt{<visibility>}, 'struct', <name>, '{', <memberslist>, '}'}
     // 7: {<annotations>, opt{<visibility>}, 'struct', <name>, '{', <memberslist>, '}'}
