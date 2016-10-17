@@ -192,65 +192,58 @@ TEST(ActionsTest, funcOverloads) {
 
 class ActionsTest: public utils::ErrorTest {};
 
-INSTANTIATE_TEST_CASE_P(DeclConflincts, ActionsTest, ::testing::Values(
-    // Struct with struct
-    utils::ErrorTestData{
-        .input=
-R"META(
-package test;
+utils::ErrorTestData errorTests[] = {
+    { // Struct with struct
+        .input = R"META(
+            package test;
 
-struct Point {int x; int y;}
+            struct Point {int x; int y;}
 
-/*conflict*/ struct Point {int x; int y; int z;}
-)META",
-        .errMsg=
-R"(Struct 'test.Point' conflicts with other declarations.
-notice: test.meta:4:1: Struct 'test.Point')"
+            /*conflict*/ struct Point {int x; int y; int z;}
+        )META",
+        .errMsg =
+            "Struct 'test.Point' conflicts with other declarations.\n"
+            "notice: test.meta:4:1: Struct 'test.Point')"
     },
-    // Struct with function
-    utils::ErrorTestData{
-        .input=
-R"META(
-package test;
+    { // Struct with function
+        .input = R"META(
+            package test;
 
-void foo() {return;}
+            void foo() {return;}
 
-/*conflict*/ struct foo {int x = 0;}
-)META",
-        .errMsg=
-R"(Struct 'test.foo' conflicts with other declarations.
-notice: test.meta:4:1: Function 'test.foo()')"
+            /*conflict*/ struct foo {int x = 0;}
+        )META",
+        .errMsg =
+            "Struct 'test.foo' conflicts with other declarations.\n"
+            "notice: test.meta:4:1: Function 'test.foo()')"
     },
-    // Struct with overloaded function
-    utils::ErrorTestData{
-        .input=
-R"META(
-package test;
-void foo() {return;}
-void foo(int x) {return;}
+    { // Struct with overloaded function
+        .input = R"META(
+            package test;
+            void foo() {return;}
+            void foo(int x) {return;}
 
-/*conflict*/ struct foo {int x = 0;}
-)META",
-        .errMsg=
-R"(Struct 'test.foo' conflicts with other declarations.
-notice: test.meta:3:1: Function 'test.foo()'
-notice: test.meta:4:1: Function 'test.foo(int)')"
+            /*conflict*/ struct foo {int x = 0;}
+        )META",
+        .errMsg =
+            "Struct 'test.foo' conflicts with other declarations.\n"
+            "../../analysers/tests/actions.cpp:228:9: notice: Function 'test.foo()'\n"
+            "../../analysers/tests/actions.cpp:229:9: notice: Function 'test.foo(int)'"
     },
-    // Function with struct
-    utils::ErrorTestData{
-        .input=
-R"META(
-package test;
+    { // Function with struct
+        .input = R"META(
+            package test;
 
-struct Point {int x; int y;}
+            struct Point {int x; int y;}
 
-/*conflict*/ Point Point(int x, int y) {Point res; res.x= x; res.y = y; return res;}
-)META",
-        .errMsg=
-R"(Function 'test.Point(int, int)' conflicts with other declarations.
-notice: test.meta:4:1: Struct 'test.Point')"
+            /*conflict*/ Point Point(int x, int y) {Point res; res.x= x; res.y = y; return res;}
+        )META",
+        .errMsg =
+            "Function 'test.Point(int, int)' conflicts with other declarations.\n"
+            "../../analysers/tests/actions.cpp:241:9: notice: Struct 'test.Point'"
     }
-));
+};
+INSTANTIATE_TEST_CASE_P(DeclConflincts, ActionsTest, ::testing::ValuesIn(errorTests));
 
 TEST_P(ActionsTest, conflictsTest) {
     const auto& param = GetParam();
@@ -263,8 +256,8 @@ TEST_P(ActionsTest, conflictsTest) {
         FAIL() << "Failed to detect declaration conflict";
     } catch (const SemanticError& err) {
         EXPECT_EQ(param.errMsg, err.what()) << err.what();
-        EXPECT_EQ(err.tokens().linenum() - param.input.firstLineNum(), 6u);
-        EXPECT_EQ(err.tokens().colnum(), 14);
+        EXPECT_EQ(err.tokens().linenum(), static_cast<int>(param.input.firstLineNum() + 6));
+        EXPECT_EQ(err.tokens().colnum(), 26);
     }
 }
 
