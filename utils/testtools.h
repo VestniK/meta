@@ -78,7 +78,7 @@ inline
 std::ostream& operator<< (std::ostream& out, const ErrorTestData& dat) {
     out <<
         "=== input ===\n" <<
-        utils::string_view(dat.input) <<
+        dat.input.content() <<
         "\n=== expected error ===\n" <<
         dat.errMsg <<
         "\n======";

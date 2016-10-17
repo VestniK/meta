@@ -23,7 +23,6 @@
 #include "parser/metaparser.h"
 
 namespace meta {
-class Node;
 
 class NodeException: public utils::Exception {
 public:

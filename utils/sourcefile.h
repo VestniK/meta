@@ -21,9 +21,9 @@ public:
     SourceFile(
         const array_t<const char, N>& inlinedContent,
         const char* path = __builtin_FILE(),
-        unsigned lineOffset = __builtin_LINE()
+        unsigned firstLineNum = __builtin_LINE()
     ):
-        mPath(path), mContent(inlinedContent), mLineNumOffset(lineOffset)
+        mPath(path), mContent(inlinedContent), mFirstLineNum(firstLineNum)
     {}
 
     static SourceFile fake(const utils::fs::path& path, std::string&& content) {
@@ -33,6 +33,7 @@ public:
         return res;
     }
 
+    // Should be move-only but gtest TestWithParam requires copy constructor
     SourceFile(const SourceFile&) = default;
     SourceFile& operator= (const SourceFile&) = default;
 #else
@@ -45,7 +46,7 @@ public:
 
     const fs::path& path() const {return mPath;}
     string_view content() const {return mContent;}
-    operator string_view () const {return mContent;} // TODO: check if needed
+    unsigned firstLineNum() const {return mFirstLineNum;}
 
 #if defined(META_UNIT_TEST)
 private:
@@ -57,9 +58,7 @@ private:
 private:
     fs::path mPath;
     std::string mContent;
-#if defined(META_UNIT_TEST)
-    unsigned mLineNumOffset = 0;
-#endif
+    unsigned mFirstLineNum = 1;
 };
 
 } // namespace meta::utils

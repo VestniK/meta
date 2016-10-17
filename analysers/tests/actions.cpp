@@ -263,7 +263,7 @@ TEST_P(ActionsTest, conflictsTest) {
         FAIL() << "Failed to detect declaration conflict";
     } catch (const SemanticError& err) {
         EXPECT_EQ(param.errMsg, err.what()) << err.what();
-        EXPECT_EQ(err.tokens().linenum(), 6);
+        EXPECT_EQ(err.tokens().linenum() - param.input.firstLineNum(), 6u);
         EXPECT_EQ(err.tokens().colnum(), 14);
     }
 }
