@@ -17,18 +17,9 @@ public:
     {}
 
 #if defined(META_UNIT_TEST)
-    template<size_t N>
-    SourceFile(
-        const array_t<const char, N>& inlinedContent,
-        const char* path = __builtin_FILE(),
-        unsigned firstLineNum = __builtin_LINE()
-    ):
-        mPath(path), mContent(inlinedContent), mFirstLineNum(firstLineNum)
-    {}
-
-    static SourceFile fake(const utils::fs::path& path, std::string&& content) {
+    static SourceFile fake(std::string&& content, utils::fs::path&& path = "test.meta") {
         SourceFile res;
-        res.mPath = path;
+        res.mPath = std::move(path);
         res.mContent = std::move(content);
         return res;
     }
@@ -46,7 +37,6 @@ public:
 
     const fs::path& path() const {return mPath;}
     string_view content() const {return mContent;}
-    unsigned firstLineNum() const {return mFirstLineNum;}
 
 #if defined(META_UNIT_TEST)
 private:
@@ -58,7 +48,15 @@ private:
 private:
     fs::path mPath;
     std::string mContent;
-    unsigned mFirstLineNum = 1;
 };
+
+#if defined(META_UNIT_TEST)
+namespace literals {
+inline
+SourceFile operator "" _fake_src (const char* content, size_t sz) {
+    return SourceFile::fake(std::string{content, content + sz});
+}
+} // namespace literals
+#endif
 
 } // namespace meta::utils

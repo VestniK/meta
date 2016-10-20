@@ -34,7 +34,7 @@
 namespace meta::analysers {
 namespace {
 
-const utils::SourceFile input = R"META(
+const auto input = R"META(
     package test;
 
     void privateByDefault() {return;}
@@ -66,7 +66,7 @@ const utils::SourceFile input = R"META(
 
     public void publicExplicitly(bool b) {return;}
     public struct PublicExplicitly2 {int x;}
-)META";
+)META"_fake_src;
 
 TEST(ActionsTest, funcVisibility) {
     Parser parser;
@@ -200,10 +200,10 @@ utils::ErrorTestData errorTests[] = {
             struct Point {int x; int y;}
 
             /*conflict*/ struct Point {int x; int y; int z;}
-        )META",
+        )META"_fake_src,
         .errMsg =
             "Struct 'test.Point' conflicts with other declarations.\n"
-            "notice: test.meta:4:1: Struct 'test.Point')"
+            "test.meta:4:13: notice: Struct 'test.Point'"
     },
     { // Struct with function
         .input = R"META(
@@ -212,10 +212,10 @@ utils::ErrorTestData errorTests[] = {
             void foo() {return;}
 
             /*conflict*/ struct foo {int x = 0;}
-        )META",
+        )META"_fake_src,
         .errMsg =
             "Struct 'test.foo' conflicts with other declarations.\n"
-            "notice: test.meta:4:1: Function 'test.foo()')"
+            "test.meta:4:13: notice: Function 'test.foo()'"
     },
     { // Struct with overloaded function
         .input = R"META(
@@ -224,11 +224,11 @@ utils::ErrorTestData errorTests[] = {
             void foo(int x) {return;}
 
             /*conflict*/ struct foo {int x = 0;}
-        )META",
+        )META"_fake_src,
         .errMsg =
             "Struct 'test.foo' conflicts with other declarations.\n"
-            "../../analysers/tests/actions.cpp:228:9: notice: Function 'test.foo()'\n"
-            "../../analysers/tests/actions.cpp:229:9: notice: Function 'test.foo(int)'"
+            "test.meta:3:13: notice: Function 'test.foo()'\n"
+            "test.meta:4:13: notice: Function 'test.foo(int)'"
     },
     { // Function with struct
         .input = R"META(
@@ -237,10 +237,10 @@ utils::ErrorTestData errorTests[] = {
             struct Point {int x; int y;}
 
             /*conflict*/ Point Point(int x, int y) {Point res; res.x= x; res.y = y; return res;}
-        )META",
+        )META"_fake_src,
         .errMsg =
             "Function 'test.Point(int, int)' conflicts with other declarations.\n"
-            "../../analysers/tests/actions.cpp:241:9: notice: Struct 'test.Point'"
+            "test.meta:4:13: notice: Struct 'test.Point'"
     }
 };
 INSTANTIATE_TEST_CASE_P(DeclConflincts, ActionsTest, ::testing::ValuesIn(errorTests));
@@ -256,7 +256,7 @@ TEST_P(ActionsTest, conflictsTest) {
         FAIL() << "Failed to detect declaration conflict";
     } catch (const SemanticError& err) {
         EXPECT_EQ(param.errMsg, err.what()) << err.what();
-        EXPECT_EQ(err.tokens().linenum(), static_cast<int>(param.input.firstLineNum() + 6));
+        EXPECT_EQ(err.tokens().linenum(), 6);
         EXPECT_EQ(err.tokens().colnum(), 26);
     }
 }

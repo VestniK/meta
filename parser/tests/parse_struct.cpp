@@ -32,14 +32,14 @@ namespace meta {
 namespace {
 
 TEST(StructParsing, simpleStruct) {
-     const utils::SourceFile input = R"META(
+     const auto input = utils::SourceFile::fake(R"META(
         package test;
 
         struct Point {
             int x;
             int y;
         }
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -53,7 +53,7 @@ TEST(StructParsing, simpleStruct) {
 }
 
 TEST(StructParsing, annotatedStruct) {
-     const utils::SourceFile input = R"META(
+     const auto input = utils::SourceFile::fake(R"META(
         package test;
 
         @foo
@@ -62,7 +62,7 @@ TEST(StructParsing, annotatedStruct) {
             int x;
             int y;
         }
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -82,14 +82,14 @@ TEST(StructParsing, annotatedStruct) {
 }
 
 TEST(StructParsing, defaultValsOnMembers) {
-     const utils::SourceFile input = R"META(
+     const auto input = utils::SourceFile::fake(R"META(
         package test;
 
         struct Point {
             int x = 0;
             int y = 0;
         }
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -105,7 +105,7 @@ TEST(StructParsing, defaultValsOnMembers) {
 }
 
 TEST(StructParsing, declareStructVar) {
-     const utils::SourceFile input = R"META(
+     const auto input = utils::SourceFile::fake(R"META(
         package test;
 
         struct Point {
@@ -116,7 +116,7 @@ TEST(StructParsing, declareStructVar) {
         void foo() {
             Point pt;
         }
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -127,7 +127,7 @@ TEST(StructParsing, declareStructVar) {
 }
 
 TEST(StructParsing, memberAccess) {
-     const utils::SourceFile input = R"META(
+     const auto input = utils::SourceFile::fake(R"META(
         package test;
 
         struct Point {
@@ -140,7 +140,7 @@ TEST(StructParsing, memberAccess) {
             pt.y = 5;
             pt.x = pt.y + 7;
         }
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();

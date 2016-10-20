@@ -197,7 +197,7 @@ struct Resolver {
                 ;
                 for (const auto& func: funcs) {
                     oss <<
-                        "\nnotice: " << SourceInfo{func} << ": " << declinfo(func) <<
+                        "\n" << SourceInfo{func} << ": notice: " << declinfo(func) <<
                         " is " << func->visibility()
                     ;
                 }

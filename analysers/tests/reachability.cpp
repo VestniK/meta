@@ -45,12 +45,12 @@ TEST_P(Reachability, resolveErrors) {
         checkReachability(ast);
         FAIL() << "Error was not detected: " << param.errMsg;
     } catch (const SemanticError &err) {
-        EXPECT_EQ(err.what(), param.errMsg) << SourceInfo(err) << ": " << err.what();
+        EXPECT_EQ(param.errMsg, err.what()) << err.what();
     }
 }
 
-INSTANTIATE_TEST_CASE_P(semanticErrors, Reachability, ::testing::Values(
-    utils::ErrorTestData{
+utils::ErrorTestData testData[] = {
+    {
         .input = R"META(
             package test;
 
@@ -58,13 +58,10 @@ INSTANTIATE_TEST_CASE_P(semanticErrors, Reachability, ::testing::Values(
                 return x;
                 bool y = x > 0;
             }
-        )META",
-        .errMsg =
-R"(Function 'overload2' from the package 'test.lib' has no overloads visible from the current package 'test'
-notice: lib.meta:41:5: Function 'test.lib.overload2()' is protected
-notice: lib.meta:42:5: Function 'test.lib.overload2(int)' is private)"
+        )META"_fake_src,
+        .errMsg = "Code is unreachable due to return statement at position 5:17"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -76,13 +73,10 @@ notice: lib.meta:42:5: Function 'test.lib.overload2(int)' is private)"
                 }
                 return 0;
             }
-        )META",
-        .errMsg =
-R"(Function 'overload2' from the package 'test.lib' has no overloads visible from the current package 'test'
-notice: lib.meta:41:5: Function 'test.lib.overload2()' is protected
-notice: lib.meta:42:5: Function 'test.lib.overload2(int)' is private)"
+        )META"_fake_src,
+        .errMsg = "Code is unreachable due to return statement at position 8:21"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -96,13 +90,11 @@ notice: lib.meta:42:5: Function 'test.lib.overload2(int)' is private)"
                 }
                 return 0;
             }
-        )META",
-        .errMsg =
-R"(Function 'overload2' from the package 'test.lib' has no overloads visible from the current package 'test'
-notice: lib.meta:41:5: Function 'test.lib.overload2()' is protected
-notice: lib.meta:42:5: Function 'test.lib.overload2(int)' is private)"
+        )META"_fake_src,
+        .errMsg = "Code is unreachable due to return statement at position 9:21"
     }
-));
+};
+INSTANTIATE_TEST_CASE_P(semanticErrors, Reachability, ::testing::ValuesIn(testData));
 
 } // anonymous namespace
 } // namespace meta::analysers::tests

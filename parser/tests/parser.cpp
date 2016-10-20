@@ -53,7 +53,7 @@ TEST(MetaParser, imports) {
         import pkg.subpkg.bar as bar1;
 
         int foo() {return 5;}
-    )META";
+    )META"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -68,7 +68,7 @@ TEST(MetaParser, imports) {
 }
 
 TEST(MetaParser, emptyPackage) {
-    const utils::SourceFile input = "package test.test;";
+    const utils::SourceFile input = "package test.test;"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -86,7 +86,7 @@ TEST(MetaParser, varTest) {
             z = x*x;
             return z + y - 3;
         }
-    )META";
+    )META"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -118,7 +118,7 @@ TEST(MetaParser, assignAsExpr) {
             z = (y = x + 1)*x;
             return z + y - 3;
         }
-    )META";
+    )META"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -152,7 +152,7 @@ TEST(MetaParser, ifStatement) {
                 foo1(x);
             foo2(x);
         }
-    )META";
+    )META"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -180,7 +180,7 @@ TEST(MetaParser, ifWithEmptyStatement) {
                 ;
             foo1(x);
         }
-    )META";
+    )META"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -207,7 +207,7 @@ TEST(MetaParser, ifElseStatement) {
                 foo2(x);
             foo3(x);
         }
-    )META";
+    )META"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -240,7 +240,7 @@ TEST(MetaParser, ifElseEmptyStatement) {
                 ;
             foo2(x);
         }
-    )META";
+    )META"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -270,7 +270,7 @@ TEST(MetaParser, ifElseBothEmptyStatements) {
                 ;
             foo1(x);
         }
-    )META";
+    )META"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -298,7 +298,7 @@ TEST(MetaParser, ifBlockStatement) {
             y = foo2(y);
             return y;
         }
-    )META";
+    )META"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -332,7 +332,7 @@ TEST(MetaParser, ifElseBlockStatement) {
             y = foo3(y);
             return y;
         }
-    )META";
+    )META"_fake_src;
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -354,8 +354,8 @@ TEST(MetaParser, ifElseBlockStatement) {
 }
 
 TEST(MetaParser, multipleFiles) {
-    const utils::SourceFile src1 = "package test; int foo() {return 0;}";
-    const utils::SourceFile src2 = "package test; bool bar() {return false;}";
+    const utils::SourceFile src1 = "package test; int foo() {return 0;}"_fake_src;
+    const utils::SourceFile src2 = "package test; bool bar() {return false;}"_fake_src;
 
     Parser parser;
     ASSERT_PARSE(parser, src1);
@@ -391,7 +391,7 @@ TEST(Parser, stringLiteral) {
         string escaped() {
             return "\t \n \r \a \b \f \\ \" \0";
         }
-    )META";
+    )META"_fake_src;
 
     Parser parser;
     ASSERT_PARSE(parser, input);
@@ -415,7 +415,6 @@ class MetaParser: public testing::TestWithParam<TestData>
 TEST_P(MetaParser, binaryOp) {
     TestData data = GetParam();
     const auto input = utils::SourceFile::fake(
-        "test.meta",
         str(boost::format("package test; int foo(int x, int y) {return x %s y;}")%data.opStr)
     );
     Parser parser;

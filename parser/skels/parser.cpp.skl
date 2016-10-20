@@ -151,7 +151,7 @@ Parser::Parser():
 Parser::~Parser() = default;
 
 void Parser::parse(const utils::SourceFile &src) {
-    lexer.start(src.content().data(), src.firstLineNum());
+    lexer.start(src.content().data());
     stateNum = 0;
     stackTop = 0;
     while (true) {

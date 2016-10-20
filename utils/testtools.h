@@ -70,8 +70,8 @@ std::string markerLine(size_t column) {
 }
 
 struct ErrorTestData {
-    utils::SourceFile input;
-    utils::string_view errMsg;
+    SourceFile input;
+    string_view errMsg;
 };
 
 inline
@@ -88,3 +88,10 @@ std::ostream& operator<< (std::ostream& out, const ErrorTestData& dat) {
 class ErrorTest: public ::testing::TestWithParam<ErrorTestData> {};
 
 } // namespace meta::utils
+
+namespace std::experimental {
+inline
+namespace fundamentals_v1 {
+inline
+void PrintTo(const string_view& str, std::ostream* dest) {(*dest) << str;}
+}}

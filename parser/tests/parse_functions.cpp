@@ -35,7 +35,7 @@ using namespace meta;
  * is set properly for functions with and without annotations.
  */
 TEST(FunctionParsing, funcDeclarationsAndVisibilities) {
-    const utils::SourceFile input = R"META(
+    const auto input = utils::SourceFile::fake(R"META(
         package test;
 
         int privateByDefault() {return 5;}
@@ -52,7 +52,7 @@ TEST(FunctionParsing, funcDeclarationsAndVisibilities) {
         @some
         @other
         private int privateExplicitly() {return 5;}
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -87,10 +87,10 @@ TEST(FunctionParsing, funcDeclarationsAndVisibilities) {
 }
 
 TEST(FunctionParsing, zeroParamFunc) {
-    const utils::SourceFile input = R"META(
+    const auto input = utils::SourceFile::fake(R"META(
         package test;
         int foo() {return 5;}
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -101,10 +101,10 @@ TEST(FunctionParsing, zeroParamFunc) {
 }
 
 TEST(FunctionParsing, oneParamFunc) {
-    const utils::SourceFile input = R"META(
+    const auto input = utils::SourceFile::fake(R"META(
         package test;
         int foo(int x) {return 5*x*x - 2*x + 3;}
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -118,10 +118,10 @@ TEST(FunctionParsing, oneParamFunc) {
 }
 
 TEST(FunctionParsing, twoParamFunc) {
-    const utils::SourceFile input = R"META(
+    const auto input = utils::SourceFile::fake(R"META(
         package test;
         int foo(int x, int y) {return 5*x + 6/y;}
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -137,11 +137,11 @@ TEST(FunctionParsing, twoParamFunc) {
 }
 
 TEST(FunctionParsing, twoFunc) {
-    const utils::SourceFile input = R"META(
+    const auto input = utils::SourceFile::fake(R"META(
         package test;
         int foo(int x) {return 5*x;}
         int bar(int x) {return x/5;}
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -162,11 +162,11 @@ TEST(FunctionParsing, twoFunc) {
 }
 
 TEST(FunctionParsing, funcCall) {
-    const utils::SourceFile input = R"META(
+    const auto input = utils::SourceFile::fake(R"META(
         package test;
         int foo(int x) {return 5*x;}
         int bar(int y) {return 5*foo(y/5);}
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
@@ -187,11 +187,11 @@ TEST(FunctionParsing, funcCall) {
 }
 
 TEST(FunctionParsing, funcRetType) {
-    const utils::SourceFile input = R"META(
+    const auto input = utils::SourceFile::fake(R"META(
         package example.test;
         int iFoo() {return 0;}
         double dFoo() {return 0;}
-    )META";
+    )META");
     Parser parser;
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();

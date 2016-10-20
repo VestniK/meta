@@ -93,77 +93,77 @@ TEST_P(TypeCheker, typeCheck) {
 
 INSTANTIATE_TEST_CASE_P(typeCheckAndDeduce, TypeCheker, ::testing::Values(
     TestData{
-        "package test; int foo() {return 5;} bool bar(int x) {return x < 5;}",
+        "package test; int foo() {return 5;} bool bar(int x) {return x < 5;}"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::Int), NameType("bar", typesystem::Type::Bool)}),
         NameTypeList({NameType("x", typesystem::Type::Int)})
     },
     TestData{
-        "package test; auto foo() {return 5;} auto bar(int x) {return x < 5;}",
+        "package test; auto foo() {return 5;} auto bar(int x) {return x < 5;}"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::Int), NameType("bar", typesystem::Type::Bool)}),
         NameTypeList({NameType("x", typesystem::Type::Int)})
     },
     TestData{
-        "package test; bool foo(int x, int y) {auto var = x+y; auto flag = x < y; return flag == x < var;}",
+        "package test; bool foo(int x, int y) {auto var = x+y; auto flag = x < y; return flag == x < var;}"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("x", typesystem::Type::Int), NameType("y", typesystem::Type::Int), NameType("var", typesystem::Type::Int), NameType("flag", typesystem::Type::Bool)})
     },
     TestData{
-        "package test; bool foo(auto x = 5, auto y = !(5 < 2)) {return y != x < 5;}",
+        "package test; bool foo(auto x = 5, auto y = !(5 < 2)) {return y != x < 5;}"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("x", typesystem::Type::Int), NameType("y", typesystem::Type::Bool)})
     },
     TestData{
-        "package test; auto foo() {auto val = 5; return val;}",
+        "package test; auto foo() {auto val = 5; return val;}"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::Int)}),
         NameTypeList({NameType("val", typesystem::Type::Int)})
     },
     TestData{
-        "package test; auto foo() {auto val = true; return val;}",
+        "package test; auto foo() {auto val = true; return val;}"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("val", typesystem::Type::Bool)})
     },
     TestData{
-        "package test; auto foo() {auto val = false; return val || true;}",
+        "package test; auto foo() {auto val = false; return val || true;}"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("val", typesystem::Type::Bool)})
     },
     TestData{
-        "package test; auto foo() {auto val = false; if (val) val = false; return val && true;}",
+        "package test; auto foo() {auto val = false; if (val) val = false; return val && true;}"_fake_src,
          NameTypeList({NameType("foo", typesystem::Type::Bool)}),
          NameTypeList({NameType("val", typesystem::Type::Bool)})
     },
     TestData{
-        "package test; auto foo() {auto val = false; if (val) {int x = 5; return x > 2;} return val && true;}",
+        "package test; auto foo() {auto val = false; if (val) {int x = 5; return x > 2;} return val && true;}"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("val", typesystem::Type::Bool), NameType("x", typesystem::Type::Int)})
     },
     TestData{
-        "package test; auto foo() {auto val = false; if (val) val = false; else return val || true; return val && true;}",
+        "package test; auto foo() {auto val = false; if (val) val = false; else return val || true; return val && true;}"_fake_src,
          NameTypeList({NameType("foo", typesystem::Type::Bool)}),
          NameTypeList({NameType("val", typesystem::Type::Bool)})
     },
     TestData{
-        "package test; auto foo() {auto val = false; if (val) {int x = 5; return x > 2;} else {int y = 7; val = val && y < 5;} return val && true;}",
+        "package test; auto foo() {auto val = false; if (val) {int x = 5; return x > 2;} else {int y = 7; val = val && y < 5;} return val && true;}"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::Bool)}),
         NameTypeList({NameType("val", typesystem::Type::Bool), NameType("x", typesystem::Type::Int), NameType("y", typesystem::Type::Int)})
     },
     TestData{
-        R"META(package test; auto foo() {auto var = "Hello"; return var;})META",
+        R"META(package test; auto foo() {auto var = "Hello"; return var;})META"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::String)}),
         NameTypeList({NameType("var", typesystem::Type::String)})
     },
     TestData{
-        R"META(package test; string foo() {auto var = "Hello"; return var;})META",
+        R"META(package test; string foo() {auto var = "Hello"; return var;})META"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::String)}),
         NameTypeList({NameType("var", typesystem::Type::String)})
     },
     TestData{
-        R"META(package test; auto foo() {string var = "Hello"; return var;})META",
+        R"META(package test; auto foo() {string var = "Hello"; return var;})META"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::String)}),
         NameTypeList({NameType("var", typesystem::Type::String)})
     },
     TestData{
-        R"META(package test; string foo() {string var = "Hello"; return var;})META",
+        R"META(package test; string foo() {string var = "Hello"; return var;})META"_fake_src,
         NameTypeList({NameType("foo", typesystem::Type::String)}),
         NameTypeList({NameType("var", typesystem::Type::String)})
     }
@@ -186,24 +186,22 @@ TEST_P(TypeChekerErrors, typeErrors) {
         checkTypes(ast, typestore);
         FAIL() << "Error was not detected: " << param.errMsg;
     } catch (const SemanticError &err) {
-        EXPECT_EQ(err.what(), param.errMsg) << SourceInfo(err) << ": " << err.what();
+        EXPECT_EQ(param.errMsg, err.what()) << err.what();
     }
 }
 
-INSTANTIATE_TEST_CASE_P(inconsistentTypes, TypeChekerErrors, ::testing::Values(
-    utils::ErrorTestData{
+utils::ErrorTestData testData[] = {
+    {
         .input = R"META(
             package test;
 
             int foo(int x) {
                 return x < 5;
             }
-        )META",
-        .errMsg =
-R"(Function 'protFoo' from the package 'test.lib' has no overloads visible from the current package 'test'
-notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
+        )META"_fake_src,
+        .errMsg = "Attempt to return value of type 'bool' from function returning 'int'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -211,12 +209,10 @@ notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
                 bool b = x;
                 return b;
             }
-        )META",
-        .errMsg =
-R"(Function 'protFoo' from the package 'test.lib' has no overloads visible from the current package 'test'
-notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
+        )META"_fake_src,
+        .errMsg = "Attempt to init variable 'b' of type 'bool' with value of type 'int'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -225,13 +221,11 @@ notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
                 b = x;
                 return b;
             }
-        )META",
-        .errMsg =
-R"(Function 'protFoo' from the package 'test.lib' has no overloads visible from the current package 'test'
-notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
+        )META"_fake_src,
+        .errMsg = "Attempt to assign value of type 'int' to a the variable 'b' of type 'bool'"
     },
     // Deduce loops
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -241,184 +235,184 @@ notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
             auto bar() {
                 return foo();
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't return value of incomplete type"
     },
     // arythmetic on incompatible
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(int x, bool y) {
                 return x + y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform arythmetic operation on values of types 'int' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(int x, bool y) {
                 return x - y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform arythmetic operation on values of types 'int' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(int x, bool y) {
                 return x * y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform arythmetic operation on values of types 'int' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(int x, bool y) {
                 return x / y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform arythmetic operation on values of types 'int' and 'bool'"
     },
     // numeric operation on non-numeric
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(bool x, bool y) {
                 return x + y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform arythmetic operation on values of types 'bool' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(bool x, bool y) {
                 return x - y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform arythmetic operation on values of types 'bool' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(bool x, bool y) {
                 return x * y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform arythmetic operation on values of types 'bool' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(bool x, bool y) {
                 return x / y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform arythmetic operation on values of types 'bool' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(bool x, bool y) {
                 return x > y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't compare values of types 'bool' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(bool x, bool y) {
                 return x >= y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't compare values of types 'bool' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(bool x, bool y) {
                 return x < y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't compare values of types 'bool' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(bool x, bool y) {
                 return x <= y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't compare values of types 'bool' and 'bool'"
     },
     // Equality on different types
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(int x, bool y) {
                 return x == y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't compare values of types 'int' and 'bool'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(int x, bool y) {
                 return x != y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't compare values of types 'int' and 'bool'"
     },
     // Bool operations on nonbool
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(int x) {
                 return !x;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform boolean not operation on value of type 'int'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(int x, int y) {
                 return x && y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform boolean operations on values of types 'int' and 'int'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
             auto foo(int x, int y) {
                 return x || y;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform boolean operations on values of types 'int' and 'int'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -427,11 +421,11 @@ notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
                     return 1;
                 return 0;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "If statement can't work with condition of type 'int'"
     },
     // Types are checked inside if branches
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -440,10 +434,10 @@ notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
                     return x && y;
                 return false;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform boolean operations on values of types 'int' and 'int'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -454,10 +448,10 @@ notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
                 }
                 return false;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform boolean operations on values of types 'int' and 'int'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -468,10 +462,10 @@ notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
                     return x && y;
                 return false;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform boolean operations on values of types 'int' and 'int'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -484,10 +478,10 @@ notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
                 }
                 return false;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform boolean operations on values of types 'int' and 'int'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -498,10 +492,10 @@ notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
                     return true;
                 return false;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform boolean operations on values of types 'int' and 'int'"
     },
-    utils::ErrorTestData{
+    {
         .input = R"META(
             package test;
 
@@ -514,10 +508,11 @@ notice: lib.meta:39:5: Function 'test.lib.protFoo(int)' is protected)"
                 }
                 return false;
             }
-        )META",
-        .errMsg = ""
+        )META"_fake_src,
+        .errMsg = "Can't perform boolean operations on values of types 'int' and 'int'"
     }
-));
+};
+INSTANTIATE_TEST_CASE_P(inconsistentTypes, TypeChekerErrors, ::testing::ValuesIn(testData));
 
 
 } // anonymous namespace

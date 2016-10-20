@@ -31,14 +31,14 @@ namespace meta::analysers {
 namespace {
 
 TEST(MetaProcessor, attribute) {
-    const utils::SourceFile input = R"META(
+    const auto input = R"META(
         package test;
 
         @entrypoint
         int foo() {return 0;}
 
         int bar() {return 1;}
-    )META";
+    )META"_fake_src;
     Parser parser;
     Actions act;
     parser.setParseActions(&act);

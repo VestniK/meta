@@ -87,7 +87,7 @@ auto findExpressions(Walkable* walkable) {
 }
 
 TEST(Arythmetic, parenthesis) {
-    const utils::SourceFile input = "package test; int foo() {return 2*(11+5)/8;}";
+    const auto input = utils::SourceFile::fake("package test; int foo() {return 2*(11+5)/8;}");
     Parser parser;
     ASSERT_PARSE(parser, input);
     const auto expressions = findExpressions(parser.ast());
@@ -125,7 +125,6 @@ class Arythmetic: public ::testing::TestWithParam<TestData> {};
 TEST_P(Arythmetic, calcTest) {
     TestData data = GetParam();
     const auto input = utils::SourceFile::fake(
-        "test.meta",
         str(boost::format("package test; int foo() {return %s;}")%data.expression)
     );
 

@@ -46,87 +46,87 @@ TEST_P(ResolveErrors, resolveErrors) {
         v2::resolve(ast, act.dictionary());
         FAIL() << "Error was not detected: " << param.errMsg;
     } catch (const SemanticError& err) {
-        EXPECT_EQ(err.what(), param.errMsg) << err.what();
+        EXPECT_EQ(param.errMsg, err.what()) << err.what();
     }
 }
 
-INSTANTIATE_TEST_CASE_P(Resolver, ResolveErrors, ::testing::Values(
-    utils::ErrorTestData{
-        .input=R"META(
+utils::ErrorTestData testData[] = {
+    {
+        .input = R"META(
             package test;
 
             extern int foo(int x) {return 2*x;}
-        )META",
-        .errMsg=R"(Extern function 'foo' must not have implementation)"
+        )META"_fake_src,
+        .errMsg = "Extern function 'foo' must not have implementation"
     },
-    utils::ErrorTestData{
+    {
         .input=R"META(
             package test;
 
             export string foo(int x);
-        )META",
-        .errMsg=R"(Implementation missing for the function 'foo')"
+        )META"_fake_src,
+        .errMsg = "Implementation missing for the function 'foo'"
     },
-    utils::ErrorTestData{
-        .input=R"META(
+    {
+        .input = R"META(
             package test;
 
             public string foo(int x);
-        )META",
-        .errMsg=R"(Implementation missing for the function 'foo')"
+        )META"_fake_src,
+        .errMsg = "Implementation missing for the function 'foo'"
     },
-    utils::ErrorTestData{
+    {
         .input=R"META(
             package test;
 
             protected string foo(int x);
-        )META",
-        .errMsg=R"(Implementation missing for the function 'foo')"
+        )META"_fake_src,
+        .errMsg = "Implementation missing for the function 'foo'"
     },
-    utils::ErrorTestData{
+    {
         .input=R"META(
             package test;
 
             private string foo(int x);
-        )META",
-        .errMsg=R"(Implementation missing for the function 'foo')"
+        )META"_fake_src,
+        .errMsg = "Implementation missing for the function 'foo'"
     },
-    utils::ErrorTestData{
-        .input=R"META(
+    {
+        .input = R"META(
             package test;
 
             int foo(int x = 42, int y) {return x + y;}
-        )META",
-        .errMsg=R"(Argument 'y' has no default value while previous argument 'x' has)"
+        )META"_fake_src,
+        .errMsg = "Argument 'y' has no default value while previous argument 'x' has"
     },
-    utils::ErrorTestData{
-        .input=R"META(
+    {
+        .input = R"META(
             package test;
 
             int foo(int x = 42, int y, int z)  {return x + y + z;}
-        )META",
-        .errMsg=R"(Argument 'y' has no default value while previous argument 'x' has)"
+        )META"_fake_src,
+        .errMsg = "Argument 'y' has no default value while previous argument 'x' has"
     },
-    utils::ErrorTestData{
-        .input=R"META(
+    {
+        .input = R"META(
             package test;
 
             int foo(int x, int y = 42, int z)  {return x + y + z;}
-        )META",
-        .errMsg=R"(Argument 'z' has no default value while previous argument 'y' has)"
+        )META"_fake_src,
+        .errMsg = "Argument 'z' has no default value while previous argument 'y' has"
     },
-    utils::ErrorTestData{
-        .input=R"META(
+    {
+        .input = R"META(
             package test;
 
             bool foo(int x, int y) {bool x = y < 0; return x;}
-        )META",
-        .errMsg=
-R"(Variable 'bool x' conflicts with other declarations.
-notice: test.meta:4:22: Variable 'int x' (function argument))"
+        )META"_fake_src,
+        .errMsg =
+            "Variable 'bool x' conflicts with other declarations.\n"
+            "test.meta:4:22: notice: Variable 'int x' (function argument)"
     },
-    utils::ErrorTestData{
-        .input=R"META(
+    {
+        .input = R"META(
             package test;
 
             bool foo(int x, int y) {
@@ -136,12 +136,12 @@ notice: test.meta:4:22: Variable 'int x' (function argument))"
                 }
                 return true;
             }
-        )META",
-        .errMsg=
-R"(Variable 'bool x' conflicts with other declarations.
-notice: test.meta:4:22: Variable 'int x' (function argument))"
+        )META"_fake_src,
+        .errMsg =
+            "Variable 'bool x' conflicts with other declarations.\n"
+            "test.meta:4:22: notice: Variable 'int x' (function argument)"
     },
-    utils::ErrorTestData{
+    {
         .input=R"META(
             package test;
 
@@ -152,32 +152,32 @@ notice: test.meta:4:22: Variable 'int x' (function argument))"
                 int var = x - 9;
                 return var;
             }
-        )META",
+        )META"_fake_src,
         .errMsg=
-R"(Variable 'int var' conflicts with other declarations.
-notice: test.meta:5:17: Variable 'bool var')"
+            "Variable 'int var' conflicts with other declarations.\n"
+            "test.meta:5:17: notice: Variable 'bool var'"
     },
-    utils::ErrorTestData{
+    {
         .input=R"META(
             package test;
 
             int foo(int x) {
                 return y;
             }
-        )META",
-        .errMsg=R"(Undefined variable 'y')"
+        )META"_fake_src,
+        .errMsg = "Undefined variable 'y'"
     },
-    utils::ErrorTestData{
+    {
         .input=R"META(
             package test;
 
             int foo(int x) {
                 return 5;
             }
-        )META",
-        .errMsg=R"(Variable 'x' is never used)"
+        )META"_fake_src,
+        .errMsg = "Variable 'x' is never used"
     },
-    utils::ErrorTestData{
+    {
         .input=R"META(
             package test;
 
@@ -185,21 +185,22 @@ notice: test.meta:5:17: Variable 'bool var')"
                 bool b;
                 return x;
             }
-        )META",
-        .errMsg=R"(Variable 'b' is never used)"
+        )META"_fake_src,
+        .errMsg = "Variable 'b' is never used"
     },
-    utils::ErrorTestData{
-        .input=R"META(
+    {
+        .input = R"META(
             package test;
 
             int foo(int x) {
                 int y;
                 return x+y;
             }
-        )META",
-        .errMsg=R"(Variable 'y' accessed before initialization)"
+        )META"_fake_src,
+        .errMsg = "Variable 'y' accessed before initialization"
     }
-));
+};
+INSTANTIATE_TEST_CASE_P(Resolver, ResolveErrors, ::testing::ValuesIn(testData));
 
 } // anonymous namespace
 } // namespace meta::analysers

@@ -25,11 +25,7 @@
 
 #include "utils/array_view.h"
 
-using namespace std::experimental::literals::string_view_literals;
-using namespace std::literals;
-
-namespace meta {
-namespace utils {
+namespace meta::utils {
 
 using std::experimental::string_view;
 
@@ -39,5 +35,14 @@ using std::experimental::nullopt;
 
 namespace fs = std::experimental::filesystem;
 
-} // namespace utils
+namespace literals {}
+
+} // namespace meta::utils
+
+namespace meta {
+
+using namespace std::experimental::literals::string_view_literals;
+using namespace std::literals;
+using namespace utils::literals;
+
 } // namespace meta

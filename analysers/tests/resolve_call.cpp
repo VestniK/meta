@@ -14,7 +14,7 @@ namespace meta::analysers {
 namespace {
 
 TEST(ResolveCall, simple) {
-    const utils::SourceFile input = R"META(
+    const auto input = R"META(
         package test;
 
         int foo(int x, int y) {return x + y - 42;}
@@ -24,7 +24,7 @@ TEST(ResolveCall, simple) {
                 return foo(123, 456);
             return foo(42, 15);
         }
-    )META";
+    )META"_fake_src;
 
     Parser parser;
     Actions act;
@@ -42,7 +42,7 @@ TEST(ResolveCall, simple) {
 }
 
 TEST(ResolveCall, recursive) {
-    const utils::SourceFile input = R"META(
+    const auto input = R"META(
         package test;
 
         int fact(int n) {
@@ -50,7 +50,7 @@ TEST(ResolveCall, recursive) {
                 return 1;
             return n*fact(n - 1);
         }
-    )META";
+    )META"_fake_src;
 
     Parser parser;
     Actions act;
@@ -66,7 +66,7 @@ TEST(ResolveCall, recursive) {
 }
 
 TEST(ResolveCall, inderectRecursive) {
-    const utils::SourceFile input = R"META(
+    const auto input = R"META(
         package test;
 
         int foo(int n) {
@@ -80,7 +80,7 @@ TEST(ResolveCall, inderectRecursive) {
                 return foo(n/2);
             return foo(2*n);
         }
-    )META";
+    )META"_fake_src;
 
     Parser parser;
     Actions act;
@@ -102,7 +102,7 @@ TEST(ResolveCall, inderectRecursive) {
 }
 
 TEST(ResolveCall, imported) {
-    const utils::SourceFile input1 = R"META(
+    const auto input1 = utils::SourceFile::fake(R"META(
         package test.a;
 
         import test.b.baz as bar;
@@ -112,8 +112,8 @@ TEST(ResolveCall, imported) {
                 return bar(-n);
             return 2*n;
         }
-    )META";
-    const utils::SourceFile input2 = R"META(
+    )META", "test/a.meta");
+    const auto input2 = utils::SourceFile::fake(R"META(
         package test.b;
 
         import test.a.foo;
@@ -123,7 +123,7 @@ TEST(ResolveCall, imported) {
                 return foo(n/2);
             return foo(2*n);
         }
-    )META";
+    )META", "test/b.meta");
 
     Parser parser;
     Actions act;
@@ -147,7 +147,7 @@ TEST(ResolveCall, imported) {
 }
 
 TEST(ResolveCall, samePkgAnotherFile) {
-    const utils::SourceFile input1 = R"META(
+    const auto input1 = utils::SourceFile::fake(R"META(
         package test;
 
         int foo(int n) {
@@ -155,8 +155,8 @@ TEST(ResolveCall, samePkgAnotherFile) {
                 return bar(-n);
             return 2*n;
         }
-    )META";
-    const utils::SourceFile input2 = R"META(
+    )META", "test1.meta");
+    const auto input2 = utils::SourceFile::fake(R"META(
         package test;
 
         public int bar(int n) {
@@ -164,7 +164,7 @@ TEST(ResolveCall, samePkgAnotherFile) {
                 return foo(n/2);
             return foo(2*n);
         }
-    )META";
+    )META", "test2.meta");
 
     Parser parser;
     Actions act;
@@ -214,7 +214,7 @@ INSTANTIATE_TEST_CASE_P(Resolver, ResolveCallErrors, ::testing::Values(
             int foo(int x) {
                 return bar(x, 42, 65);
             }
-        )META",
+        )META"_fake_src,
         .errMsg=R"(Function 'test.bar(int, int)' is called with incorrect number of arguments)"
     },
     utils::ErrorTestData{
@@ -224,7 +224,7 @@ INSTANTIATE_TEST_CASE_P(Resolver, ResolveCallErrors, ::testing::Values(
             int foo(int x) {
                 return bar(x, 42, 65);
             }
-        )META",
+        )META"_fake_src,
         .errMsg=R"(Unresolved function call 'bar')"
     }
 ));

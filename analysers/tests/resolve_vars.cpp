@@ -23,7 +23,7 @@ TEST(ResolveVars, simple) {
         int foo(int x) {
             return dist(x+5);
         }
-    )META";
+    )META"_fake_src;
 
     Parser parser;
     Actions act;
