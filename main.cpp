@@ -127,7 +127,7 @@ int main(int argc, char **argv) try {
     return meta::main(opts) ? EXIT_SUCCESS : EXIT_FAILURE;
 } catch(const NodeException& err) {
     std::cerr <<
-        err.sourcePath() << ':' << err.tokens().begin()->line <<
+        err.sourcePath().string() << ':' << err.tokens().begin()->line <<
         ':' << err.tokens().begin()->column << ": Internal compiler error: " << err.what() <<
         ":" << std::endl
     ;
@@ -173,7 +173,7 @@ bool main(const Options &opts) try {
 } catch(const SyntaxError &err) {
     if (opts.verbosity > ErrorVerbosity::silent) {
         std::cerr <<
-            err.sourcePath() << ':' << err.token().line << ':' <<
+            err.sourcePath().string() << ':' << err.token().line << ':' <<
             err.token().column << ": " << err.what()
         ;
     }
@@ -192,7 +192,7 @@ bool main(const Options &opts) try {
 } catch(const analysers::SemanticError &err) {
     if (opts.verbosity > ErrorVerbosity::silent)
         std::cerr <<
-            err.sourcePath() << ':' << err.tokens().begin()->line <<
+            err.sourcePath().string() << ':' << err.tokens().begin()->line <<
             ':' << err.tokens().begin()->column << ": " << err.what() <<
             (opts.verbosity == ErrorVerbosity::brief ? "" : ":") << std::endl
         ;
