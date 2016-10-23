@@ -64,7 +64,7 @@ TEST(Range, byMemberOfMember) {
     auto it = dict.begin();
     for (int x: dict | &std::pair<const std::string, Point>::second | &Point::x) {
         ASSERT_NE(it, dict.end());
-        EXPECT_EQ(x, dict[it->first].x);
+        EXPECT_EQ(x, it->second.x);
         ++it;
     }
     ASSERT_EQ(it, dict.end());

@@ -24,7 +24,6 @@
 #include "parser/metaparser.h"
 
 #include "analysers/actions.h"
-#include "analysers/declconflicts.h" // TODO: for SourceInfo only!!! remove this header.
 #include "analysers/reachabilitychecker.h"
 #include "analysers/semanticerror.h"
 
@@ -44,7 +43,7 @@ TEST_P(Reachability, resolveErrors) {
     try {
         checkReachability(ast);
         FAIL() << "Error was not detected: " << param.errMsg;
-    } catch (const SemanticError &err) {
+    } catch (const SemanticError& err) {
         EXPECT_EQ(param.errMsg, err.what()) << err.what();
     }
 }
