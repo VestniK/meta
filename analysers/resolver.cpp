@@ -122,6 +122,12 @@ struct CodeContext {
     Dict<DeclRef<Struct>> structs;
     std::map<utils::string_view, VarStats> vars;
 
+    CodeContext() = default;
+    CodeContext(const CodeContext&) = delete;
+    CodeContext(CodeContext&&) = delete;
+    const CodeContext& operator= (const CodeContext&) = delete;
+    CodeContext& operator= (CodeContext&&) = delete;
+
     ~CodeContext() noexcept(false) {
         if (std::uncaught_exceptions() != 0)
             return;
@@ -306,7 +312,7 @@ struct Resolver {
 
     void operator() (CodeBlock* node, CodeContext& ctx) {
         trace(resolverTraceTag, node);
-        CodeContext blockCtx{ctx};
+        CodeContext blockCtx{&ctx};
         for (auto statement: node->statements())
             dispatch(*this, statement, blockCtx);
     }
@@ -327,11 +333,11 @@ struct Resolver {
         trace(resolverTraceTag, node);
         dispatch(*this, node->condition(), ctx);
         if (node->thenBlock()) {
-            CodeContext thenCtx{ctx};
+            CodeContext thenCtx{&ctx};
             dispatch(*this, node->thenBlock(), thenCtx);
         }
         if (node->elseBlock()) {
-            CodeContext elseCtx{ctx};
+            CodeContext elseCtx{&ctx};
             dispatch(*this, node->elseBlock(), elseCtx);
         }
     }
@@ -386,6 +392,11 @@ struct Resolver {
 
     void operator() (Struct* node, CodeContext&) {
         trace(resolverTraceTag, node);
+    }
+
+    void operator() (ExprStatement* node, CodeContext& ctx) {
+        trace(resolverTraceTag, node);
+        dispatch(*this, node->expression(), ctx);
     }
 };
 
