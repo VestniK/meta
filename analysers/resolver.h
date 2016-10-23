@@ -24,10 +24,6 @@ class AST;
 
 namespace analysers {
 
-namespace v1 {
-void resolve(AST* ast, Dictionary& dict);
-}
-
 inline namespace v2 {
 void resolve(AST* ast, Dictionary& dict);
 }
