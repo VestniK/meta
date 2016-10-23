@@ -19,10 +19,10 @@
 
 #pragma once
 
+#include "utils/range.h"
 #include "utils/types.h"
 
-namespace meta {
-namespace utils {
+namespace meta::utils {
 
 /**
  * @return nullopt if string is not a number
@@ -53,5 +53,57 @@ bool starts_with(string_view str, string_view prefix) {
     return str.substr(0, prefix.size()) == prefix;
 }
 
-} // namespace utils
-} // namespace meta
+class SplitIterator: public std::iterator<
+    std::input_iterator_tag,
+    string_view
+> {
+public:
+    SplitIterator(char sep): mSep(sep) {} // end sentinel
+    SplitIterator(string_view str, char sep):
+        mSep(sep),
+        mStart(str.empty() ? nullptr : str.data()),
+        mFinish(str.empty() ? nullptr : str.data() + str.size()),
+        mSepPos(std::find(mStart, mFinish, mSep))
+    {}
+
+    string_view operator* () {
+        return {mStart, static_cast<size_t>(mSepPos - mStart)};
+    }
+
+    SplitIterator& operator++ () {
+        if (!mStart)
+            return *this;
+        if (mSepPos == mFinish) {
+            mStart = mSepPos = mFinish = nullptr;
+            return *this;
+        }
+        mStart = mSepPos + 1;
+        mSepPos = std::find(mStart, mFinish, mSep);
+        return *this;
+    }
+
+    bool operator== (const SplitIterator& rhs) const {
+        return
+            mSep == rhs.mSep &&
+            mStart == rhs.mStart &&
+            mFinish == rhs.mFinish &&
+            mSepPos == rhs.mSepPos
+        ;
+    }
+    bool operator!= (const SplitIterator& rhs) const {return !(*this == rhs);}
+private:
+    char mSep;
+    const char* mStart = nullptr;
+    const char* mFinish = nullptr;
+    const char* mSepPos = nullptr;
+};
+
+inline
+auto split(string_view str, char sep) {
+    return Slice<SplitIterator>{
+        {str, sep},
+        {sep}
+    };
+}
+
+} // namespace meta::utils

@@ -1,5 +1,6 @@
 set(SRC
   exception.cpp
+  term.cpp
 )
 
 add_library(utils STATIC ${SRC})

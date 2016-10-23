@@ -19,6 +19,7 @@
 #pragma once
 
 #include <algorithm>
+#include <iterator>
 #include <tuple>
 
 #include "utils/property.h"
@@ -118,6 +119,11 @@ auto slice(Iter b) {Slice<Iter> res{b, b}; ++res.end_it; return res;}
 
 template<typename Iter>
 auto slice(std::pair<Iter, Iter> range) {return Slice<Iter>{range.first, range.second};}
+
+template<typename Container, typename Val>
+bool contains(const Container& cnt, Val&& val) {
+    return std::find(cnt.begin(), cnt.end(), std::forward<Val>(val)) != cnt.end();
+}
 
 template<typename Container, typename Key>
 auto equal_range(const Container& cnt, const Key& key) {
