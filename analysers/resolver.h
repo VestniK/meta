@@ -24,11 +24,11 @@ class AST;
 
 namespace analysers {
 
-inline namespace v1 {
+namespace v1 {
 void resolve(AST* ast, Dictionary& dict);
 }
 
-namespace v2 {
+inline namespace v2 {
 void resolve(AST* ast, Dictionary& dict);
 }
 

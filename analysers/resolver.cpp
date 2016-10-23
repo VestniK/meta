@@ -532,7 +532,7 @@ private:
     std::map<utils::string_view, VarSrc> mVars;
 };
 
-inline namespace v1 {
+namespace v1 {
 
 void resolve(AST* ast, Dictionary& dict)
 {
@@ -542,7 +542,7 @@ void resolve(AST* ast, Dictionary& dict)
 
 } // namespace v1
 
-namespace v2 {
+inline namespace v2 {
 
 void resolve(AST* ast, Dictionary& dict) {
     Resolver resolver{dict};
