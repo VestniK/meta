@@ -115,20 +115,20 @@ Decl* decl(const DeclRef<Decl>& val) {return val.decl;}
 template<typename Decl>
 Import* import(const DeclRef<Decl>& val) {return val.import;}
 
-struct CodeContext {
-    CodeContext* parent = nullptr;
+struct Scope {
+    Scope* parent = nullptr;
     utils::string_view package;
     MultiDict<DeclRef<Function>> functions;
     Dict<DeclRef<Struct>> structs;
     std::map<utils::string_view, VarStats> vars;
 
-    CodeContext() = default;
-    CodeContext(const CodeContext&) = delete;
-    CodeContext(CodeContext&&) = delete;
-    const CodeContext& operator= (const CodeContext&) = delete;
-    CodeContext& operator= (CodeContext&&) = delete;
+    Scope() = default;
+    Scope(const Scope&) = delete;
+    Scope(Scope&&) = delete;
+    const Scope& operator= (const Scope&) = delete;
+    Scope& operator= (Scope&&) = delete;
 
-    ~CodeContext() noexcept(false) {
+    ~Scope() noexcept(false) {
         if (std::uncaught_exceptions() != 0)
             return;
         for (const auto& kv: vars) {
@@ -139,11 +139,11 @@ struct CodeContext {
 };
 
 template<typename Decl>
-Decl* find(CodeContext& ctx, utils::string_view name);
+Decl* find(Scope& scope, utils::string_view name);
 
 template<>
-VarStats* find<VarStats>(CodeContext& ctx, utils::string_view name) {
-    for (auto* context = &ctx; context != nullptr; context = context->parent) {
+VarStats* find<VarStats>(Scope& scope, utils::string_view name) {
+    for (auto* context = &scope; context != nullptr; context = context->parent) {
         auto it = context->vars.find(name);
         if (it != context->vars.end())
             return &(it->second);
@@ -154,14 +154,14 @@ VarStats* find<VarStats>(CodeContext& ctx, utils::string_view name) {
 struct Resolver {
     Dictionary& dict;
 
-    void operator() (Node* node, CodeContext&) {
+    void operator() (Node* node, Scope&) {
         trace(resolverTraceTag, node);
         throw UnexpectedNode(node, "Don't know how to resolve declaration and types for");
     }
 
-    void operator() (SourceFile* node, CodeContext& ctx) {
+    void operator() (SourceFile* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        CodeContext srcFileContext = {&ctx, node->package()};
+        Scope srcFileContext = {&scope, node->package()};
         for (auto* func: dict[node->package()].functions)
             srcFileContext.functions.emplace(DeclRef<Function>{func});
         for (auto* strct: dict[node->package()].structs)
@@ -178,7 +178,7 @@ struct Resolver {
             (*this)(func, srcFileContext);
     }
 
-    void operator() (Import* node, CodeContext& ctx) {
+    void operator() (Import* node, Scope& scope) {
         trace(resolverTraceTag, node);
         POSTCONDITION(!node->importedDeclarations().empty());
         POSTCONDITION(
@@ -187,7 +187,7 @@ struct Resolver {
                 return decl->getVisitableType() != std::type_index(typeid(Function));
             }) == 0
         );
-        if (node->targetPackage() == ctx.package)
+        if (node->targetPackage() == scope.package)
             throw SemanticError(node, "Import of a declaration from the current package is meaningless");
         auto pkgIt = dict.find(node->targetPackage());
         if (pkgIt == dict.end())
@@ -199,40 +199,40 @@ struct Resolver {
                 throw SemanticError(node, "Struct '%s' is private in the package '%s'", node->name(), node->targetPackage());
             if (
                 (*structIt)->visibility() == Visibility::Protected &&
-                !isChildPackage(ctx.package, node->targetPackage())
+                !isChildPackage(scope.package, node->targetPackage())
             ) {
                 throw SemanticError(
                     node, "Struct '%s' is protected in the package '%s' which is not parent of current package '%s'",
-                    node->name(), node->targetPackage(), ctx.package
+                    node->name(), node->targetPackage(), scope.package
                 );
             }
-            const auto conflictingFuncs = utils::equal_range(ctx.functions, node->name());
+            const auto conflictingFuncs = utils::equal_range(scope.functions, node->name());
             if (!conflictingFuncs.empty())
                 throwDeclConflict(node, conflictingFuncs);
-            const auto insres = ctx.structs.emplace(DeclRef<Struct>{*structIt, node});
+            const auto insres = scope.structs.emplace(DeclRef<Struct>{*structIt, node});
             if (!insres.second)
                 throwDeclConflict(node, utils::slice(insres.first));
             node->addImportedDeclaration(*structIt);
         } else if (!funcs.empty()) {
-            auto conflictingStruct = ctx.structs.find(node->name());
-            if (conflictingStruct != ctx.structs.end())
+            auto conflictingStruct = scope.structs.find(node->name());
+            if (conflictingStruct != scope.structs.end())
                 throwDeclConflict(node, utils::slice(conflictingStruct));
             for (auto* func: funcs) {
                 if (func->visibility() == Visibility::Private)
                     continue;
                 if (
                     func->visibility() == Visibility::Protected &&
-                    !isChildPackage(ctx.package, node->targetPackage())
+                    !isChildPackage(scope.package, node->targetPackage())
                 )
                     continue;
-                ctx.functions.emplace(DeclRef<Function>{func, node});
+                scope.functions.emplace(DeclRef<Function>{func, node});
                 node->addImportedDeclaration(func);
             }
             if (node->importedDeclarations().empty()) {
                 std::ostringstream oss;
                 oss <<
                     "Function '" << node->name() << "' from the package '" << node->targetPackage() <<
-                    "' has no overloads visible from the current package '" << ctx.package << '\''
+                    "' has no overloads visible from the current package '" << scope.package << '\''
                 ;
                 for (const auto& func: funcs) {
                     oss <<
@@ -250,7 +250,7 @@ struct Resolver {
         }
     }
 
-    void operator() (Function* node, CodeContext& ctx) {
+    void operator() (Function* node, Scope& scope) {
         trace(resolverTraceTag, node);
         if (node->visibility() != Visibility::Extern && node->body() == nullptr)
             throw SemanticError(node, "Implementation missing for the function '%s'", node->name());
@@ -270,7 +270,7 @@ struct Resolver {
 
         if (!node->body())
             return;
-        CodeContext funcContext{&ctx};
+        Scope funcContext{&scope};
         for (auto arg: node->args()) {
             auto res = funcContext.vars.emplace(arg->name(), VarStats{arg});
             if (!res.second)
@@ -283,11 +283,11 @@ struct Resolver {
             dispatch(*this, statement, funcContext);
     }
 
-    void operator() (Call* node, CodeContext& ctx) {
+    void operator() (Call* node, Scope& scope) {
         trace(resolverTraceTag, node);
         POSTCONDITION(node->function() != nullptr);
-        for (auto* currctx = &ctx; currctx != nullptr; currctx = currctx->parent) {
-            auto matches = utils::equal_range(currctx->functions, node->functionName());
+        for (auto* currscope = &scope; currscope != nullptr; currscope = currscope->parent) {
+            auto matches = utils::equal_range(currscope->functions, node->functionName());
             if (matches.empty())
                 continue;
             /// @todo replace assert by proper support of function overload
@@ -307,59 +307,59 @@ struct Resolver {
         if (!node->function())
             throw SemanticError(node, "Unresolved function call '%s'", node->functionName());
         for (Expression* arg: node->args())
-            dispatch(*this, arg, ctx);
+            dispatch(*this, arg, scope);
     }
 
-    void operator() (CodeBlock* node, CodeContext& ctx) {
+    void operator() (CodeBlock* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        CodeContext blockCtx{&ctx};
+        Scope blockscope{&scope};
         for (auto statement: node->statements())
-            dispatch(*this, statement, blockCtx);
+            dispatch(*this, statement, blockscope);
     }
 
-    void operator() (VarDecl* node, CodeContext& ctx) {
+    void operator() (VarDecl* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        auto conflict = find<VarStats>(ctx, node->name());
+        auto conflict = find<VarStats>(scope, node->name());
         if (conflict && (conflict->decl->flags() & VarFlags::argument))
             throwDeclConflict(node, conflict->decl);
         if (node->inited() && !(node->flags() & VarFlags::argument))
-            dispatch(*this, node->initExpr(), ctx);
-        auto res = ctx.vars.emplace(node->name(), VarStats{node});
+            dispatch(*this, node->initExpr(), scope);
+        auto res = scope.vars.emplace(node->name(), VarStats{node});
         if (!res.second)
             throwDeclConflict(node, res.first->second.decl);
     }
 
-    void operator() (If* node, CodeContext& ctx) {
+    void operator() (If* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        dispatch(*this, node->condition(), ctx);
+        dispatch(*this, node->condition(), scope);
         if (node->thenBlock()) {
-            CodeContext thenCtx{&ctx};
-            dispatch(*this, node->thenBlock(), thenCtx);
+            Scope thenscope{&scope};
+            dispatch(*this, node->thenBlock(), thenscope);
         }
         if (node->elseBlock()) {
-            CodeContext elseCtx{&ctx};
-            dispatch(*this, node->elseBlock(), elseCtx);
+            Scope elsescope{&scope};
+            dispatch(*this, node->elseBlock(), elsescope);
         }
     }
 
-    void operator() (BinaryOp* node, CodeContext& ctx) {
+    void operator() (BinaryOp* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        dispatch(*this, node->left(), ctx);
-        dispatch(*this, node->right(), ctx);
+        dispatch(*this, node->left(), scope);
+        dispatch(*this, node->right(), scope);
     }
 
-    void operator() (PrefixOp* node, CodeContext& ctx) {
+    void operator() (PrefixOp* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        dispatch(*this, node->operand(), ctx);
+        dispatch(*this, node->operand(), scope);
     }
 
-    void operator() (Number* node, CodeContext&) {trace(resolverTraceTag, node);}
-    void operator() (StrLiteral* node, CodeContext&) {trace(resolverTraceTag, node);}
-    void operator() (Literal* node, CodeContext&) {trace(resolverTraceTag, node);}
+    void operator() (Number* node, Scope&) {trace(resolverTraceTag, node);}
+    void operator() (StrLiteral* node, Scope&) {trace(resolverTraceTag, node);}
+    void operator() (Literal* node, Scope&) {trace(resolverTraceTag, node);}
 
-    void operator() (Var* node, CodeContext& ctx) {
+    void operator() (Var* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        auto varstat = find<VarStats>(ctx, node->name());
+        auto varstat = find<VarStats>(scope, node->name());
         if (!varstat)
             throw SemanticError(node, "Undefined variable '%s'", node->name());
         if (varstat->assignCount == 0)
@@ -368,11 +368,11 @@ struct Resolver {
         node->setDeclaration(varstat->decl);
     }
 
-    void operator() (Assigment* node, CodeContext& ctx) {
+    void operator() (Assigment* node, Scope& scope) {
         trace(resolverTraceTag, node);
         if (node->target()->getVisitableType() == std::type_index(typeid(Var))) {
             auto target = static_cast<Var*>(node->target());
-            auto stats = find<VarStats>(ctx, target->name());
+            auto stats = find<VarStats>(scope, target->name());
             if (stats->decl->flags() & VarFlags::argument)
                 throw SemanticError(node, "Attempt to modify function argument '%s'", target->name());
             stats->assignCount++;
@@ -381,22 +381,22 @@ struct Resolver {
             throw UnexpectedNode(node->target(), "Member assigment is not yet implemented");
         } else
             throw UnexpectedNode(node->target(), "Unexpected assigment left side expression type");
-        dispatch(*this, node->value(), ctx);
+        dispatch(*this, node->value(), scope);
     }
 
-    void operator() (Return* node, CodeContext& ctx) {
+    void operator() (Return* node, Scope& scope) {
         trace(resolverTraceTag, node);
         if (node->value())
-            dispatch(*this, node->value(), ctx);
+            dispatch(*this, node->value(), scope);
     }
 
-    void operator() (Struct* node, CodeContext&) {
+    void operator() (Struct* node, Scope&) {
         trace(resolverTraceTag, node);
     }
 
-    void operator() (ExprStatement* node, CodeContext& ctx) {
+    void operator() (ExprStatement* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        dispatch(*this, node->expression(), ctx);
+        dispatch(*this, node->expression(), scope);
     }
 };
 
@@ -406,9 +406,9 @@ inline namespace v2 {
 
 void resolve(AST* ast, Dictionary& dict) {
     Resolver resolver{dict};
-    CodeContext globalCtx;
+    Scope globalscope;
     for (auto root: ast->getChildren<Node>(0))
-        dispatch(resolver, root, globalCtx);
+        dispatch(resolver, root, globalscope);
 }
 
 } // namespace v2
