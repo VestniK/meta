@@ -1,9 +1,5 @@
 set(SRC
-  actions.cpp
-  metaprocessor.cpp
-  reachabilitychecker.cpp
-  resolver.cpp
-  typechecker.cpp
+  lib.cpp
 )
 
 add_library(analysers STATIC ${SRC})

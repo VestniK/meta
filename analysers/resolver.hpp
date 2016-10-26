@@ -161,21 +161,21 @@ struct Resolver {
 
     void operator() (SourceFile* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        Scope srcFileContext = {&scope, node->package()};
+        Scope srcFileScope = {&scope, node->package()};
         for (auto* func: dict[node->package()].functions)
-            srcFileContext.functions.emplace(DeclRef<Function>{func});
+            srcFileScope.functions.emplace(DeclRef<Function>{func});
         for (auto* strct: dict[node->package()].structs)
-            srcFileContext.structs.emplace(DeclRef<Struct>{strct});
+            srcFileScope.structs.emplace(DeclRef<Struct>{strct});
 
         /// @todo split SourceFile children into imports, functions and structs
         for (auto import: node->getChildren<Import>())
-            (*this)(import, srcFileContext);
+            (*this)(import, srcFileScope);
 
         for (auto structure: node->getChildren<Struct>())
-            (*this)(structure, srcFileContext);
+            (*this)(structure, srcFileScope);
 
         for (auto func: node->getChildren<Function>())
-            (*this)(func, srcFileContext);
+            (*this)(func, srcFileScope);
     }
 
     void operator() (Import* node, Scope& scope) {
