@@ -21,13 +21,15 @@
 
 namespace meta {
 class AST;
-
-namespace analysers {
-
-inline namespace v2 {
-void resolve(AST* ast, Dictionary& dict);
 }
 
-} // namespace analysers
-} // namespace meta
+namespace meta::typesystem {
+class TypesStore;
+}
+
+namespace meta::analysers {
+
+void resolve(AST* ast, Dictionary& dict, typesystem::TypesStore& types);
+
+} // namespace meta::analysers
 

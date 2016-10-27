@@ -23,6 +23,8 @@
 
 #include "utils/testtools.h"
 
+#include "typesystem/typesstore.h"
+
 #include "parser/metaparser.h"
 
 #include "analysers/actions.h"
@@ -42,8 +44,9 @@ TEST_P(ResolveErrors, resolveErrors) {
     parser.setParseActions(&act);
     ASSERT_PARSE(parser, param.input);
     auto ast = parser.ast();
+    typesystem::TypesStore typestore;
     try {
-        v2::resolve(ast, act.dictionary());
+        resolve(ast, act.dictionary(), typestore);
         FAIL() << "Error was not detected: " << param.errMsg;
     } catch (const SemanticError& err) {
         EXPECT_EQ(param.errMsg, err.what()) << err.what();

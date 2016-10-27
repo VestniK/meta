@@ -3,6 +3,8 @@
 #include "utils/testtools.h"
 #include "utils/sourcefile.h"
 
+#include "typesystem/typesstore.h"
+
 #include "parser/function.h"
 #include "parser/import.h"
 #include "parser/metaparser.h"
@@ -87,7 +89,8 @@ TEST(ResolveImports, properStructImport) {
     ASSERT_PARSE(parser, input);
     ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
-    v2::resolve(ast, act.dictionary());
+    typesystem::TypesStore typestore;
+    resolve(ast, act.dictionary(), typestore);
     auto imports = ast->getChildren<Import>(infinitDepth);
     ASSERT_EQ(imports.size(), 4u);
     for (auto import: imports) {
@@ -113,7 +116,8 @@ TEST(ResolveImports, simpleFuncImport) {
     ASSERT_PARSE(parser, input);
     ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
-    v2::resolve(ast, act.dictionary());
+    typesystem::TypesStore typestore;
+    resolve(ast, act.dictionary(), typestore);
     auto imports = ast->getChildren<Import>();
     ASSERT_EQ(imports.size(), 2u);
     for (auto import: imports) {
@@ -139,7 +143,8 @@ TEST(ResolveImports, partialFuncImport) {
     ASSERT_PARSE(parser, input);
     ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
-    v2::resolve(ast, act.dictionary());
+    typesystem::TypesStore typestore;
+    resolve(ast, act.dictionary(), typestore);
     auto imports = ast->getChildren<Import>();
     ASSERT_EQ(imports.size(), 2u);
 
@@ -185,7 +190,8 @@ TEST(ResolveImports, allFuncImport) {
     ASSERT_PARSE(parser, input);
     ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
-    v2::resolve(ast, act.dictionary());
+    typesystem::TypesStore typestore;
+    resolve(ast, act.dictionary(), typestore);
     auto imports = ast->getChildren<Import>();
     ASSERT_EQ(imports.size(), 1u);
 
@@ -212,7 +218,8 @@ TEST(ResolveImports, filterOutProtectedFuncImport) {
     ASSERT_PARSE(parser, input);
     ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
-    v2::resolve(ast, act.dictionary());
+    typesystem::TypesStore typestore;
+    resolve(ast, act.dictionary(), typestore);
     auto imports = ast->getChildren<Import>();
     ASSERT_EQ(imports.size(), 1u);
 
@@ -244,7 +251,8 @@ TEST(ResolveImports, importAsOverload) {
     ASSERT_PARSE(parser, input);
     ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
-    v2::resolve(ast, act.dictionary());
+    typesystem::TypesStore typestore;
+    resolve(ast, act.dictionary(), typestore);
     auto imports = ast->getChildren<Import>();
     ASSERT_EQ(imports.size(), 2u);
     EXPECT_EQ(imports[0]->name(), imports[1]->name());
@@ -270,7 +278,8 @@ TEST(ResolveImports, importAsRenamedOverload) {
     ASSERT_PARSE(parser, input);
     ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
-    v2::resolve(ast, act.dictionary());
+    typesystem::TypesStore typestore;
+    resolve(ast, act.dictionary(), typestore);
     auto imports = ast->getChildren<Import>();
     ASSERT_EQ(imports.size(), 2u);
     EXPECT_EQ(imports[0]->name(), imports[1]->name());
@@ -297,7 +306,8 @@ TEST(ResolveImports, importExtendingOverload) {
     ASSERT_PARSE(parser, input);
     ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
-    v2::resolve(ast, act.dictionary());
+    typesystem::TypesStore typestore;
+    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
     auto imports = ast->getChildren<Import>();
     ASSERT_EQ(imports.size(), 1u);
     EXPECT_EQ(imports[0]->name(), "foo");
@@ -521,8 +531,9 @@ TEST_P(ImportErrors, importErrors) {
     ASSERT_PARSE(parser, param.input);
     ASSERT_PARSE(parser, lib);
     auto ast = parser.ast();
+    typesystem::TypesStore typestore;
     try {
-        v2::resolve(ast, act.dictionary());
+        resolve(ast, act.dictionary(), typestore);
         FAIL() << "Error was not detected: " << param.errMsg;
     } catch (const SemanticError& err) {
         EXPECT_EQ(param.errMsg, err.what()) << err.what();

@@ -61,8 +61,8 @@ TEST_P(TypeCheker, typeCheck) {
     parser.setNodeActions(&act);
     ASSERT_PARSE(parser, param.src);
     auto ast = parser.ast();
-    ASSERT_ANALYSE(resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;
+    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
     ASSERT_ANALYSE(checkTypes(ast, typestore));
     auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), param.functions.size());
@@ -180,8 +180,8 @@ TEST_P(TypeChekerErrors, typeErrors) {
     parser.setNodeActions(&act);
     ASSERT_PARSE(parser, param.input);
     auto ast = parser.ast();
-    ASSERT_ANALYSE(resolve(ast, act.dictionary()));
     typesystem::TypesStore typestore;
+    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
     try {
         checkTypes(ast, typestore);
         FAIL() << "Error was not detected: " << param.errMsg;

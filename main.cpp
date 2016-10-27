@@ -161,8 +161,8 @@ bool main(const Options &opts) try {
     }
     auto ast = parser.ast();
     // analyse
-    analysers::resolve(ast, act.dictionary());
     typesystem::TypesStore typestore;
+    analysers::resolve(ast, act.dictionary(), typestore);
     analysers::checkTypes(ast, typestore);
     analysers::checkReachability(ast);
     analysers::processMeta(ast);

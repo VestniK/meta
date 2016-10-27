@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#pragma once
+
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
@@ -35,6 +37,8 @@
 #include "analysers/declconflicts.h"
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
+
+#include "typechecker.hpp"
 
 namespace meta::analysers {
 namespace {
@@ -151,8 +155,9 @@ VarStats* find<VarStats>(Scope& scope, utils::string_view name) {
     return nullptr;
 }
 
-struct Resolver {
+struct Analyser {
     Dictionary& dict;
+    Types& types;
 
     void operator() (Node* node, Scope&) {
         trace(resolverTraceTag, node);
@@ -402,15 +407,11 @@ struct Resolver {
 
 } // anonymous namespace
 
-inline namespace v2 {
-
-void resolve(AST* ast, Dictionary& dict) {
-    Resolver resolver{dict};
+void resolve(AST* ast, Dictionary& dict, typesystem::TypesStore& types) {
+    Analyser resolver{dict, types};
     Scope globalscope;
     for (auto root: ast->getChildren<Node>(0))
         dispatch(resolver, root, globalscope);
 }
-
-} // namespace v2
 
 } // namespace meta::analysers

@@ -1,7 +1,8 @@
-
 #include <gtest/gtest.h>
 
 #include "utils/testtools.h"
+
+#include "typesystem/typesstore.h"
 
 #include "parser/metaparser.h"
 #include "parser/var.h"
@@ -31,7 +32,8 @@ TEST(ResolveVars, simple) {
     parser.setParseActions(&act);
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
-    ASSERT_ANALYSE(v2::resolve(ast, act.dictionary()));
+    typesystem::TypesStore typestore;
+    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
     auto vars = ast->getChildren<Var>(infinitDepth);
     ASSERT_EQ(vars.size(), 1u);
     ASSERT_NE(vars[0]->declaration(), nullptr);
@@ -57,7 +59,8 @@ TEST(ResolveVars, complexUsage) {
     parser.setParseActions(&act);
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
-    ASSERT_ANALYSE(v2::resolve(ast, act.dictionary()));
+    typesystem::TypesStore typestore;
+    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
     auto vars = ast->getChildren<Var>(infinitDepth);
     ASSERT_EQ(vars.size(), 5u);
     for (auto* var: vars) {
