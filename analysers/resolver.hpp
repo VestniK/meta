@@ -38,6 +38,7 @@
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
 
+#include "scope.hpp"
 #include "typechecker.hpp"
 
 namespace meta::analysers {
@@ -89,71 +90,10 @@ bool isChildPackage(utils::string_view subpkg, utils::string_view parentpkg) {
 }
 
 template<typename Decl>
-struct DeclRef {
-    Decl* decl;
-    Import* import = nullptr;
-
-    utils::string_view name() const {
-        if (import)
-            return import->name();
-        return decl->name();
-    }
-};
-
-struct VarStats {
-    VarStats(VarDecl* decl):
-        decl(decl),
-        assignCount((decl->flags() & VarFlags::argument) || decl->inited() ? 1 : 0)
-    {}
-
-    VarDecl* decl;
-    unsigned assignCount;
-    unsigned accessCount = 0;
-
-    utils::string_view name() const {return decl->name();}
-};
-
-template<typename Decl>
 Decl* decl(const DeclRef<Decl>& val) {return val.decl;}
 
 template<typename Decl>
 Import* import(const DeclRef<Decl>& val) {return val.import;}
-
-struct Scope {
-    Scope* parent = nullptr;
-    utils::string_view package;
-    MultiDict<DeclRef<Function>> functions;
-    Dict<DeclRef<Struct>> structs;
-    std::map<utils::string_view, VarStats> vars;
-
-    Scope() = default;
-    Scope(const Scope&) = delete;
-    Scope(Scope&&) = delete;
-    const Scope& operator= (const Scope&) = delete;
-    Scope& operator= (Scope&&) = delete;
-
-    ~Scope() noexcept(false) {
-        if (std::uncaught_exceptions() != 0)
-            return;
-        for (const auto& kv: vars) {
-            if (kv.second.accessCount == 0)
-                throw SemanticError(kv.second.decl, "Variable '%s' is never used", kv.first);
-        }
-    }
-};
-
-template<typename Decl>
-Decl* find(Scope& scope, utils::string_view name);
-
-template<>
-VarStats* find<VarStats>(Scope& scope, utils::string_view name) {
-    for (auto* context = &scope; context != nullptr; context = context->parent) {
-        auto it = context->vars.find(name);
-        if (it != context->vars.end())
-            return &(it->second);
-    }
-    return nullptr;
-}
 
 struct Analyser {
     Dictionary& dict;
@@ -358,9 +298,15 @@ struct Analyser {
         dispatch(*this, node->operand(), scope);
     }
 
-    void operator() (Number* node, Scope&) {trace(resolverTraceTag, node);}
-    void operator() (StrLiteral* node, Scope&) {trace(resolverTraceTag, node);}
-    void operator() (Literal* node, Scope&) {trace(resolverTraceTag, node);}
+    void operator() (Number* node, Scope&) {
+        trace(resolverTraceTag, node);
+    }
+    void operator() (StrLiteral* node, Scope&) {
+        trace(resolverTraceTag, node);
+    }
+    void operator() (Literal* node, Scope&) {
+        trace(resolverTraceTag, node);
+    }
 
     void operator() (Var* node, Scope& scope) {
         trace(resolverTraceTag, node);
@@ -383,6 +329,9 @@ struct Analyser {
             stats->assignCount++;
             target->setDeclaration(stats->decl);
         } else if (node->target()->getVisitableType() == std::type_index(typeid(MemberAccess))) {
+            auto aggregate = static_cast<MemberAccess*>(node->target())->parent();
+            [[gnu::unused]]
+            auto aggregate_type = type_of(aggregate, types);
             throw UnexpectedNode(node->target(), "Member assigment is not yet implemented");
         } else
             throw UnexpectedNode(node->target(), "Unexpected assigment left side expression type");

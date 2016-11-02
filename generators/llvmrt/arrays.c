@@ -11,7 +11,7 @@ struct ArrayControlBlock {
 };
 _Static_assert(
     sizeof(struct ArrayControlBlock) == 8,
-    "ArrayControlBlock must be 64bit long to preserve array data aaligmnet"
+    "ArrayControlBlock must be 64bit long to preserve array data aligmnet"
 );
 
 struct Array {

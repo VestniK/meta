@@ -32,6 +32,7 @@
 #include "analysers/typechecker.h"
 
 namespace meta::analysers {
+namespace {
 
 using Type = const typesystem::Type*;
 using Types = typesystem::TypesStore;
@@ -185,6 +186,10 @@ struct TypeEvaluator {
     Type operator() (Call* node, Types &types);
 };
 
+Type type_of(Node* node, Types& types) {
+    return dispatch(TypeEvaluator{}, node, types);
+}
+
 class TypeChecker: public Visitor {
 public:
     explicit TypeChecker(typesystem::TypesStore &types): mTypes(types) {}
@@ -287,6 +292,8 @@ Type TypeEvaluator::operator() (Call* node, Types &types) {
     node->setType(node->function()->type());
     return node->type();
 }
+
+} // anonymous namespace
 
 void checkTypes(AST *ast, typesystem::TypesStore &types) {
     TypeChecker visitor(types);

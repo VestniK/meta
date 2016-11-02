@@ -1,0 +1,75 @@
+#pragma once
+
+#include <map>
+
+#include "utils/types.h"
+
+#include "parser/dictionary.h"
+#include "parser/metanodes.h"
+
+namespace meta::analysers {
+namespace {
+
+template<typename Decl>
+struct DeclRef {
+    Decl* decl;
+    Import* import = nullptr;
+
+    utils::string_view name() const {
+        if (import)
+            return import->name();
+        return decl->name();
+    }
+};
+
+struct VarStats {
+    VarStats(VarDecl* decl):
+        decl(decl),
+        assignCount((decl->flags() & VarFlags::argument) || decl->inited() ? 1 : 0)
+    {}
+
+    VarDecl* decl;
+    unsigned assignCount;
+    unsigned accessCount = 0;
+
+    utils::string_view name() const {return decl->name();}
+};
+
+struct Scope {
+    Scope* parent = nullptr;
+    utils::string_view package;
+    MultiDict<DeclRef<Function>> functions;
+    Dict<DeclRef<Struct>> structs;
+    std::map<utils::string_view, VarStats> vars;
+
+    Scope() = default;
+    Scope(const Scope&) = delete;
+    Scope(Scope&&) = delete;
+    const Scope& operator= (const Scope&) = delete;
+    Scope& operator= (Scope&&) = delete;
+
+    ~Scope() noexcept(false) {
+        if (std::uncaught_exceptions() != 0)
+            return;
+        for (const auto& kv: vars) {
+            if (kv.second.accessCount == 0)
+                throw SemanticError(kv.second.decl, "Variable '%s' is never used", kv.first);
+        }
+    }
+};
+
+template<typename Decl>
+Decl* find(Scope& scope, utils::string_view name);
+
+template<>
+VarStats* find<VarStats>(Scope& scope, utils::string_view name) {
+    for (auto* context = &scope; context != nullptr; context = context->parent) {
+        auto it = context->vars.find(name);
+        if (it != context->vars.end())
+            return &(it->second);
+    }
+    return nullptr;
+}
+
+} // anonymous namespace
+} // namespace meta::analysers
