@@ -195,7 +195,7 @@ void Parser::parse(const utils::SourceFile &src) {
             }
             throw SyntaxError(
                 src,
-                utils::array_view<StackFrame>(stack.data() + 1, stackTop > 0 ? stackTop - 1 : 0),
+                utils::array_view<StackFrame>(stack).slice(1, stackTop),
                 stateNum, lexer.currentToken()
             );
         }

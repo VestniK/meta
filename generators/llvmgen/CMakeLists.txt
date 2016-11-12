@@ -9,11 +9,7 @@ set(LLVM_DEPS ${LLVM_DEPS} dl)
 set(LLVM_REQUIRED_LIBS LLVMBitWriter LLVMCore LLVMSupport)
 
 set(SRC
-  environment.cpp
-  expressionbuilder.cpp
-  generator.cpp
-  mangling.cpp
-  modulebuilder.cpp
+  lib.cpp
 )
 
 add_library(llvmgenerator STATIC ${SRC})

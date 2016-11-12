@@ -1,3 +1,5 @@
+#pragma once
+
 #include "parser/metanodes.h"
 
 #include "generators/llvmgen/generator.h"
