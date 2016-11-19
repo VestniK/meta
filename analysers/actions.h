@@ -21,22 +21,18 @@
 #include <deque>
 #include <set>
 
-#include "utils/contract.h"
 #include "utils/types.h"
 
-#include "parser/dictionary.h"
 #include "parser/metaparser.h"
 #include "parser/visibility.h"
+
+#include "analysers/dictionary.h"
 
 namespace meta::analysers {
 
 class Actions: public ParseActions, public NodeActions {
 public:
-    void package(utils::array_view<StackFrame> reduction) override {
-        PRECONDITION(reduction.size() == 3);
-        POSTCONDITION(!mCurrentPackage.empty());
-        mCurrentPackage = reduction[1].tokens;
-    }
+    void package(utils::array_view<StackFrame> reduction) override;
     void changeVisibility(utils::array_view<StackFrame> reduction) override;
     void onFunction(Function* node) override;
     void onSourceFile(SourceFile* node) override;

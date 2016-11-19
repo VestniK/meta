@@ -4,8 +4,9 @@
 
 #include "utils/types.h"
 
-#include "parser/dictionary.h"
 #include "parser/metanodes.h"
+
+#include "analysers/dictionary.h"
 
 namespace meta::analysers {
 namespace {

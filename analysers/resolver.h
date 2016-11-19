@@ -17,7 +17,7 @@
  */
 #pragma once
 
-#include "parser/dictionary.h"
+#include "analysers/dictionary.h"
 
 namespace meta {
 class AST;

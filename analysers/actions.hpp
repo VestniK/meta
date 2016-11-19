@@ -16,17 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include "utils/contract.h"
 #include "utils/range.h"
 
 #include "parser/function.h"
 #include "parser/sourcefile.h"
 #include "parser/struct.h"
 
-#include "analysers/declconflicts.h"
 #include "analysers/actions.h"
+#include "analysers/declconflicts.h"
+#include "analysers/dictionary.h"
 #include "analysers/semanticerror.h"
 
 namespace meta::analysers {
+
+void Actions::package(utils::array_view<StackFrame> reduction) {
+    PRECONDITION(reduction.size() == 3);
+    POSTCONDITION(!mCurrentPackage.empty());
+    mCurrentPackage = reduction[1].tokens;
+}
 
 void Actions::changeVisibility(utils::array_view<StackFrame> reduction) {
     PRECONDITION(reduction.size() == 2);

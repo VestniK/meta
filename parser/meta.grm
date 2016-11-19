@@ -5,6 +5,7 @@ strLiteral <str>;
 
 trueVal 'true';
 falseVal 'false';
+nullVal 'null';
 
 Extern 'extern';
 Export 'export';
@@ -43,7 +44,7 @@ Goal -> Source <eof>
 
 Source -> PackageHdr [Import]... [Declaration | VisibilityChange]... *> SourceFile
 
-PackageHdr -> 'package' QualifiedName ';' => package
+PackageHdr -> 'package' (QualifiedName | 'null') ';' => package
 
 QualifiedName -> <identifier>/'.'...
 

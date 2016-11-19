@@ -29,7 +29,6 @@
 #include "utils/string.h"
 #include "utils/term.h"
 
-#include "parser/dictionary.h"
 #include "parser/metaparser.h"
 #include "parser/metanodes.h"
 #include "parser/visibility.h"
