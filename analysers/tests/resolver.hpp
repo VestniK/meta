@@ -31,7 +31,7 @@
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
 
-namespace meta::analysers {
+namespace meta::analysers::tests::resolver {
 namespace {
 
 class ResolveErrors: public utils::ErrorTest {};

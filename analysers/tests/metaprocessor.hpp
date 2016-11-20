@@ -27,7 +27,7 @@
 #include "analysers/actions.h"
 #include "analysers/metaprocessor.h"
 
-namespace meta::analysers {
+namespace meta::analysers::tests::metaprocessor {
 namespace {
 
 TEST(MetaProcessor, attribute) {

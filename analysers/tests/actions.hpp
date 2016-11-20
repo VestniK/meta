@@ -31,7 +31,7 @@
 #include "analysers/metaprocessor.h"
 #include "analysers/semanticerror.h"
 
-namespace meta::analysers {
+namespace meta::analysers::tests::actions {
 namespace {
 
 const auto input = R"META(

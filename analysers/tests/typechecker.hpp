@@ -34,7 +34,7 @@
 #include "analysers/semanticerror.h"
 #include "analysers/typechecker.h"
 
-namespace meta::analysers::tests {
+namespace meta::analysers::tests::typechecker {
 namespace {
 
 struct NameType {

@@ -15,7 +15,7 @@
 #include "analysers/semanticerror.h"
 #include "analysers/resolver.h"
 
-namespace meta::analysers {
+namespace meta::analysers::tests::resolve_imports {
 namespace {
 
 const auto lib = utils::SourceFile::fake(R"META(

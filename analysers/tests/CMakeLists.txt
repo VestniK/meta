@@ -1,13 +1,18 @@
 include(TestTools)
 
+set(IMP_HPP
+  actions.hpp
+  metaprocessor.hpp
+  reachability.hpp
+  resolver.hpp
+  resolve_call.hpp
+  resolve_imports.hpp
+  resolve_vars.hpp
+  typechecker.hpp
+)
+
 AddGTest(AnalysersTests
-  actions.cpp
-  metaprocessor.cpp
-  reachability.cpp
-  resolver.cpp
-  resolve_call.cpp
-  resolve_imports.cpp
-  resolve_vars.cpp
-  typechecker.cpp
+  tests.cpp
+  ${IMP_HPP}
 )
 target_link_libraries(AnalysersTests analysers parser)

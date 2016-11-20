@@ -12,7 +12,7 @@
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
 
-namespace meta::analysers {
+namespace meta::analysers::tests::resolve_vars {
 namespace {
 
 TEST(ResolveVars, simple) {

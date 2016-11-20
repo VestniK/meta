@@ -27,7 +27,7 @@
 #include "analysers/reachabilitychecker.h"
 #include "analysers/semanticerror.h"
 
-namespace meta::analysers::tests {
+namespace meta::analysers::tests::reachability {
 namespace {
 
 class Reachability: public utils::ErrorTest {};
