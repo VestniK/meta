@@ -16,9 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-#include <experimental/string_view>
-
 #include "utils/contract.h"
 #include "utils/exception.h"
 
