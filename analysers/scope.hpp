@@ -39,8 +39,8 @@ struct VarStats {
 struct Scope {
     Scope* parent = nullptr;
     utils::string_view package;
-    MultiDict<DeclRef<Function>> functions;
-    Dict<DeclRef<Struct>> structs;
+    utils::multidict<DeclRef<Function>> functions;
+    utils::dict<DeclRef<Struct>> structs;
     std::map<utils::string_view, VarStats> vars;
 
     Scope() = default;

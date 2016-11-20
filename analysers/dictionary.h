@@ -22,49 +22,16 @@
 #include <set>
 
 #include "utils/types.h"
+#include "utils/dicts.h"
 
 #include "parser/function.h"
 #include "parser/struct.h"
 
 namespace meta {
 
-template<typename Decl>
-struct NameComparator {
-    using is_transparent = void;
-
-    bool operator() (const Decl* lhs, const Decl* rhs) const {
-        return lhs->name() < rhs->name();
-    }
-
-    bool operator() (const Decl& lhs, const Decl& rhs) const {
-        return lhs.name() < rhs.name();
-    }
-
-    bool operator() (const Decl* lhs, utils::string_view rhs) const {
-        return lhs->name() < rhs;
-    }
-
-    bool operator() (const Decl& lhs, utils::string_view rhs) const {
-        return lhs.name() < rhs;
-    }
-
-    bool operator() (utils::string_view lhs, const Decl* rhs) const {
-        return lhs < rhs->name();
-    }
-
-    bool operator() (utils::string_view lhs, const Decl& rhs) const {
-        return lhs < rhs.name();
-    }
-};
-
-template<typename T>
-using Dict = std::set<T, NameComparator<typename std::remove_pointer<T>::type>>;
-template<typename T>
-using MultiDict = std::multiset<T, NameComparator<typename std::remove_pointer<T>::type>>;
-
 struct PackageDict {
-    MultiDict<Function*> functions;
-    Dict<Struct*> structs;
+    utils::multidict<Function*> functions;
+    utils::dict<Struct*> structs;
 };
 
 using Dictionary = std::map<utils::string_view, PackageDict>;

@@ -32,13 +32,16 @@ namespace meta::analysers {
 
 class Actions: public ParseActions, public NodeActions {
 public:
+    Dictionary& dictionary() {return mDictionary;}
+
+public: // ParseActions
     void package(utils::array_view<StackFrame> reduction) override;
     void changeVisibility(utils::array_view<StackFrame> reduction) override;
+
+public: // NodeActions
     void onFunction(Function* node) override;
     void onSourceFile(SourceFile* node) override;
     void onStruct(Struct* node) override;
-
-    Dictionary& dictionary() {return mDictionary;}
 
 private:
     Visibility mDefaultVisibility = Visibility::Private;
@@ -46,4 +49,4 @@ private:
     utils::string_view mCurrentPackage;
 };
 
-} // namespace meta
+} // namespace meta::analysers
