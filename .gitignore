@@ -2,3 +2,4 @@ build
 parser/meta.lex
 parser/meta.*.txt
 .kdev4
+CMakeLists.txt.user
