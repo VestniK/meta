@@ -48,8 +48,7 @@
 
 namespace meta::generators::llvmgen {
 
-bool ModuleBuilder::visit(Function *node)
-{
+bool ModuleBuilder::visit(Function *node) {
     mCtx.varMap.clear();
     llvm::Function *func = mCtx.env.module->getFunction(mangledName(node));
     if (!func)
@@ -79,8 +78,7 @@ bool ModuleBuilder::visit(Function *node)
     return false;
 }
 
-ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx)
-{
+ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx) {
     PRECONDITION(!(node->flags() & VarFlags::argument));
     // types integrity should be checked by analyzers
     PRECONDITION(ctx.env.getType(node->type()) != nullptr);
@@ -95,8 +93,7 @@ ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx)
     return ExecStatus::cont;
 }
 
-ExecStatus StatementBuilder::operator() (Return *node, Context &ctx)
-{
+ExecStatus StatementBuilder::operator() (Return *node, Context &ctx) {
     auto value = node->value();
     if (!value) {
         ctx.builder.CreateRetVoid();
@@ -114,8 +111,7 @@ ExecStatus StatementBuilder::operator() (Return *node, Context &ctx)
     return ExecStatus::stop;
 }
 
-ExecStatus StatementBuilder::operator() (If *node, Context &ctx)
-{
+ExecStatus StatementBuilder::operator() (If *node, Context &ctx) {
     ExpressionBuilder evaluator;
     llvm::Value *val = dispatch(evaluator, node->condition(), ctx);
     if (!node->thenBlock() && !node->elseBlock()) // "if (cond) ;" || "if (cond) ; else ;" no additional generation needed
@@ -144,8 +140,7 @@ ExecStatus StatementBuilder::operator() (If *node, Context &ctx)
     return ExecStatus::cont;
 }
 
-ExecStatus StatementBuilder::operator() (CodeBlock *block, Context &ctx)
-{
+ExecStatus StatementBuilder::operator() (CodeBlock *block, Context &ctx) {
     ExecStatus lastStatus = ExecStatus::cont;
     Node *lastStatement = nullptr;
     for (Node *statement: block->statements()) {
@@ -162,8 +157,7 @@ ExecStatus StatementBuilder::operator() (CodeBlock *block, Context &ctx)
     return lastStatus;
 }
 
-ExecStatus StatementBuilder::operator() (ExprStatement *node, Context &ctx)
-{
+ExecStatus StatementBuilder::operator() (ExprStatement *node, Context &ctx) {
     ExpressionBuilder evaluator;
     dispatch(evaluator, node->expression(), ctx);
     return ExecStatus::cont;
@@ -182,7 +176,7 @@ private:
     std::string mMsg;
 };
 
-void ModuleBuilder::save(const std::string &path) {
+void ModuleBuilder::save(const std::string& path) {
     // verify module IR correctness
     std::ostringstream oss;
     llvm::raw_os_ostream llvmOss(oss);

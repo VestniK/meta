@@ -16,25 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#pragma once
-
-#include <map>
-#include <memory>
-
 #include "typesystem/type.h"
+#include "typesystem/typesstore.h"
 
 namespace meta::typesystem {
 
-class TypesStore {
-public:
-    TypesStore(TypesStore* parent = nullptr);
-    ~TypesStore() = default;
+TypesStore::TypesStore(TypesStore* parent): mParent(parent) {
+    for (auto& primitive: createBuiltinTypes()) {
+        const auto name = primitive->name();
+        mTypes[name] = std::move(primitive);
+    }
+}
 
-    Type *get(utils::string_view name) const;
-
-private:
-    TypesStore* mParent = nullptr;
-    std::map<utils::string_view, std::unique_ptr<Type>> mTypes;
-};
+Type* TypesStore::get(utils::string_view name) const {
+    const auto it = mTypes.find(name);
+    if (it == mTypes.end())
+        return mParent ? mParent->get(name) : nullptr;
+    return it->second.get();
+}
 
 } // namespace meta::typesystem

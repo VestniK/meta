@@ -145,6 +145,11 @@ auto adjacent_find(const Container& cnt, BinPred&& pred) {
     return std::adjacent_find(cnt.begin(), cnt.end(), std::forward<BinPred>(pred));
 }
 
+template<typename Container, typename OIter>
+auto move(Container&& src, OIter dest) {
+    return std::move(src.begin(), src.end(), dest);
+}
+
 /**
  * Итератор для обхода коллекции по парам соседних элементов.
  */

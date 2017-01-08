@@ -4,6 +4,8 @@
 
 #include "utils/types.h"
 
+#include "typesystem/type.h"
+
 #include "parser/metanodes.h"
 
 #include "analysers/dictionary.h"
@@ -42,8 +44,14 @@ struct Scope {
     utils::multidict<DeclRef<Function>> functions;
     utils::dict<DeclRef<Struct>> structs;
     std::map<utils::string_view, VarStats> vars;
+    utils::dict<std::unique_ptr<typesystem::Type>> types;
 
-    Scope() = default;
+    /// Создание глобального контекста
+    Scope() {
+        utils::move(typesystem::createBuiltinTypes(), std::inserter(types, types.end()));
+    }
+    Scope(Scope* parent, utils::string_view package = {}): parent(parent), package(package) {}
+
     Scope(const Scope&) = delete;
     Scope(Scope&&) = delete;
     const Scope& operator= (const Scope&) = delete;
@@ -71,6 +79,17 @@ VarStats* find<VarStats>(Scope& scope, utils::string_view name) {
     }
     return nullptr;
 }
+
+// TODO: раскомментировать как только понадобится
+// template<>
+// typesystem::Type* find<typesystem::Type>(Scope& scope, utils::string_view name) {
+//     for (auto* context = &scope; context != nullptr; context = context->parent) {
+//         auto it = context->types.find(name);
+//         if (it != context->types.end())
+//             return it->get();
+//     }
+//     return nullptr;
+// }
 
 } // anonymous namespace
 } // namespace meta::analysers

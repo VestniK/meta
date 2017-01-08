@@ -26,6 +26,15 @@
 
 namespace meta::typesystem {
 
+namespace BuiltinType {
+
+constexpr static utils::string_view Int = "int"sv;
+constexpr static utils::string_view Bool = "bool"sv;
+constexpr static utils::string_view String = "string"sv;
+constexpr static utils::string_view Void = "void"sv;
+
+};
+
 enum class TypeProp {
     complete,
     voidtype,
@@ -70,5 +79,7 @@ inline
 TypeProps operator& (const Type* t, TypeProp prop) {return t->properties() & prop;}
 inline
 TypeProps operator& (const Type* t, TypeProps props) {return t->properties() & props;}
+
+std::vector<std::unique_ptr<Type>> createBuiltinTypes();
 
 } // namespace meta::typesystem

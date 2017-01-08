@@ -1,5 +1,5 @@
 set(SRC
-  typesstore.cpp
+  lib.cpp
 )
 
 add_library(typesystem STATIC ${SRC})
