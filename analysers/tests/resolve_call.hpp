@@ -2,8 +2,6 @@
 
 #include "utils/testtools.h"
 
-#include "typesystem/typesstore.h"
-
 #include "parser/metaparser.h"
 #include "parser/function.h"
 #include "parser/call.h"
@@ -34,8 +32,7 @@ TEST(ResolveCall, simple) {
     parser.setParseActions(&act);
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
-    typesystem::TypesStore typestore;
-    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
+    ASSERT_ANALYSE(resolve(ast, act.dictionary()));
     auto calls = ast->getChildren<Call>(infinitDepth);
     ASSERT_EQ(calls.size(), 2u);
     ASSERT_NE(calls[0]->function(), nullptr);
@@ -61,8 +58,7 @@ TEST(ResolveCall, recursive) {
     parser.setParseActions(&act);
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
-    typesystem::TypesStore typestore;
-    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
+    ASSERT_ANALYSE(resolve(ast, act.dictionary()));
     auto calls = ast->getChildren<Call>(infinitDepth);
     ASSERT_EQ(calls.size(), 1u);
     ASSERT_NE(calls[0]->function(), nullptr);
@@ -92,8 +88,7 @@ TEST(ResolveCall, inderectRecursive) {
     parser.setParseActions(&act);
     ASSERT_PARSE(parser, input);
     auto ast = parser.ast();
-    typesystem::TypesStore typestore;
-    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
+    ASSERT_ANALYSE(resolve(ast, act.dictionary()));
     auto calls = ast->getChildren<Call>(infinitDepth);
     ASSERT_EQ(calls.size(), 3u);
     ASSERT_NE(calls[0]->function(), nullptr);
@@ -137,8 +132,7 @@ TEST(ResolveCall, imported) {
     ASSERT_PARSE(parser, input1);
     ASSERT_PARSE(parser, input2);
     auto ast = parser.ast();
-    typesystem::TypesStore typestore;
-    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
+    ASSERT_ANALYSE(resolve(ast, act.dictionary()));
     auto calls = ast->getChildren<Call>(infinitDepth);
     ASSERT_EQ(calls.size(), 3u);
     ASSERT_NE(calls[0]->function(), nullptr);
@@ -179,8 +173,7 @@ TEST(ResolveCall, samePkgAnotherFile) {
     ASSERT_PARSE(parser, input1);
     ASSERT_PARSE(parser, input2);
     auto ast = parser.ast();
-    typesystem::TypesStore typestore;
-    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
+    ASSERT_ANALYSE(resolve(ast, act.dictionary()));
     auto calls = ast->getChildren<Call>(infinitDepth);
     ASSERT_EQ(calls.size(), 3u);
     ASSERT_NE(calls[0]->function(), nullptr);
@@ -203,9 +196,8 @@ TEST_P(ResolveCallErrors, resolveErrors) {
     parser.setParseActions(&act);
     ASSERT_PARSE(parser, param.input);
     auto ast = parser.ast();
-    typesystem::TypesStore typestore;
     try {
-        resolve(ast, act.dictionary(), typestore);
+        resolve(ast, act.dictionary());
         FAIL() << "Error was not detected: " << param.errMsg;
     } catch (const SemanticError& err) {
         EXPECT_EQ(err.what(), param.errMsg) << err.what();

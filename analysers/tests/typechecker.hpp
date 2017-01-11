@@ -32,7 +32,6 @@
 #include "analysers/declconflicts.h" // TODO elliminate necessity of this header (SourceInfo only)
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
-#include "analysers/typechecker.h"
 
 namespace meta::analysers::tests::typechecker {
 namespace {
@@ -61,9 +60,7 @@ TEST_P(TypeCheker, typeCheck) {
     parser.setNodeActions(&act);
     ASSERT_PARSE(parser, param.src);
     auto ast = parser.ast();
-    typesystem::TypesStore typestore;
-    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
-    ASSERT_ANALYSE(checkTypes(ast, typestore));
+    ASSERT_ANALYSE(resolve(ast, act.dictionary()));
     auto functions = ast->getChildren<Function>();
     ASSERT_EQ(functions.size(), param.functions.size());
     for (size_t pos = 0; pos < functions.size(); ++pos) {
@@ -180,10 +177,8 @@ TEST_P(TypeChekerErrors, typeErrors) {
     parser.setNodeActions(&act);
     ASSERT_PARSE(parser, param.input);
     auto ast = parser.ast();
-    typesystem::TypesStore typestore;
-    ASSERT_ANALYSE(resolve(ast, act.dictionary(), typestore));
     try {
-        checkTypes(ast, typestore);
+        resolve(ast, act.dictionary());
         FAIL() << "Error was not detected: " << param.errMsg;
     } catch (const SemanticError &err) {
         EXPECT_EQ(param.errMsg, err.what()) << err.what();

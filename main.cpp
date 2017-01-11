@@ -30,14 +30,11 @@
 #include "parser/metaparser.h"
 #include "parser/nodeexception.h"
 
-#include "typesystem/typesstore.h"
-
 #include "analysers/actions.h"
 #include "analysers/metaprocessor.h"
 #include "analysers/reachabilitychecker.h"
 #include "analysers/resolver.h"
 #include "analysers/semanticerror.h"
-#include "analysers/typechecker.h"
 
 #include "generators/llvmgen/generator.h"
 
@@ -161,9 +158,7 @@ bool main(const Options &opts) try {
     }
     auto ast = parser.ast();
     // analyse
-    typesystem::TypesStore typestore;
-    analysers::resolve(ast, act.dictionary(), typestore);
-    analysers::checkTypes(ast, typestore);
+    analysers::resolve(ast, act.dictionary());
     analysers::checkReachability(ast);
     analysers::processMeta(ast);
     // generate

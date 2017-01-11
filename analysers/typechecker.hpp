@@ -29,7 +29,6 @@
 #include "typesystem/typesstore.h"
 
 #include "analysers/semanticerror.h"
-#include "analysers/typechecker.h"
 
 namespace meta::analysers {
 namespace {
@@ -293,11 +292,10 @@ Type TypeEvaluator::operator() (Call* node, Types &types) {
     return node->type();
 }
 
-} // anonymous namespace
-
 void checkTypes(AST *ast, typesystem::TypesStore &types) {
     TypeChecker visitor(types);
     ast->walk(&visitor);
 }
 
+} // anonymous namespace
 } // namespace meta::analysers

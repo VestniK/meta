@@ -355,11 +355,13 @@ struct Analyser {
 
 } // anonymous namespace
 
-void resolve(AST* ast, Dictionary& dict, typesystem::TypesStore& types) {
+void resolve(AST* ast, Dictionary& dict) {
+    typesystem::TypesStore types;
     Analyser resolver{dict, types};
     Scope globalscope;
     for (auto root: ast->getChildren<Node>(0))
         dispatch(resolver, root, globalscope);
+    checkTypes(ast, types);
 }
 
 } // namespace meta::analysers
