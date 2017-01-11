@@ -13,6 +13,7 @@ utils::string_view Type::name() const {
     case Void: return BuiltinType::Void;
     case Int: return BuiltinType::Int;
     case Bool: return BuiltinType::Bool;
+    case Double: return BuiltinType::Double;
     case String: return BuiltinType::String;
     }
     assert(false);
@@ -24,6 +25,7 @@ TypeProps Type::properties() const {
     case Void: return TypeProp::complete | TypeProp::primitive | TypeProp::voidtype;
     case Int: return TypeProp::complete | TypeProp::primitive | TypeProp::numeric;
     case Bool: return TypeProp::complete | TypeProp::primitive | TypeProp::boolean;
+    case Double: return TypeProp::complete | TypeProp::primitive | TypeProp::numeric;
     case String: return TypeProp::complete | TypeProp::primitive | TypeProp::sret;
     case Auto: break;
     }
@@ -36,6 +38,7 @@ utils::array_view<Type> builtinTypes() {
         Type::Void,
         Type::Int,
         Type::Bool,
+        Type::Double,
         Type::String
     };
     return types;

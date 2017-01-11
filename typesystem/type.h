@@ -33,6 +33,7 @@ constexpr static utils::string_view Int = "int"sv;
 constexpr static utils::string_view Bool = "bool"sv;
 constexpr static utils::string_view String = "string"sv;
 constexpr static utils::string_view Void = "void"sv;
+constexpr static utils::string_view Double = "double"sv;
 
 };
 
@@ -64,6 +65,7 @@ public:
         Void,
         Int,
         Bool,
+        Double,
         String
     };
 

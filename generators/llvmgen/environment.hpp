@@ -88,6 +88,7 @@ llvm::Type* Environment::getType(const typesystem::Type* type) {
     // built in types:
     switch (type->typeId()) {
         case typesystem::Type::Int: return llvm::Type::getInt32Ty(context);
+        case typesystem::Type::Double: return llvm::Type::getDoubleTy(context);
         case typesystem::Type::Bool: return llvm::Type::getInt1Ty(context);
         case typesystem::Type::String: return string;
 
