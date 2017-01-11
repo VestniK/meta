@@ -18,23 +18,17 @@
  */
 #pragma once
 
-#include <map>
-#include <memory>
-
 #include "typesystem/type.h"
 
 namespace meta::typesystem {
 
 class TypesStore {
 public:
-    TypesStore(TypesStore* parent = nullptr);
-    ~TypesStore() = default;
-
-    Type *get(utils::string_view name) const;
+    TypesStore(TypesStore* parent = nullptr): mParent(parent) {}
+    const Type* get(utils::string_view name) const;
 
 private:
     TypesStore* mParent = nullptr;
-    std::map<utils::string_view, std::unique_ptr<Type>> mTypes;
 };
 
 } // namespace meta::typesystem

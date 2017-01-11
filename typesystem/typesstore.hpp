@@ -21,18 +21,12 @@
 
 namespace meta::typesystem {
 
-TypesStore::TypesStore(TypesStore* parent): mParent(parent) {
-    for (auto& primitive: createBuiltinTypes()) {
-        const auto name = primitive->name();
-        mTypes[name] = std::move(primitive);
+const Type* TypesStore::get(utils::string_view name) const {
+    for (auto& type: builtinTypes()) {
+        if (type.name() == name)
+            return &type;
     }
-}
-
-Type* TypesStore::get(utils::string_view name) const {
-    const auto it = mTypes.find(name);
-    if (it == mTypes.end())
-        return mParent ? mParent->get(name) : nullptr;
-    return it->second.get();
+    return nullptr;
 }
 
 } // namespace meta::typesystem

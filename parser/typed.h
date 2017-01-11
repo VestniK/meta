@@ -26,13 +26,13 @@ namespace meta {
 
 class Typed {
 public:
-    virtual ~Typed() {}
+    virtual ~Typed() = default;
 
-    const typesystem::Type *type() const {return mType;}
-    void setType(const typesystem::Type *type) {mType = type;}
+    const typesystem::Type* type() const {return mType;}
+    void setType(const typesystem::Type* type) {mType = type;}
 
 private:
-    const typesystem::Type *mType = nullptr;
+    const typesystem::Type* mType = nullptr;
 };
 
 } // namespace meta

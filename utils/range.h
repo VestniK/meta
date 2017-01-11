@@ -120,34 +120,34 @@ auto slice(Iter b) {Slice<Iter> res{b, b}; ++res.end_it; return res;}
 template<typename Iter>
 auto slice(std::pair<Iter, Iter> range) {return Slice<Iter>{range.first, range.second};}
 
-template<typename Container, typename Val>
+template<Iterable Container, typename Val>
 bool contains(const Container& cnt, Val&& val) {
     return std::find(cnt.begin(), cnt.end(), std::forward<Val>(val)) != cnt.end();
 }
 
-template<typename Container, typename Key>
+template<Iterable Container, typename Key>
 auto equal_range(const Container& cnt, const Key& key) {
     return slice(cnt.equal_range(key));
 }
 
-template<typename Container, typename Pred>
+template<Iterable Container, typename Pred>
 auto count_if(const Container& cnt, Pred&& pred) {
     return std::count_if(cnt.begin(), cnt.end(), std::forward<Pred>(pred));
 }
 
-template<typename Container, typename Pred>
+template<Iterable Container, typename Pred>
 auto find_if(const Container& cnt, Pred&& pred) {
     return std::find_if(cnt.begin(), cnt.end(), std::forward<Pred>(pred));
 }
 
-template<typename Container, typename BinPred>
+template<Iterable Container, typename BinPred>
 auto adjacent_find(const Container& cnt, BinPred&& pred) {
     return std::adjacent_find(cnt.begin(), cnt.end(), std::forward<BinPred>(pred));
 }
 
-template<typename Container, typename OIter>
-auto move(Container&& src, OIter dest) {
-    return std::move(src.begin(), src.end(), dest);
+template<Iterable Container, typename OIter>
+auto copy(Container&& src, OIter dest) {
+    return std::copy(begin(src), end(src), dest);
 }
 
 /**

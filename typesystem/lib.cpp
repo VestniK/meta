@@ -1,2 +1,2 @@
-#include "builtin_types.hpp"
+#include "type.hpp"
 #include "typesstore.hpp"

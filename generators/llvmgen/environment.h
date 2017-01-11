@@ -51,27 +51,24 @@ class Type;
 namespace generators {
 namespace llvmgen {
 
-struct Environment
-{
-    Environment(const std::string &moduleName);
-    ~Environment();
+struct Environment {
+    Environment(utils::string_view moduleName);
 
-    llvm::Function *addFunction(Function *func);
-    llvm::Type *getType(const typesystem::Type *type);
+    llvm::Function* addFunction(Function* func);
+    llvm::Type* getType(const typesystem::Type* type);
 
     llvm::LLVMContext context;
     std::unique_ptr<llvm::Module> module;
-    llvm::StructType *string;
+    llvm::StructType* string;
 };
 
-struct Context
-{
+struct Context {
     Environment &env;
-    std::map<VarDecl *, llvm::Value *> varMap;
+    std::map<VarDecl*, llvm::Value*> varMap;
     llvm::IRBuilder<> builder;
 };
 
-llvm::AllocaInst* addLocalVar(llvm::Function* func, llvm::Type* type, const utils::string_view& name);
+llvm::AllocaInst* addLocalVar(llvm::Function* func, llvm::Type* type, utils::string_view name);
 
 } // namespace llvmgen
 } // namespace generators

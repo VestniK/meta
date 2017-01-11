@@ -44,11 +44,11 @@ struct Scope {
     utils::multidict<DeclRef<Function>> functions;
     utils::dict<DeclRef<Struct>> structs;
     std::map<utils::string_view, VarStats> vars;
-    utils::dict<std::unique_ptr<typesystem::Type>> types;
+    utils::dict<typesystem::Type> types;
 
     /// Создание глобального контекста
     Scope() {
-        utils::move(typesystem::createBuiltinTypes(), std::inserter(types, types.end()));
+        utils::copy(typesystem::builtinTypes(), std::inserter(types, types.end()));
     }
     Scope(Scope* parent, utils::string_view package = {}): parent(parent), package(package) {}
 

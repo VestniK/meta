@@ -35,9 +35,9 @@ namespace meta {
 namespace generators {
 namespace llvmgen {
 
-Environment::Environment(const std::string& moduleName):
+Environment::Environment(utils::string_view moduleName):
     context(),
-    module(new llvm::Module(moduleName, context)),
+    module(new llvm::Module({moduleName.data(), moduleName.size()}, context)),
     string(llvm::StructType::get(
         llvm::Type::getInt32PtrTy(context), // control block pointer used by meta-rt only
         llvm::Type::getInt8PtrTy(context), // content ptr
@@ -46,12 +46,7 @@ Environment::Environment(const std::string& moduleName):
 {
 }
 
-Environment::~Environment()
-{
-}
-
-llvm::Function *Environment::addFunction(Function *func)
-{
+llvm::Function *Environment::addFunction(Function *func) {
     const auto args = func->args();
     std::vector<llvm::Type *> argTypes;
     auto rettype = getType(func->type());
@@ -89,8 +84,7 @@ llvm::Function *Environment::addFunction(Function *func)
     return prototype;
 }
 
-llvm::Type *Environment::getType(const typesystem::Type *type)
-{
+llvm::Type* Environment::getType(const typesystem::Type* type) {
     // built in types:
     switch (type->typeId()) {
         case typesystem::Type::Int: return llvm::Type::getInt32Ty(context);
@@ -99,13 +93,11 @@ llvm::Type *Environment::getType(const typesystem::Type *type)
 
         case typesystem::Type::Auto: assert(false);
         case typesystem::Type::Void: return llvm::Type::getVoidTy(context);
-
-        case typesystem::Type::UserDefined: break; /// @todo
     }
     return nullptr;
 }
 
-llvm::AllocaInst *addLocalVar(llvm::Function* func, llvm::Type* type, const utils::string_view& name) {
+llvm::AllocaInst* addLocalVar(llvm::Function* func, llvm::Type* type, utils::string_view name) {
     llvm::IRBuilder<> builder(&(func->getEntryBlock()), func->getEntryBlock().begin());
     return builder.CreateAlloca(type, 0, llvm::StringRef(name.data(), name.size()));
 }

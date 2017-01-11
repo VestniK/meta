@@ -28,6 +28,7 @@ namespace meta::typesystem {
 
 namespace BuiltinType {
 
+constexpr static utils::string_view Auto = "auto"sv;
 constexpr static utils::string_view Int = "int"sv;
 constexpr static utils::string_view Bool = "bool"sv;
 constexpr static utils::string_view String = "string"sv;
@@ -63,23 +64,29 @@ public:
         Void,
         Int,
         Bool,
-        String,
-
-        UserDefined
+        String
     };
 
-    virtual utils::string_view name() const = 0;
-    virtual TypeId typeId() const = 0;
-    virtual TypeProps properties() const = 0;
+    constexpr Type(TypeId id): mId(id) {}
 
-    virtual ~Type() = default;
+    utils::string_view name() const;
+    TypeId typeId() const {return mId;}
+    TypeProps properties() const;
+
+private:
+    TypeId mId;
 };
+
+utils::array_view<Type> builtinTypes();
+
+inline
+TypeProps operator& (const Type t, TypeProp prop) {return t.properties() & prop;}
+inline
+TypeProps operator& (const Type t, TypeProps props) {return t.properties() & props;}
 
 inline
 TypeProps operator& (const Type* t, TypeProp prop) {return t->properties() & prop;}
 inline
 TypeProps operator& (const Type* t, TypeProps props) {return t->properties() & props;}
-
-std::vector<std::unique_ptr<Type>> createBuiltinTypes();
 
 } // namespace meta::typesystem
