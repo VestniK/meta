@@ -38,6 +38,8 @@ struct VarStats {
     utils::string_view name() const {return decl->name();}
 };
 
+using Type = typesystem::Type;
+
 struct Scope {
     Scope* parent = nullptr;
     utils::string_view package;
@@ -65,31 +67,29 @@ struct Scope {
                 throw SemanticError(kv.second.decl, "Variable '%s' is never used", kv.first);
         }
     }
+
+    template<typename Decl>
+    Decl* find(utils::string_view name) = delete;
+
+    utils::optional<typesystem::Type> findType(utils::string_view name) const {
+        for (auto* scope = this; scope != nullptr; scope = scope->parent) {
+            auto it = scope->types.find(name);
+            if (it != scope->types.end())
+                return *it;
+        }
+        return utils::nullopt;
+    }
 };
 
-template<typename Decl>
-Decl* find(Scope& scope, utils::string_view name);
-
 template<>
-VarStats* find<VarStats>(Scope& scope, utils::string_view name) {
-    for (auto* context = &scope; context != nullptr; context = context->parent) {
-        auto it = context->vars.find(name);
-        if (it != context->vars.end())
+VarStats* Scope::find<VarStats>(utils::string_view name) {
+    for (auto* scope = this; scope != nullptr; scope = scope->parent) {
+        auto it = scope->vars.find(name);
+        if (it != scope->vars.end())
             return &(it->second);
     }
     return nullptr;
 }
-
-// TODO: раскомментировать как только понадобится
-// template<>
-// typesystem::Type* find<typesystem::Type>(Scope& scope, utils::string_view name) {
-//     for (auto* context = &scope; context != nullptr; context = context->parent) {
-//         auto it = context->types.find(name);
-//         if (it != context->types.end())
-//             return it->get();
-//     }
-//     return nullptr;
-// }
 
 } // anonymous namespace
 } // namespace meta::analysers

@@ -18,9 +18,9 @@
  */
 #pragma once
 
-namespace meta::typesystem {
-class Type;
-} // namespace meta::typesystem
+#include "utils/types.h"
+
+#include "typesystem/type.h"
 
 namespace meta {
 
@@ -28,11 +28,17 @@ class Typed {
 public:
     virtual ~Typed() = default;
 
-    const typesystem::Type* type() const {return mType;}
-    void setType(const typesystem::Type* type) {mType = type;}
+    utils::optional<typesystem::Type> type() const {return mType;}
+    void setType(utils::optional<typesystem::Type> val) {mType = val;}
+    void setType(const typesystem::Type* type) {
+        if (type)
+            mType = *type;
+        else
+            mType = utils::nullopt;
+    }
 
 private:
-    const typesystem::Type* mType = nullptr;
+    utils::optional<typesystem::Type> mType;
 };
 
 } // namespace meta

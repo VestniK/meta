@@ -75,20 +75,13 @@ public:
     TypeId typeId() const {return mId;}
     TypeProps properties() const;
 
+    bool operator== (Type rhs) const {return mId == rhs.mId;}
+    bool operator!= (Type rhs) const {return mId != rhs.mId;}
+
 private:
     TypeId mId;
 };
 
 utils::array_view<Type> builtinTypes();
-
-inline
-TypeProps operator& (const Type t, TypeProp prop) {return t.properties() & prop;}
-inline
-TypeProps operator& (const Type t, TypeProps props) {return t.properties() & props;}
-
-inline
-TypeProps operator& (const Type* t, TypeProp prop) {return t->properties() & prop;}
-inline
-TypeProps operator& (const Type* t, TypeProps props) {return t->properties() & props;}
 
 } // namespace meta::typesystem

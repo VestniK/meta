@@ -26,55 +26,55 @@
 #include "parser/metanodes.h"
 
 #include "typesystem/type.h"
-#include "typesystem/typesstore.h"
 
 #include "analysers/semanticerror.h"
+
+#include "scope.hpp"
 
 namespace meta::analysers {
 namespace {
 
-using Type = const typesystem::Type*;
-using Types = typesystem::TypesStore;
-
 struct TypeEvaluator {
-    Type operator() (Node* node, Types&) {throw UnexpectedNode(node, "Can't evaluate type");}
+    utils::optional<Type> operator() (Node* node, Scope&) {throw UnexpectedNode(node, "Can't evaluate type");}
 
-    Type operator() (Number* node, Types& types) {
-        node->setType(types.get(typesystem::BuiltinType::Int));
+    utils::optional<Type> operator() (Number* node, Scope& scope) {
+        node->setType(scope.findType(typesystem::BuiltinType::Int));
         return node->type();
     }
 
-    Type operator() (Literal* node, Types& types) {
+    utils::optional<Type> operator() (Literal* node, Scope& scope) {
         switch (node->value()) {
         case Literal::trueVal:
         case Literal::falseVal:
-            node->setType(types.get(typesystem::BuiltinType::Bool));
+            node->setType(scope.findType(typesystem::BuiltinType::Bool));
         break;
         }
         return node->type();
     }
 
-    Type operator() (StrLiteral* node, Types& types) {
-        node->setType(types.get(typesystem::BuiltinType::String));
+    utils::optional<Type> operator() (StrLiteral* node, Scope& scope) {
+        node->setType(scope.findType(typesystem::BuiltinType::String));
         return node->type();
     }
 
-    Type operator() (Var* node, Types&) {
+    utils::optional<Type> operator() (Var* node, Scope&) {
         PRECONDITION(node->declaration() != nullptr);
-        PRECONDITION(node->declaration()->type() != nullptr);
-        PRECONDITION(node->declaration()->type() & typesystem::TypeProp::complete);
+        PRECONDITION(node->declaration()->type());
+        PRECONDITION(node->declaration()->type()->properties() & typesystem::TypeProp::complete);
         node->setType(node->declaration()->type());
 
         return node->type();
     }
 
-    Type operator() (Assigment* node, Types& types) {
-        Type valueType = dispatch(*this, node->value(), types);
+    utils::optional<Type> operator() (Assigment* node, Scope& scope) {
+        utils::optional<Type> valueType = dispatch(*this, node->value(), scope);
 
         struct {
-            Type operator() (Node* node, Type) {throw UnexpectedNode(node, "Variable or access to Memeber required");}
+            utils::optional<Type> operator() (Node* node, utils::optional<Type>) {
+              throw UnexpectedNode(node, "Variable or access to Memeber required");
+            }
 
-            Type operator() (Var* node, Type valType) {
+            utils::optional<Type> operator() (Var* node, utils::optional<Type> valType) {
                 if (!node->type())
                     node->setType(node->declaration()->type());
                 if (node->type() != valType)
@@ -84,7 +84,7 @@ struct TypeEvaluator {
                     );
                 return node->declaration()->type();
             }
-            Type operator() (MemberAccess* node, Type valType) {
+            utils::optional<Type> operator() (MemberAccess* node, utils::optional<Type> valType) {
                 if (node->memberDecl()->type() != valType)
                     throw SemanticError(
                         node, "Attempt to assign value of type '%s' to a the variable '%s.%s.%s' of type '%s'",
@@ -96,24 +96,24 @@ struct TypeEvaluator {
                 return node->memberDecl()->type();
             }
         } getAssignType;
-        Type targetType = dispatch(getAssignType, node->target(), valueType);
+        utils::optional<Type> targetType = dispatch(getAssignType, node->target(), valueType);
         node->setType(targetType);
         return node->type();
     }
 
-    Type operator() (PrefixOp* node, Types& types) {
-        Type operandType = dispatch(*this, node->operand(), types);
+    utils::optional<Type> operator() (PrefixOp* node, Scope& scope) {
+        utils::optional<Type> operandType = dispatch(*this, node->operand(), scope);
         switch (node->operation()) {
             case PrefixOp::positive:
             case PrefixOp::negative:
-                if (!(operandType & typesystem::TypeProp::numeric))
+                if (!(operandType->properties() & typesystem::TypeProp::numeric))
                     throw SemanticError(
                         node,
                         "Can't perform arythmetic operation on value of type '%s'", operandType->name()
                     );
                 break;
             case PrefixOp::boolnot:
-                if (!(operandType & typesystem::TypeProp::boolean))
+                if (!(operandType->properties() & typesystem::TypeProp::boolean))
                     throw SemanticError(
                         node,
                         "Can't perform boolean not operation on value of type '%s'", operandType->name()
@@ -124,10 +124,10 @@ struct TypeEvaluator {
         return operandType;
     }
 
-    Type operator() (BinaryOp* node, Types& types) {
-        POSTCONDITION(node->type() != nullptr);
-        Type lhs = dispatch(*this, node->left(), types);
-        Type rhs = dispatch(*this, node->right(), types);
+    utils::optional<Type> operator() (BinaryOp* node, Scope& scope) {
+        POSTCONDITION(node->type());
+        utils::optional<Type> lhs = dispatch(*this, node->left(), scope);
+        utils::optional<Type> rhs = dispatch(*this, node->right(), scope);
 
         switch (node->operation()) {
             case BinaryOp::add:
@@ -135,8 +135,8 @@ struct TypeEvaluator {
             case BinaryOp::sub:
             case BinaryOp::mul:
                 if (
-                    !(lhs & typesystem::TypeProp::numeric) ||
-                    !(rhs & typesystem::TypeProp::numeric)
+                    !(lhs->properties() & typesystem::TypeProp::numeric) ||
+                    !(rhs->properties() & typesystem::TypeProp::numeric)
                 )
                     throw SemanticError(
                         node, "Can't perform arythmetic operation on values of types '%s' and '%s'",
@@ -151,84 +151,84 @@ struct TypeEvaluator {
             case BinaryOp::noteq:
                 if (lhs != rhs)
                     throw SemanticError(node, "Can't compare values of types '%s' and '%s'", lhs->name(), rhs->name());
-                node->setType(types.get(typesystem::BuiltinType::Bool));
+                node->setType(scope.findType(typesystem::BuiltinType::Bool));
                 break;
             case BinaryOp::greater:
             case BinaryOp::greatereq:
             case BinaryOp::less:
             case BinaryOp::lesseq:
                 if (
-                    !(lhs & typesystem::TypeProp::numeric) ||
-                    !(rhs & typesystem::TypeProp::numeric)
+                    !(lhs->properties() & typesystem::TypeProp::numeric) ||
+                    !(rhs->properties() & typesystem::TypeProp::numeric)
                 )
                     throw SemanticError(node, "Can't compare values of types '%s' and '%s'", lhs->name(), rhs->name());
-                node->setType(types.get(typesystem::BuiltinType::Bool));
+                node->setType(scope.findType(typesystem::BuiltinType::Bool));
                 break;
 
             case BinaryOp::boolAnd:
             case BinaryOp::boolOr:
                 if (
-                    !(lhs & typesystem::TypeProp::boolean) ||
-                    !(rhs & typesystem::TypeProp::boolean)
+                    !(lhs->properties() & typesystem::TypeProp::boolean) ||
+                    !(rhs->properties() & typesystem::TypeProp::boolean)
                 )
                     throw SemanticError(
                         node, "Can't perform boolean operations on values of types '%s' and '%s'",
                         lhs->name(), rhs->name()
                     );
-                node->setType(types.get(typesystem::BuiltinType::Bool));
+                node->setType(scope.findType(typesystem::BuiltinType::Bool));
                 break;
         }
         return node->type();
     }
 
     // Requires TypeChecker as complete type so definition is bellow
-    Type operator() (Call* node, Types &types);
+    utils::optional<Type> operator() (Call* node, Scope& scope);
 };
 
-Type type_of(Node* node, Types& types) {
-    return dispatch(TypeEvaluator{}, node, types);
+utils::optional<Type> type_of(Node* node, Scope& scope) {
+    return dispatch(TypeEvaluator{}, node, scope);
 }
 
 class TypeChecker: public Visitor {
 public:
-    explicit TypeChecker(typesystem::TypesStore &types): mTypes(types) {}
+    explicit TypeChecker(Scope& scope): mScope(scope) {}
 
     bool visit(Function* node) override {
-        if (node->type() != nullptr)
+        if (node->type())
             return false;
-        node->setType(mTypes.get(node->retType()));
-        if (node->type() == nullptr)
+        node->setType(mScope.findType(node->retType()));
+        if (!node->type())
             throw SemanticError(node, "Function '%s' returns unknown type '%s'", node->name(), node->retType());
         mCurrFunc = node;
         return true;
     }
     void leave(Function* node) override {
-        POSTCONDITION(node->type() != nullptr);
-        POSTCONDITION(node->type() & typesystem::TypeProp::complete);
+        POSTCONDITION(node->type());
+        POSTCONDITION(node->type()->properties() & typesystem::TypeProp::complete);
 
         mCurrFunc = nullptr;
     }
 
     bool visit(meta::ExprStatement* node) override {
-        dispatch(TypeEvaluator{}, node->expression(), mTypes);
+        dispatch(TypeEvaluator{}, node->expression(), mScope);
         return false;
     }
 
     bool visit(VarDecl* node) override {
-        POSTCONDITION(node->type() != nullptr);
-        POSTCONDITION(node->type() & typesystem::TypeProp::complete);
+        POSTCONDITION(node->type());
+        POSTCONDITION(node->type()->properties() & typesystem::TypeProp::complete);
 
-        node->setType(mTypes.get(node->typeName()));
-        if (node->type() == nullptr)
+        node->setType(mScope.findType(node->typeName()));
+        if (!node->type())
             throw SemanticError(node, "Variable '%s' has unknown type '%s'", node->name(), node->typeName());
         if (!node->inited()) {
-            if (!(node->type() & typesystem::TypeProp::complete))
+            if (!(node->type()->properties() & typesystem::TypeProp::complete))
                 throw SemanticError(node, "Can't deduce variable '%s' type.", node->name());
             return false;
         }
 
-        Type initExprType = dispatch(TypeEvaluator{}, node->initExpr(), mTypes);
-        if (!(node->type() & typesystem::TypeProp::complete))
+        utils::optional<Type> initExprType = dispatch(TypeEvaluator{}, node->initExpr(), mScope);
+        if (!(node->type()->properties() & typesystem::TypeProp::complete))
             node->setType(initExprType);
         else if (node->type() != initExprType)
             throw SemanticError(
@@ -239,8 +239,8 @@ public:
     }
 
     bool visit(If* node) override {
-        Type condType = dispatch(TypeEvaluator{}, node->condition(), mTypes);
-        if (!(condType & typesystem::TypeProp::boolean))
+        utils::optional<Type> condType = dispatch(TypeEvaluator{}, node->condition(), mScope);
+        if (!(condType->properties() & typesystem::TypeProp::boolean))
             throw SemanticError(node->condition(), "If statement can't work with condition of type '%s'", condType->name());
         if (node->thenBlock())
             node->thenBlock()->walk(this);
@@ -250,12 +250,12 @@ public:
     }
 
     bool visit(meta::Return* node) override {
-        Type ret = node->value() == nullptr ?
-            mTypes.get(typesystem::BuiltinType::Void):
-            dispatch(TypeEvaluator{}, node->value(), mTypes)
+        utils::optional<Type> ret = node->value() == nullptr ?
+            mScope.findType(typesystem::BuiltinType::Void):
+            dispatch(TypeEvaluator{}, node->value(), mScope)
         ;
-        if (!(mCurrFunc->type() & typesystem::TypeProp::complete)) {
-            if (!(ret & typesystem::TypeProp::complete))
+        if (!(mCurrFunc->type()->properties() & typesystem::TypeProp::complete)) {
+            if (!(ret->properties() & typesystem::TypeProp::complete))
                 throw SemanticError(node, "Can't return value of incomplete type");
             mCurrFunc->setType(ret);
         }
@@ -268,20 +268,20 @@ public:
     }
 
 private:
-    typesystem::TypesStore &mTypes;
-    Function *mCurrFunc = nullptr;
+    Scope& mScope;
+    Function* mCurrFunc = nullptr;
 };
 
-Type TypeEvaluator::operator() (Call* node, Types &types) {
+utils::optional<Type> TypeEvaluator::operator() (Call* node, Scope& scope) {
     PRECONDITION(node->args().size() == node->function()->args().size());
-    if (node->function()->type() == nullptr) {
-        TypeChecker subchecker(types);
+    if (!node->function()->type()) {
+        TypeChecker subchecker(scope);
         node->function()->walk(&subchecker);
     }
     const auto& argdecls = node->function()->args();
     const auto& args = node->args();
     for (size_t i = 0; i < args.size(); ++i) {
-        Type argtype = dispatch(*this, args[i], types);
+        utils::optional<Type> argtype = dispatch(*this, args[i], scope);
         if (argdecls[i]->type() != argtype)
             throw SemanticError(
                 args[i], "Can't call function '%s' with argument %u of type '%s'. Expected type is '%s'",
@@ -292,8 +292,8 @@ Type TypeEvaluator::operator() (Call* node, Types &types) {
     return node->type();
 }
 
-void checkTypes(AST *ast, typesystem::TypesStore &types) {
-    TypeChecker visitor(types);
+void checkTypes(AST* ast, Scope& scope) {
+    TypeChecker visitor(scope);
     ast->walk(&visitor);
 }
 

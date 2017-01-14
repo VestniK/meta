@@ -18,8 +18,6 @@
  */
 #include "utils/contract.h"
 
-#include "typesystem/typesstore.h"
-
 #include "parser/literal.h"
 
 namespace meta {

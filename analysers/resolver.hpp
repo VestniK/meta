@@ -76,8 +76,7 @@ void trace(utils::string_view scopeTag, Node* node) {
     std::clog << ": " << line_start << utils::TermColor::red << str << utils::TermColor::none << line_end << '\n';
 }
 
-
-const utils::string_view resolverTraceTag = "RESOLVE";
+constexpr utils::string_view resolverTraceTag = "RESOLVE"sv;
 
 bool isChildPackage(utils::string_view subpkg, utils::string_view parentpkg) {
     if (parentpkg.length() > subpkg.length())
@@ -96,7 +95,6 @@ Import* import(const DeclRef<Decl>& val) {return val.import;}
 
 struct Analyser {
     Dictionary& dict;
-    Types& types;
 
     void operator() (Node* node, Scope&) {
         trace(resolverTraceTag, node);
@@ -263,7 +261,7 @@ struct Analyser {
 
     void operator() (VarDecl* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        auto conflict = find<VarStats>(scope, node->name());
+        auto conflict = scope.find<VarStats>(node->name());
         if (conflict && (conflict->decl->flags() & VarFlags::argument))
             throwDeclConflict(node, conflict->decl);
         if (node->inited() && !(node->flags() & VarFlags::argument))
@@ -309,7 +307,7 @@ struct Analyser {
 
     void operator() (Var* node, Scope& scope) {
         trace(resolverTraceTag, node);
-        auto varstat = find<VarStats>(scope, node->name());
+        auto varstat = scope.find<VarStats>(node->name());
         if (!varstat)
             throw SemanticError(node, "Undefined variable '%s'", node->name());
         if (varstat->assignCount == 0)
@@ -322,7 +320,7 @@ struct Analyser {
         trace(resolverTraceTag, node);
         if (node->target()->getVisitableType() == std::type_index(typeid(Var))) {
             auto target = static_cast<Var*>(node->target());
-            auto stats = find<VarStats>(scope, target->name());
+            auto stats = scope.find<VarStats>(target->name());
             if (stats->decl->flags() & VarFlags::argument)
                 throw SemanticError(node, "Attempt to modify function argument '%s'", target->name());
             stats->assignCount++;
@@ -330,7 +328,7 @@ struct Analyser {
         } else if (node->target()->getVisitableType() == std::type_index(typeid(MemberAccess))) {
             auto aggregate = static_cast<MemberAccess*>(node->target())->parent();
             [[gnu::unused]]
-            auto aggregate_type = type_of(aggregate, types);
+            auto aggregate_type = type_of(aggregate, scope);
             throw UnexpectedNode(node->target(), "Member assigment is not yet implemented");
         } else
             throw UnexpectedNode(node->target(), "Unexpected assigment left side expression type");
@@ -356,12 +354,11 @@ struct Analyser {
 } // anonymous namespace
 
 void resolve(AST* ast, Dictionary& dict) {
-    typesystem::TypesStore types;
-    Analyser resolver{dict, types};
+    Analyser resolver{dict};
     Scope globalscope;
     for (auto root: ast->getChildren<Node>(0))
         dispatch(resolver, root, globalscope);
-    checkTypes(ast, types);
+    checkTypes(ast, globalscope);
 }
 
 } // namespace meta::analysers

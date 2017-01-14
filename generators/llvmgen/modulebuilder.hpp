@@ -72,7 +72,7 @@ bool ModuleBuilder::visit(Function *node) {
     const ExecStatus status = statementBuilder(node->body(), mCtx);
     if (status == ExecStatus::stop) // Function body ends with terminating instruction
         return false;
-    if (!(node->type() & typesystem::TypeProp::voidtype))
+    if (!(node->type()->properties() & typesystem::TypeProp::voidtype))
         throw analysers::SemanticError(node, "Non-void function ends without return");
     mCtx.builder.CreateRetVoid(); // Void function with implicit return.
     return false;
@@ -81,8 +81,8 @@ bool ModuleBuilder::visit(Function *node) {
 ExecStatus StatementBuilder::operator() (VarDecl *node, Context &ctx) {
     PRECONDITION(!(node->flags() & VarFlags::argument));
     // types integrity should be checked by analyzers
-    PRECONDITION(ctx.env.getType(node->type()) != nullptr);
-    auto type = ctx.env.getType(node->type());
+    PRECONDITION(ctx.env.getType(*node->type()) != nullptr);
+    auto type = ctx.env.getType(*node->type());
     // TODO: good point to check for multiple definitions
     auto allocaVal = ctx.varMap[node] = addLocalVar(ctx.builder.GetInsertBlock()->getParent(), type, node->name());
     if (!node->initExpr())
@@ -101,7 +101,7 @@ ExecStatus StatementBuilder::operator() (Return *node, Context &ctx) {
     }
     auto retval = dispatch(ExpressionBuilder{}, value, ctx);
     auto* typedNode = dynamic_cast<Typed*>(value);
-    if (typedNode->type() & typesystem::TypeProp::sret) {
+    if (typedNode->type()->properties() & typesystem::TypeProp::sret) {
         llvm::Argument& sretArg = *ctx.builder.GetInsertBlock()->getParent()->arg_begin();
         assert(sretArg.hasStructRetAttr());
         ctx.builder.CreateStore(retval, &sretArg);

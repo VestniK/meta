@@ -31,9 +31,7 @@
 #include "generators/llvmgen/mangling.h"
 #include "generators/llvmgen/environment.h"
 
-namespace meta {
-namespace generators {
-namespace llvmgen {
+namespace meta::generators::llvmgen {
 
 Environment::Environment(utils::string_view moduleName):
     context(),
@@ -49,18 +47,18 @@ Environment::Environment(utils::string_view moduleName):
 llvm::Function *Environment::addFunction(Function *func) {
     const auto args = func->args();
     std::vector<llvm::Type *> argTypes;
-    auto rettype = getType(func->type());
+    auto rettype = getType(*func->type());
     assert(rettype != nullptr);
-    if (func->type() & typesystem::TypeProp::sret)
+    if (func->type()->properties() & typesystem::TypeProp::sret)
         argTypes.push_back(rettype->getPointerTo());
     for (const auto arg : args) {
-        assert(arg->type() != nullptr); // must be set during type integryty checks
-        auto type = getType(arg->type());
+        assert(arg->type()); // must be set during type integryty checks
+        auto type = getType(*arg->type());
         assert(type != nullptr); // all known types should be mapped to llvm types
         argTypes.push_back(type);
     }
     llvm::FunctionType *funcType = llvm::FunctionType::get(
-        (func->type() & typesystem::TypeProp::sret) ? llvm::Type::getVoidTy(context) : rettype,
+        (func->type()->properties() & typesystem::TypeProp::sret) ? llvm::Type::getVoidTy(context) : rettype,
         argTypes, false
     );
     const llvm::GlobalValue::LinkageTypes linkType = func->visibility() == Visibility::Export || func->visibility() == Visibility::Extern ?
@@ -69,7 +67,7 @@ llvm::Function *Environment::addFunction(Function *func) {
     ;
     llvm::Function *prototype = llvm::Function::Create(funcType, linkType, mangledName(func), module.get());
     llvm::Function::arg_iterator it = prototype->arg_begin();
-    if (func->type() & typesystem::TypeProp::sret) {
+    if (func->type()->properties() & typesystem::TypeProp::sret) {
         llvm::AttrBuilder attrBuilder;
         attrBuilder.addAttribute(llvm::Attribute::StructRet);
         it->addAttr(llvm::AttributeSet::get(context, 0, attrBuilder));
@@ -84,15 +82,15 @@ llvm::Function *Environment::addFunction(Function *func) {
     return prototype;
 }
 
-llvm::Type* Environment::getType(const typesystem::Type* type) {
+llvm::Type* Environment::getType(typesystem::Type type) {
     // built in types:
-    switch (type->typeId()) {
+    switch (type.typeId()) {
         case typesystem::Type::Int: return llvm::Type::getInt32Ty(context);
         case typesystem::Type::Double: return llvm::Type::getDoubleTy(context);
         case typesystem::Type::Bool: return llvm::Type::getInt1Ty(context);
         case typesystem::Type::String: return string;
 
-        case typesystem::Type::Auto: assert(false);
+        case typesystem::Type::Auto: assert(false); break;
         case typesystem::Type::Void: return llvm::Type::getVoidTy(context);
     }
     return nullptr;
@@ -103,6 +101,4 @@ llvm::AllocaInst* addLocalVar(llvm::Function* func, llvm::Type* type, utils::str
     return builder.CreateAlloca(type, 0, llvm::StringRef(name.data(), name.size()));
 }
 
-} // namespace llvmgen
-} // namespace generators
-} // namespace meta
+} // namespace meta::generators::llvmgen

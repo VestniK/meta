@@ -40,7 +40,7 @@ llvm::Value* ExpressionBuilder::operator() (Call *node, Context &ctx) {
     std::vector<llvm::Value*> args;
     llvm::Value* sret = nullptr;
     if (func->arg_begin()->hasStructRetAttr()) {
-        sret = addLocalVar(ctx.builder.GetInsertBlock()->getParent(), ctx.env.getType(node->function()->type()), {});
+        sret = addLocalVar(ctx.builder.GetInsertBlock()->getParent(), ctx.env.getType(*node->function()->type()), {});
         args.push_back(sret);
     }
     for (auto argNode: node->args())
@@ -52,13 +52,13 @@ llvm::Value* ExpressionBuilder::operator() (Call *node, Context &ctx) {
 
 llvm::Value *ExpressionBuilder::operator() (Number *node, Context &ctx)
 {
-    llvm::Type *type = ctx.env.getType(node->type());
+    llvm::Type *type = ctx.env.getType(*node->type());
     return llvm::ConstantInt::get(type, node->value(), true);
 }
 
 llvm::Value *ExpressionBuilder::operator() (Literal *node, Context &ctx)
 {
-    llvm::Type *type = ctx.env.getType(node->type());
+    llvm::Type *type = ctx.env.getType(*node->type());
     switch (node->value()) {
         case Literal::trueVal: return llvm::ConstantInt::getTrue(type);
         case Literal::falseVal:return llvm::ConstantInt::getFalse(type);
