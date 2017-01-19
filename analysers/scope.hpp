@@ -2,6 +2,7 @@
 
 #include <map>
 
+#include "utils/mutable_wrapper.h"
 #include "utils/types.h"
 
 #include "typesystem/type.h"
@@ -38,6 +39,8 @@ struct VarStats {
     utils::string_view name() const {return decl->name();}
 };
 
+using MutableVarStats = utils::mutable_wrapper<VarStats>;
+
 using Type = typesystem::Type;
 
 struct Scope {
@@ -45,7 +48,7 @@ struct Scope {
     utils::string_view package;
     utils::multidict<DeclRef<Function>> functions;
     utils::dict<DeclRef<Struct>> structs;
-    std::map<utils::string_view, VarStats> vars;
+    utils::dict<MutableVarStats> vars;
     utils::dict<typesystem::Type> types;
 
     /// Создание глобального контекста
@@ -62,9 +65,9 @@ struct Scope {
     ~Scope() noexcept(false) {
         if (std::uncaught_exceptions() != 0)
             return;
-        for (const auto& kv: vars) {
-            if (kv.second.accessCount == 0)
-                throw SemanticError(kv.second.decl, "Variable '%s' is never used", kv.first);
+        for (const auto& varstat: vars) {
+            if (varstat->accessCount == 0)
+                throw SemanticError(varstat->decl, "Variable '%s' is never used", varstat->name());
         }
     }
 
@@ -86,7 +89,7 @@ VarStats* Scope::find<VarStats>(utils::string_view name) {
     for (auto* scope = this; scope != nullptr; scope = scope->parent) {
         auto it = scope->vars.find(name);
         if (it != scope->vars.end())
-            return &(it->second);
+            return &(it->get());
     }
     return nullptr;
 }

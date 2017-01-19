@@ -214,7 +214,7 @@ struct Analyser {
             return;
         Scope funcContext{&scope};
         for (auto arg: node->args()) {
-            auto res = funcContext.vars.emplace(arg->name(), VarStats{arg});
+            auto res = funcContext.vars.emplace(MutableVarStats{arg});
             if (!res.second)
                 throw SemanticError(
                     arg, "%s has more than one arguments with the same name '%s'",
@@ -266,9 +266,9 @@ struct Analyser {
             throwDeclConflict(node, conflict->decl);
         if (node->inited() && !(node->flags() & VarFlags::argument))
             dispatch(*this, node->initExpr(), scope);
-        auto res = scope.vars.emplace(node->name(), VarStats{node});
+        auto res = scope.vars.emplace(MutableVarStats{node});
         if (!res.second)
-            throwDeclConflict(node, res.first->second.decl);
+            throwDeclConflict(node, res.first->get().decl);
     }
 
     void operator() (If* node, Scope& scope) {
