@@ -57,17 +57,7 @@ public:
     const auto& flags() const {return mFlags;}
     auto& flags() {return mFlags;}
 
-    void walk(Visitor* visitor, int depth = infinitDepth) override {
-        if (accept(visitor) && depth != 0) {
-            for (auto& ann: mAnnotations)
-                ann->walk(visitor, depth - 1);
-            for (auto& arg: mArgs)
-                arg->walk(visitor, depth - 1);
-            if (mBody)
-                mBody->walk(visitor, depth - 1);
-        }
-        seeOff(visitor);
-    }
+    void walk(Visitor* visitor, int depth = infinitDepth) override;
 
 private:
     std::vector<Node::Ptr<Annotation>> mAnnotations;

@@ -68,6 +68,18 @@ Function::Function(const utils::SourceFile& src, utils::array_view<StackFrame> r
 
 Function::~Function() = default;
 
+void Function::walk(Visitor* visitor, int depth) {
+    if (accept(visitor) && depth != 0) {
+        for (auto& ann: mAnnotations)
+            ann->walk(visitor, depth - 1);
+        for (auto& arg: mArgs)
+            arg->walk(visitor, depth - 1);
+        if (mBody)
+            mBody->walk(visitor, depth - 1);
+    }
+    seeOff(visitor);
+}
+
 const Declaration::AttributesMap Function::attrMap = {
     {"entrypoint", [](Declaration *decl) {
         dynamic_cast<Function&>(*decl).flags() |= FuncFlags::entrypoint;
