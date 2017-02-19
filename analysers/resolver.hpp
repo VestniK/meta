@@ -59,6 +59,26 @@ Decl* decl(const DeclRef<Decl>& val) {return val.decl;}
 template<typename Decl>
 Import* import(const DeclRef<Decl>& val) {return val.import;}
 
+enum class DeclFilter {all, publicOnly};
+
+void fillPackageScope(Scope& scope, const Dictionary& dict, DeclFilter filter = DeclFilter::all) {
+    const auto pkg_it = dict.find(scope.package);
+    if (pkg_it == dict.end())
+        return;
+
+    for (auto* func: pkg_it->second.functions) {
+        if (filter == DeclFilter::publicOnly && func->visibility() < Visibility::Public)
+            continue;
+        scope.functions.emplace(DeclRef<Function>{func});
+    }
+    for (auto* strct: pkg_it->second.structs) {
+        if (filter == DeclFilter::publicOnly && strct->visibility() < Visibility::Public)
+            continue;
+        scope.structs.emplace(DeclRef<Struct>{strct});
+    }
+    /// @todo re-imports
+}
+
 struct Analyser {
     Dictionary& dict;
 
@@ -70,10 +90,7 @@ struct Analyser {
     void operator() (SourceFile* node, Scope& scope) {
         trace(resolverTraceTag, node);
         Scope srcFileScope = {&scope, node->package()};
-        for (auto* func: dict[node->package()].functions)
-            srcFileScope.functions.emplace(DeclRef<Function>{func});
-        for (auto* strct: dict[node->package()].structs)
-            srcFileScope.structs.emplace(DeclRef<Struct>{strct});
+        fillPackageScope(srcFileScope, dict);
 
         /// @todo split SourceFile children into imports, functions and structs
         for (auto import: node->getChildren<Import>())
@@ -322,9 +339,13 @@ struct Analyser {
 void resolve(AST* ast, Dictionary& dict) {
     Analyser resolver{dict};
     Scope globalscope;
+
+    Scope nullscope{&globalscope, "null"sv};
+    fillPackageScope(nullscope, dict, DeclFilter::publicOnly);
+
     for (auto root: ast->getChildren<Node>(0))
-        dispatch(resolver, root, globalscope);
-    checkTypes(ast, globalscope);
+        dispatch(resolver, root, nullscope);
+    checkTypes(ast, nullscope);
 }
 
 } // namespace meta::analysers

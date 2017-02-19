@@ -26,12 +26,15 @@ struct Token;
 
 enum class Visibility {
     Default,
-    Extern,
-    Export,
-    Public,
+    Private,
     Protected,
-    Private
+    Public,
+    Extern,
+    Export
 };
+
+/// Return true if lhs is more restrictive then rhs
+bool operator< (Visibility lhs, Visibility rhs);
 
 Visibility fromTerm(int term);
 

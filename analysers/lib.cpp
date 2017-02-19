@@ -3,3 +3,4 @@
 #include "reachabilitychecker.hpp"
 #include "resolver.hpp"
 #include "typechecker.hpp"
+#include "trace.hpp"

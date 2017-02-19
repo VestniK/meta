@@ -6,6 +6,13 @@
 
 namespace meta {
 
+bool operator< (Visibility lhs, Visibility rhs) {
+    return
+        static_cast<std::underlying_type_t<Visibility>>(lhs) <
+        static_cast<std::underlying_type_t<Visibility>>(rhs)
+    ;
+}
+
 Visibility fromToken(const Token &token) {return fromTerm(token.termNum);}
 
 Visibility fromTerm(int term) {
